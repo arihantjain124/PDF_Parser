@@ -65,10 +65,6 @@ public class PDPolylineAppearanceHandler extends PDAbstractAppearanceHandler
     {
         PDAnnotationMarkup annotation = (PDAnnotationMarkup) getAnnotation();
         PDRectangle rect = annotation.getRectangle();
-        if (rect == null)
-        {
-            return;
-        }
         float[] pathsArray = annotation.getVertices();
         if (pathsArray == null || pathsArray.length < 4)
         {
