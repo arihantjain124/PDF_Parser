@@ -45,44 +45,19 @@ public class NewPDFTextStripper extends PDFTextStripper{
             return textPositions;
         }
     }
+	@SuppressWarnings("null")
 	protected void writeLine(List<WordWithTextPositions> line) throws IOException
     {
 		super.writeLine(line);
+		List<Wordwithbounds> wordbounds = null;
+		
 		System.out.println("Here");
-//        List<Float> posX=new ArrayList<Float>();  
-//        List<Float> posY=new ArrayList<Float>();  
-//		int numberOfStrings = line.size();
-//        for (int i = 0; i < numberOfStrings; i++)
-//        {
-//            WordWithTextPositions word = line.get(i);
-//			Iterator<TextPosition> textIter = word.getTextPositions().iterator();
-//	        while (textIter.hasNext())
-//	        {
-//	            TextPosition pos = textIter.next();
-//	            posX.add(pos.getX());
-//	            posY.add(pos.getY());
-//	        }  
+		int numberOfStrings = line.size();
+        for (int i = 0; i < numberOfStrings; i++)
+        {
+            WordWithTextPositions word = line.get(i);
+            wordbounds.add(new Wordwithbounds(word));
+        }
     }
-	/*public static class WordWithTextPositions
-    {
-        String text;
-        List<TextPosition> textPositions;
-       
-        WordWithTextPositions(String word, List<TextPosition> positions)
-        {
-            text = word;
-            textPositions = positions;
-             
-        }
-
-        public String getText()
-        {
-            return text;
-        }
-
-        public List<TextPosition> getTextPositions()
-        {
-            return textPositions;
-        }
-    }*/
+	
 }
