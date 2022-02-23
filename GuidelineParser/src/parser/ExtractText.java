@@ -1,3 +1,5 @@
+package parser;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,10 +24,13 @@ import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecifica
 import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.text.PDFTextStripper;
-import NewPDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.tools.PDFText2HTML;
 import org.apache.pdfbox.util.Matrix;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
+
+import parser.NewPDFTextStripper;
 
 /**
  * This is the main program that simply parses the pdf document and transforms it
@@ -249,7 +254,7 @@ public final class ExtractText
                     }
                     else
                     {
-                        stripper = new PDFTextStripper();
+                        stripper = new NewPDFTextStripper();
                     }
                     stripper.setSortByPosition(sort);
                     stripper.setShouldSeparateByBeads(separateBeads);
