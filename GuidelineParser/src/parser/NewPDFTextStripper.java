@@ -34,7 +34,6 @@ public class NewPDFTextStripper extends PDFTextStripper{
 	public void postiontobound(String text, List<TextPosition> positions) {
 
         
-        
         int numberofchar = positions.size();
         float x=0;
         float fontsize=0;
@@ -74,15 +73,12 @@ public class NewPDFTextStripper extends PDFTextStripper{
         
         Wordwithbounds(String text, List<TextPosition> positions)
         {
-        	double x;
-            double y;
-            double w;
-            double h;
+        	double x,y,w,h;
             this.text = text;
             this.textPositions = positions;
             int numberofchar = textPositions.size();
-            x=textPositions.get(0).getX();
-            y=textPositions.get(0).getY();
+            x = textPositions.get(0).getX();
+            y = textPositions.get(0).getY();
             w=numberofchar*textPositions.get(0).getWidth();
             h=textPositions.get(0).getHeight();
             bound.setRect(x, y-h, w, h);
