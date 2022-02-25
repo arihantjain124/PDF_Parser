@@ -160,7 +160,9 @@ public class GlyfCompositeDescript extends GlyfDescript
             int n = i - c.getFirstIndex();
             int x = gd.getXCoordinate(n);
             int y = gd.getYCoordinate(n);
-            return (short) (c.scaleX(x, y) + c.getXTranslate());
+            short x1 = (short) c.scaleX(x, y);
+            x1 += c.getXTranslate();
+            return x1;
         }
         return 0;
     }
@@ -178,7 +180,9 @@ public class GlyfCompositeDescript extends GlyfDescript
             int n = i - c.getFirstIndex();
             int x = gd.getXCoordinate(n);
             int y = gd.getYCoordinate(n);
-            return (short) (c.scaleY(x, y) + c.getYTranslate());
+            short y1 = (short) c.scaleY(x, y);
+            y1 += c.getYTranslate();
+            return y1;
         }
         return 0;
     }

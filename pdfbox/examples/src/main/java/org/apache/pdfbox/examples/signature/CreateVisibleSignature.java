@@ -248,12 +248,15 @@ public class CreateVisibleSignature extends CreateSignatureBase
         // subfilter for basic and PAdES Part 2 signatures
         signature.setSubFilter(PDSignature.SUBFILTER_ADBE_PKCS7_DETACHED);
         
-        // this builds the signature structures in a separate document
-        visibleSignatureProperties.buildSignature();
+        if (visibleSignatureProperties != null)
+        {
+            // this builds the signature structures in a separate document
+            visibleSignatureProperties.buildSignature();
 
-        signature.setName(visibleSignatureProperties.getSignerName());
-        signature.setLocation(visibleSignatureProperties.getSignerLocation());
-        signature.setReason(visibleSignatureProperties.getSignatureReason());
+            signature.setName(visibleSignatureProperties.getSignerName());
+            signature.setLocation(visibleSignatureProperties.getSignerLocation());
+            signature.setReason(visibleSignatureProperties.getSignatureReason());
+        }
 
         // the signing date, needed for valid signature
         signature.setSignDate(Calendar.getInstance());
@@ -262,7 +265,7 @@ public class CreateVisibleSignature extends CreateSignatureBase
         SignatureInterface signatureInterface = isExternalSigning() ? null : this;
 
         // register signature dictionary and sign interface
-        if (visibleSignatureProperties.isVisualSignEnabled())
+        if (visibleSignatureProperties != null && visibleSignatureProperties.isVisualSignEnabled())
         {
             signatureOptions = new SignatureOptions();
             signatureOptions.setVisualSignature(visibleSignatureProperties.getVisibleSignature());
@@ -404,9 +407,7 @@ public class CreateVisibleSignature extends CreateSignatureBase
         File ksFile = new File(args[0]);
         KeyStore keystore = KeyStore.getInstance("PKCS12");
         char[] pin = args[1].toCharArray();
-        InputStream is = new FileInputStream(ksFile);
-        keystore.load(is, pin);
-        is.close();
+        keystore.load(new FileInputStream(ksFile), pin);
 
         File documentFile = new File(args[2]);
 

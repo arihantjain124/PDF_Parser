@@ -397,16 +397,11 @@ public abstract class PDFont implements COSObjectable, PDFontLike
             {
                 for (int i = 0; i < widths.size(); i++)
                 {
-                    COSBase base = widths.getObject(i);
-                    if (base instanceof COSNumber)
+                    COSNumber fontWidth = (COSNumber) widths.getObject(i);
+                    if (fontWidth.floatValue() > 0)
                     {
-                        COSNumber fontWidth = (COSNumber) base;
-                        float floatValue = fontWidth.floatValue();
-                        if (floatValue > 0)
-                        {
-                            totalWidth += floatValue;
-                            characterCount += 1;
-                        }
+                        totalWidth += fontWidth.floatValue();
+                        characterCount += 1;
                     }
                 }
             }

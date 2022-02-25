@@ -1,0 +1,41 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.apache.fontbox
+Bnd-LastModified: 1645789603020
+Build-Jdk: 11.0.14
+Built-By: ariha
+Bundle-Description: The Apache FontBox library is an open source Java to
+ ol to obtain low level information    from font files. FontBox is a sub
+ project of Apache PDFBox.
+Bundle-DocURL: http://pdfbox.apache.org
+Bundle-License: https://www.apache.org/licenses/LICENSE-2.0.txt
+Bundle-ManifestVersion: 2
+Bundle-Name: Apache FontBox
+Bundle-SymbolicName: org.apache.pdfbox.fontbox
+Bundle-Vendor: The Apache Software Foundation
+Bundle-Version: 2.0.25
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.apache.fontbox.afm;uses:="org.apache.fontbox.util";v
+ ersion="2.0.25",org.apache.fontbox.cff;uses:="org.apache.fontbox,org.ap
+ ache.fontbox.encoding,org.apache.fontbox.type1,org.apache.fontbox.util"
+ ;version="2.0.25",org.apache.fontbox.cmap;version="2.0.25",org.apache.f
+ ontbox;uses:="org.apache.fontbox.encoding,org.apache.fontbox.util";vers
+ ion="2.0.25",org.apache.fontbox.encoding;version="2.0.25",org.apache.fo
+ ntbox.pfb;version="2.0.25",org.apache.fontbox.ttf;uses:="org.apache.fon
+ tbox,org.apache.fontbox.cff,org.apache.fontbox.util";version="2.0.25",o
+ rg.apache.fontbox.type1;uses:="org.apache.fontbox,org.apache.fontbox.cf
+ f,org.apache.fontbox.encoding,org.apache.fontbox.util";version="2.0.25"
+ ,org.apache.fontbox.util.autodetect;version="2.0.25",org.apache.fontbox
+ .util;version="2.0.25"
+Implementation-Title: Apache FontBox
+Implementation-URL: http://pdfbox.apache.org/
+Implementation-Vendor: The Apache Software Foundation
+Implementation-Vendor-Id: org.apache.pdfbox
+Implementation-Version: 2.0.25
+Import-Package: org.apache.commons.logging;version="[1.2,2)",org.apache.
+ fontbox,org.apache.fontbox.cff,org.apache.fontbox.encoding,org.apache.f
+ ontbox.pfb,org.apache.fontbox.type1,org.apache.fontbox.util
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
+Specification-Title: Apache FontBox
+Specification-Vendor: The Apache Software Foundation
+Specification-Version: 2.0.25
+Tool: Bnd-3.5.0.201709291849

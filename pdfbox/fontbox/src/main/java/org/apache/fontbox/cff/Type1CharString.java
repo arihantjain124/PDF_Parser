@@ -301,19 +301,16 @@ public class Type1CharString
         }
         else if ("div".equals(name))
         {
-            if (numbers.size() >= 2)
-            {
-                float b = numbers.get(numbers.size() - 1).floatValue();
-                float a = numbers.get(numbers.size() - 2).floatValue();
+            float b = numbers.get(numbers.size() -1).floatValue();
+            float a = numbers.get(numbers.size() -2).floatValue();
 
-                float result = a / b;
+            float result = a / b;
 
-                List<Number> list = new ArrayList<Number>(numbers);
-                list.remove(list.size() - 1);
-                list.remove(list.size() - 1);
-                list.add(result);
-                return list;
-            }
+            List<Number> list = new ArrayList<Number>(numbers);
+            list.remove(list.size() - 1);
+            list.remove(list.size() - 1);
+            list.add(result);
+            return list;
         }
         else if ("hstem".equals(name) || "vstem".equals(name) ||
                  "hstem3".equals(name) || "vstem3".equals(name) || "dotsection".equals(name))
@@ -500,13 +497,6 @@ public class Type1CharString
         try
         {
             Type1CharString accent = font.getType1CharString(accentName);
-            if (path == accent.getPath())
-            {
-                // PDFBOX-5339: avoid ArrayIndexOutOfBoundsException 
-                // reproducable with poc file crash-4698e0dc7833a3f959d06707e01d03cda52a83f4
-                LOG.warn("Path for " + baseName + " and for accent " + accentName + " are same, ignored");
-                return;
-            }
             AffineTransform at = AffineTransform.getTranslateInstance(
                     leftSideBearing.getX() + adx.floatValue() - asb.floatValue(),
                     leftSideBearing.getY() + ady.floatValue());

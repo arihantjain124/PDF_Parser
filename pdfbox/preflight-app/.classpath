@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+  <classpathentry kind="src" path="target/maven-shared-archive-resources" excluding="**/*.java"/>
+  <classpathentry kind="output" path="target/classes"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+  <classpathentry kind="src" path="/pdfbox"/>
+  <classpathentry kind="src" path="/fontbox"/>
+  <classpathentry kind="var" path="M2_REPO/commons-logging/commons-logging/1.2/commons-logging-1.2.jar" sourcepath="M2_REPO/commons-logging/commons-logging/1.2/commons-logging-1.2-sources.jar"/>
+  <classpathentry kind="src" path="/xmpbox"/>
+  <classpathentry kind="src" path="/preflight"/>
+  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bcmail-jdk15on/1.64/bcmail-jdk15on-1.64.jar" sourcepath="M2_REPO/org/bouncycastle/bcmail-jdk15on/1.64/bcmail-jdk15on-1.64-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bcprov-jdk15on/1.64/bcprov-jdk15on-1.64.jar" sourcepath="M2_REPO/org/bouncycastle/bcprov-jdk15on/1.64/bcprov-jdk15on-1.64-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bcpkix-jdk15on/1.64/bcpkix-jdk15on-1.64.jar" sourcepath="M2_REPO/org/bouncycastle/bcpkix-jdk15on/1.64/bcpkix-jdk15on-1.64-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/org/apache/pdfbox/jbig2-imageio/3.0.3/jbig2-imageio-3.0.3.jar" sourcepath="M2_REPO/org/apache/pdfbox/jbig2-imageio/3.0.3/jbig2-imageio-3.0.3-sources.jar"/>
+</classpath>

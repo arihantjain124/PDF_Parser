@@ -302,7 +302,7 @@ public final class CCITTFactory
             }
 
             // Relocate to the first set of tags
-            long address = readlong(endianess, reader);
+            int address = readlong(endianess, reader);
             reader.seek(address);
     
             // If some higher page number is required, skip this page's tags, 
@@ -314,7 +314,7 @@ public final class CCITTFactory
                 {
                     throw new IOException("Not a valid tiff file");
                 }
-                reader.seek(address + 2 + numtags * 12L);
+                reader.seek(address + 2 + numtags * 12);
                 address = readlong(endianess, reader);
                 if (address == 0)
                 {

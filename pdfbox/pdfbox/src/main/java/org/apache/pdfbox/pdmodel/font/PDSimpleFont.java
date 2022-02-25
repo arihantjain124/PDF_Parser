@@ -115,10 +115,11 @@ public abstract class PDSimpleFont extends PDFont
             }
             this.encoding = new DictionaryEncoding(encodingDict, !symbolic, builtIn);
         }
-        else
+        else if (encodingBase == null)
         {
             this.encoding = readEncodingFromFont();
         }
+
         // normalise the standard 14 name, e.g "Symbol,Italic" -> "Symbol"
         String standard14Name = Standard14Fonts.getMappedFontName(getName());
         assignGlyphList(standard14Name);

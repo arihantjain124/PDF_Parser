@@ -766,25 +766,24 @@ public class CFFParser
         }
     }
 
-    private String readString(int index) throws IOException
+    private String readString(int index)
     {
-        if (index < 0)
-        {
-            throw new IOException("Invalid negative index when reading a string");
-        }
-        if (index <= 390)
+        if (index >= 0 && index <= 390)
         {
             return CFFStandardString.getName(index);
         }
-        if (stringIndex != null && index - 391 < stringIndex.length)
+        if (index - 391 < stringIndex.length)
         {
             return stringIndex[index - 391];
         }
-        // technically this maps to .notdef, but we need a unique sid name
-        return "SID" + index;
+        else
+        {
+            // technically this maps to .notdef, but we need a unique sid name
+            return "SID" + index;
+        }
     }
 
-    private String getString(DictData dict, String name) throws IOException
+    private String getString(DictData dict, String name)
     {
         DictData.Entry entry = dict.getEntry(name);
         return entry != null && entry.hasOperands() ? readString(entry.getNumber(0).intValue()) : null;
@@ -802,7 +801,7 @@ public class CFFParser
             case 1:
                 return readFormat1Encoding(dataInput, charset, format);
             default:
-                throw new IOException("Invalid encoding base format " + baseFormat);
+                throw new IllegalArgumentException();
         }
     }
 
@@ -1054,7 +1053,7 @@ public class CFFParser
             case 2:
                 return readFormat2Charset(dataInput, format, nGlyphs, isCIDFont);
             default:
-                throw new IOException("Incorrect charset format " + format);
+                throw new IllegalArgumentException();
         }
     }
 
@@ -1200,7 +1199,7 @@ public class CFFParser
         public Boolean getBoolean(String name, boolean defaultValue)
         {
             Entry entry = getEntry(name);
-            return entry != null && !entry.getArray().isEmpty() ? entry.getBoolean(0, defaultValue) : defaultValue;
+            return entry != null && !entry.getArray().isEmpty() ? entry.getBoolean(0) : defaultValue;
         }
 
         public List<Number> getArray(String name, List<Number> defaultValue)
@@ -1248,30 +1247,23 @@ public class CFFParser
                 return operands.size();
             }
 
-            public Boolean getBoolean(int index, Boolean defaultValue)
+            public Boolean getBoolean(int index)
             {
                 Number operand = operands.get(index);
                 if (operand instanceof Integer)
                 {
                     switch (operand.intValue())
                     {
-                        case 0:
-                            return Boolean.FALSE;
-                        case 1:
-                            return Boolean.TRUE;
-                        default:
-                            break;
+                    case 0:
+                        return Boolean.FALSE;
+                    case 1:
+                        return Boolean.TRUE;
+                    default:
+                        break;
                     }
                 }
-                LOG.warn("Expected boolean, got " + operand + ", returning default " + defaultValue);
-                return defaultValue;
+                throw new IllegalArgumentException();
             }
-
-            @Deprecated
-            public Boolean getBoolean(int index)
-            {
-                return getBoolean(index, Boolean.FALSE);
-            }                
 
             public boolean hasOperands()
             {

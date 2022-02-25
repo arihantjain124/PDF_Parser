@@ -161,14 +161,7 @@ public abstract class PDFunction implements COSObjectable
         if (numberOfOutputValues == -1)
         {
             COSArray rangeValues = getRangeValues();
-            if (rangeValues == null)
-            {
-                numberOfOutputValues = 0;
-            }
-            else
-            {
-                numberOfOutputValues = rangeValues.size() / 2;
-            }
+            numberOfOutputValues = rangeValues.size() / 2;
         }
         return numberOfOutputValues;
     }

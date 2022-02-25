@@ -16,6 +16,5 @@ pdfbox/bin/
 *.nar
 *.ear
 *.zip
-*.jar
 *.tar.gz
 *.rar

@@ -538,9 +538,7 @@ public class CreateVisibleSignature2 extends CreateSignatureBase
         File ksFile = new File(args[0]);
         KeyStore keystore = KeyStore.getInstance("PKCS12");
         char[] pin = args[1].toCharArray();
-        InputStream is = new FileInputStream(ksFile);
-        keystore.load(is, pin);
-        is.close();
+        keystore.load(new FileInputStream(ksFile), pin);
 
         File documentFile = new File(args[2]);
 

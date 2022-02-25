@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+  <name>preflight</name>
+  <comment>The Apache Preflight library is an open source Java tool that implements 
+      a parser compliant with the ISO-19005 (PDF/A) specification. Preflight is a 
+      subproject of Apache PDFBox. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
+  <projects>
+    <project>pdfbox</project>
+    <project>fontbox</project>
+    <project>xmpbox</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
+</projectDescription>

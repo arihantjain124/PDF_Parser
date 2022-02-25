@@ -93,8 +93,7 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
         }
         PDRange rangeX = getDecodeForParameter(0);
         PDRange rangeY = getDecodeForParameter(1);
-        if (rangeX == null || rangeY == null ||
-            Float.compare(rangeX.getMin(), rangeX.getMax()) == 0 ||
+        if (Float.compare(rangeX.getMin(), rangeX.getMax()) == 0 ||
             Float.compare(rangeY.getMin(), rangeY.getMax()) == 0)
         {
             return Collections.emptyList();
@@ -104,10 +103,6 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
         for (int i = 0; i < colRange.length; ++i)
         {
             colRange[i] = getDecodeForParameter(2 + i);
-            if (colRange[i] == null)
-            {
-                throw new IOException("Range missing in shading /Decode entry");
-            }
         }
         List<Vertex> vlist = new ArrayList<Vertex>();
         long maxSrcCoord = (long) Math.pow(2, getBitsPerCoordinate()) - 1;
@@ -137,12 +132,13 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
             mciis.close();
         }
         int rowNum = vlist.size() / numPerRow;
+        Vertex[][] latticeArray = new Vertex[rowNum][numPerRow];
+        List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
         if (rowNum < 2)
         {
             // must have at least two rows; if not, return empty list
-            return Collections.emptyList();
+            return list;
         }
-        Vertex[][] latticeArray = new Vertex[rowNum][numPerRow];
         for (int i = 0; i < rowNum; i++)
         {
             for (int j = 0; j < numPerRow; j++)
@@ -151,14 +147,8 @@ public class PDShadingType5 extends PDTriangleBasedShadingType
             }
         }
 
-        return createShadedTriangleList(rowNum, numPerRow, latticeArray);
-    }
-
-    private List<ShadedTriangle> createShadedTriangleList(int rowNum, int numPerRow, Vertex[][] latticeArray)
-    {
         Point2D[] ps = new Point2D[3]; // array will be shallow-cloned in ShadedTriangle constructor
         float[][] cs = new float[3][];
-        List<ShadedTriangle> list = new ArrayList<ShadedTriangle>();
         for (int i = 0; i < rowNum - 1; i++)
         {
             for (int j = 0; j < numPerRow - 1; j++)

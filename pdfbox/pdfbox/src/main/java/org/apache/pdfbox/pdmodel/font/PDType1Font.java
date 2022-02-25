@@ -219,7 +219,7 @@ public class PDType1Font extends PDSimpleFont
             PDStream fontFile3 = fd.getFontFile3();
             if (fontFile3 != null)
             {
-                throw new IOException("/FontFile3 for Type1 font not supported");
+                throw new IllegalArgumentException("Use PDType1CFont for FontFile3");
             }
 
             // or it may contain a PFB
@@ -578,7 +578,7 @@ public class PDType1Font extends PDSimpleFont
     //@Override
     public String codeToName(int code) throws IOException
     {
-        String name = getEncoding() != null ? getEncoding().getName(code) : ".notdef";
+        String name = getEncoding().getName(code);
         return getNameInFont(name);
     }
 

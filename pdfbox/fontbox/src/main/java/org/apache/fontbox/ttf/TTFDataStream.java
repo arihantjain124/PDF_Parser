@@ -46,7 +46,7 @@ abstract class TTFDataStream implements Closeable
     public float read32Fixed() throws IOException
     {
         float retval = readSignedShort();
-        retval += (readUnsignedShort() / 65536f);
+        retval += (readUnsignedShort() / 65536.0);
         return retval;
     }
 

@@ -34,7 +34,6 @@ import java.awt.event.WindowEvent;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +42,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.spi.IIORegistry;
@@ -71,9 +69,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.TreePath;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
@@ -101,6 +97,7 @@ import org.apache.pdfbox.debugger.treestatus.TreeStatusPane;
 import org.apache.pdfbox.debugger.ui.ArrayEntry;
 import org.apache.pdfbox.debugger.ui.DocumentEntry;
 import org.apache.pdfbox.debugger.ui.ErrorDialog;
+import org.apache.pdfbox.debugger.ui.ExtensionFileFilter;
 import org.apache.pdfbox.debugger.ui.FileOpenSaveDialog;
 import org.apache.pdfbox.debugger.ui.ImageTypeMenu;
 import org.apache.pdfbox.debugger.ui.LogDialog;
@@ -149,8 +146,6 @@ public class PDFDebugger extends JFrame
             new HashSet<COSName>(Arrays.asList(COSName.ICCBASED, COSName.PATTERN, COSName.CALGRAY,
                                  COSName.CALRGB, COSName.LAB));
 
-    private static final FileFilter PDF_FILTER = new FileNameExtensionFilter("PDF Files (*.pdf)", "pdf", "PDF");
-
     @SuppressWarnings({"squid:S2068"})
     private static final String PASSWORD = "-password";
     private static final String VIEW_STRUCTURE = "-viewstructure";
@@ -195,9 +190,6 @@ public class PDFDebugger extends JFrame
     public static JCheckBoxMenuItem allowSubsampling;
     public static JCheckBoxMenuItem repairAcroFormMenuItem;
 
-    // configuration
-    public static final Properties configuration = new Properties();
-
     /**
      * Constructor.
      */
@@ -212,29 +204,7 @@ public class PDFDebugger extends JFrame
     public PDFDebugger(boolean viewPages)
     {
         isPageMode = viewPages;
-        loadConfiguration();
         initComponents();
-    }
-
-    /**
-     * Loads the local configuration file, if any.
-     */
-    private void loadConfiguration()
-    {
-        File file = new File("config.properties");
-        if (file.exists())
-        {
-            try
-            {
-                InputStream is = new FileInputStream(file);
-                configuration.load(is);
-                is.close();
-            }
-            catch(IOException e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     /**
@@ -296,12 +266,7 @@ public class PDFDebugger extends JFrame
 
         statusPane = new TreeStatusPane(tree);
         statusPane.getPanel().setBorder(new BevelBorder(BevelBorder.RAISED));
-        Dimension preferredTreePathSize = statusPane.getPanel().getPreferredSize();
-        int treePathHeight = (int) Math.round(preferredTreePathSize.getHeight());
-        treePathHeight = Integer.parseInt(
-                configuration.getProperty("treePathHeight", Integer.toString(treePathHeight)));
-        preferredTreePathSize.height = treePathHeight;
-        statusPane.getPanel().setPreferredSize(preferredTreePathSize);
+        statusPane.getPanel().setPreferredSize(new Dimension(300, 25));
         getContentPane().add(statusPane.getPanel(), BorderLayout.PAGE_START);
 
         getContentPane().add(jSplitPane, BorderLayout.CENTER);
@@ -339,14 +304,14 @@ public class PDFDebugger extends JFrame
                             DataFlavor.javaFileListFlavor);
                     readPDFFile(files.get(0), "");
                 }
+                catch (IOException e)
+                {
+                    new ErrorDialog(e).setVisible(true);
+                }
                 catch (UnsupportedFlavorException e)
                 {
                     new ErrorDialog(e).setVisible(true);
                     return false;
-                }
-                catch (Exception e)
-                {
-                    new ErrorDialog(e).setVisible(true);
                 }
                 return true;
             }
@@ -718,7 +683,9 @@ public class PDFDebugger extends JFrame
             }
             else
             {
-                FileOpenSaveDialog saveAsDialog = new FileOpenSaveDialog(this, PDF_FILTER);
+                String[] extensions = new String[] { "pdf", "PDF" };
+                FileFilter pdfFilter = new ExtensionFileFilter(extensions, "PDF Files (*.pdf)");
+                FileOpenSaveDialog saveAsDialog = new FileOpenSaveDialog(this, pdfFilter);
                 saveAsDialog.saveDocument(document, "pdf");
             }
         }
@@ -751,7 +718,9 @@ public class PDFDebugger extends JFrame
             }
             else
             {
-                FileOpenSaveDialog openDialog = new FileOpenSaveDialog(this, PDF_FILTER);
+                String[] extensions = new String[] {"pdf", "PDF"};
+                FileFilter pdfFilter = new ExtensionFileFilter(extensions, "PDF Files (*.pdf)");
+                FileOpenSaveDialog openDialog = new FileOpenSaveDialog(this, pdfFilter);
 
                 File file = openDialog.openFile();
                 if (file != null)

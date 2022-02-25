@@ -287,9 +287,9 @@ public class PDFRenderer
     {
         PDPage page = pageTree.get(pageIndex);
 
-        PDRectangle cropBox = page.getCropBox();
-        float widthPt = cropBox.getWidth();
-        float heightPt = cropBox.getHeight();
+        PDRectangle cropbBox = page.getCropBox();
+        float widthPt = cropbBox.getWidth();
+        float heightPt = cropbBox.getHeight();
 
         // PDFBOX-4306 avoid single blank pixel line on the right or on the bottom
         int widthPx = (int) Math.max(Math.floor(widthPt * scale), 1);
@@ -343,7 +343,7 @@ public class PDFRenderer
         }
         g.clearRect(0, 0, image.getWidth(), image.getHeight());
         
-        transform(g, page.getRotation(), cropBox, scale, scale);
+        transform(g, page, scale, scale);
 
         // the end-user may provide a custom PageDrawer
         RenderingHints actualRenderingHints =
@@ -352,7 +352,7 @@ public class PDFRenderer
                 new PageDrawerParameters(this, page, subsamplingAllowed, destination,
                         actualRenderingHints, imageDownscalingOptimizationThreshold);
         PageDrawer drawer = createPageDrawer(parameters);
-        drawer.drawPage(g, cropBox);
+        drawer.drawPage(g, page.getCropBox());       
         
         g.dispose();
 
@@ -451,8 +451,9 @@ public class PDFRenderer
         PDPage page = pageTree.get(pageIndex);
         // TODO need width/height calculations? should these be in PageDrawer?
 
+        transform(graphics, page, scaleX, scaleY);
+
         PDRectangle cropBox = page.getCropBox();
-        transform(graphics, page.getRotation(), cropBox, scaleX, scaleY);
         graphics.clearRect(0, 0, (int) cropBox.getWidth(), (int) cropBox.getHeight());
 
         // the end-user may provide a custom PageDrawer
@@ -477,13 +478,15 @@ public class PDFRenderer
     }
 
     // scale rotate translate
-    private void transform(Graphics2D graphics, int rotationAngle, PDRectangle cropBox, float scaleX, float scaleY)
+    private void transform(Graphics2D graphics, PDPage page, float scaleX, float scaleY)
     {
         graphics.scale(scaleX, scaleY);
 
         // TODO should we be passing the scale to PageDrawer rather than messing with Graphics?
+        int rotationAngle = page.getRotation();
         if (rotationAngle != 0)
         {
+            PDRectangle cropBox = page.getCropBox();
             float translateX = 0;
             float translateY = 0;
             switch (rotationAngle)
@@ -560,15 +563,16 @@ public class PDFRenderer
         for (COSName name : resources.getExtGStateNames())
         {
             PDExtendedGraphicsState extGState = resources.getExtGState(name);
-            if (extGState != null)
+            if (extGState == null)
             {
-                // extGState null can happen if key exists but no value 
+                // can happen if key exists but no value 
                 // see PDFBOX-3950-23EGDHXSBBYQLKYOKGZUOVYVNE675PRD.pdf
-                BlendMode blendMode = extGState.getBlendMode();
-                if (blendMode != BlendMode.NORMAL)
-                {
-                    return true;
-                }
+                continue;
+            }
+            BlendMode blendMode = extGState.getBlendMode();
+            if (blendMode != BlendMode.NORMAL)
+            {
+                return true;
             }
         }
         return false;

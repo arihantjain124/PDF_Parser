@@ -1,0 +1,5 @@
+org\apache\pdfbox\tools\TestTextToPdf.class
+org\apache\pdfbox\tools\imageio\TestImageIOUtils.class
+org\apache\pdfbox\tools\TestExtractText.class
+org\apache\pdfbox\tools\TestPDFText2HTML.class
+org\apache\pdfbox\tools\imageio\TestImageIOUtils$1.class
