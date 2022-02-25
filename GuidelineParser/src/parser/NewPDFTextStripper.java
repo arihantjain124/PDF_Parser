@@ -20,8 +20,6 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import org.apache.pdfbox.rendering.ImageType;
-import org.apache.pdfbox.rendering.PDFRenderer;
 
 public class NewPDFTextStripper extends PDFTextStripper{
 	
@@ -33,7 +31,38 @@ public class NewPDFTextStripper extends PDFTextStripper{
 	}
 	
 
-	
+	public void postiontobound(String text, List<TextPosition> positions) {
+
+        
+        
+        int numberofchar = positions.size();
+        float x=0;
+        float fontsize=0;
+        float threshold=(float) 5;
+        int j=0;
+        
+        for (int i = 0; i < numberofchar; i++)
+        {
+        	if (i==0) {
+                x=positions.get(0).getX();
+                j=0;
+                fontsize=positions.get(0).getFontSize();
+                threshold=(float) (fontsize*1.2);
+        	}
+        	else if (positions.get(i).getX()-x >fontsize+threshold) {
+        		System.out.println(text.substring(j, i));
+        		System.out.println(positions.subList(j, i));
+        		
+            	wordbounds.add(new Wordwithbounds(text.substring(j, i), positions.subList(j, i)));
+            	j=i;
+            }
+        	else if (i==numberofchar-1) {
+        		wordbounds.add(new Wordwithbounds(text.substring(j, i), positions.subList(j, i)));
+        	}
+            x=positions.get(i).getX();
+        }
+        
+	}
 	
 	public static class Wordwithbounds
     {
@@ -43,23 +72,23 @@ public class NewPDFTextStripper extends PDFTextStripper{
         float sum;
         
         
-        Wordwithbounds(WordWithTextPositions word)
+        Wordwithbounds(String text, List<TextPosition> positions)
         {
         	double x;
             double y;
             double w;
             double h;
-            text = word.getText();
-            textPositions = word.getTextPositions();
+            this.text = text;
+            this.textPositions = positions;
             int numberofchar = textPositions.size();
             x=textPositions.get(0).getX();
             y=textPositions.get(0).getY();
-            w=numberofchar*textPositions.get(0).getIndividualWidths()[0];;
+            w=numberofchar*textPositions.get(0).getWidth();
             h=textPositions.get(0).getHeight();
             bound.setRect(x, y-h, w, h);
-            System.out.println(text);
-            System.out.println(w);
-            System.out.println("\n");
+//            System.out.println(text);
+//            System.out.println(w);
+//            System.out.println("\n");
         }
 
         public String getText()
@@ -84,7 +113,8 @@ public class NewPDFTextStripper extends PDFTextStripper{
         for (int i = 0; i < numberOfStrings; i++)
         {
             WordWithTextPositions word = line.get(i);
-            wordbounds.add(new Wordwithbounds(word));
+            //wordbounds.add(new Wordwithbounds(word.getText(),word.getTextPositions()));
+            postiontobound(word.getText(),word.getTextPositions());
         }
 //        System.out.println(wordbounds.get(0).getTextPositions().get(0).getIndividualWidths()[0]);
 //        System.out.println("\n");
@@ -114,8 +144,8 @@ public class NewPDFTextStripper extends PDFTextStripper{
             g2d.setColor(Color.RED);
 
             g2d.draw (wordbounds.get(i).bound);
-            System.out.println(wordbounds.get(i).text);
-            System.out.println("\n");
+//            System.out.println(wordbounds.get(i).text);
+//            System.out.println("\n");
         }
         
         String fileName = outputPrefix + (page) + "." + imageFormat;
