@@ -1703,7 +1703,7 @@ public class PDFTextStripper extends LegacyPDFStreamEngine
      * @param line a list with the words of the given line
      * @throws IOException if something went wrong
      */
-    protected void writeLine(List<WordWithTextPositions> line)
+    public void writeLine(List<WordWithTextPositions> line)
             throws IOException
     {
         int numberOfStrings = line.size();
