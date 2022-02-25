@@ -7,8 +7,6 @@
 pdfbox/target/
 pdfbox/bin/
 .settings/
-.classpath
-.project
 .idea/
 *.iml
 
