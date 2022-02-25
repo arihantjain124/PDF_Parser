@@ -38,18 +38,18 @@ public class NewPDFTextStripper extends PDFTextStripper{
         int numberofchar = positions.size();
         float x=0;
         float fontsize=0;
-        float threshold=(float) 5;
+        float threshold=(float) 10;
         int j=0;
         
         for (int i = 0; i < numberofchar; i++)
         {
+        	fontsize=positions.get(i).getFontSize();
         	if (i==0) {
                 x=positions.get(0).getX();
                 j=0;
-                fontsize=positions.get(0).getFontSize();
-                threshold=(float) (fontsize*1.2);
+                threshold=(float) (fontsize*threshold);
         	}
-        	else if (positions.get(i).getX()-x >fontsize+threshold) {
+        	else if (positions.get(i).getX()-x >(fontsize*(1+threshold))) {
         		System.out.println(text.substring(j, i));
         		System.out.println(positions.subList(j, i));
         		
@@ -86,9 +86,6 @@ public class NewPDFTextStripper extends PDFTextStripper{
             w=numberofchar*textPositions.get(0).getWidth();
             h=textPositions.get(0).getHeight();
             bound.setRect(x, y-h, w, h);
-//            System.out.println(text);
-//            System.out.println(w);
-//            System.out.println("\n");
         }
 
         public String getText()
@@ -113,15 +110,14 @@ public class NewPDFTextStripper extends PDFTextStripper{
         for (int i = 0; i < numberOfStrings; i++)
         {
             WordWithTextPositions word = line.get(i);
-            //wordbounds.add(new Wordwithbounds(word.getText(),word.getTextPositions()));
             postiontobound(word.getText(),word.getTextPositions());
         }
-//        System.out.println(wordbounds.get(0).getTextPositions().get(0).getIndividualWidths()[0]);
-//        System.out.println("\n");
+
     }
 	protected void writePage() throws IOException
     {
 		super.writePage();
+		//Expending the code of Writepage from PDFtextStripper to render a image to visualily verify bounding boxes
 		
 		int page =13;
         boolean subsampling = false;
@@ -136,7 +132,8 @@ public class NewPDFTextStripper extends PDFTextStripper{
         boolean success = true;
         BufferedImage image = renderer.renderImageWithDPI(page, dpi, imageType);
     	Graphics2D g2d = image.createGraphics();
-		
+		//Above code is mostly related to image rendering and bounding boxes are generated in writeline function
+    	
 		int numberOfStrings = wordbounds.size();
         for (int i = 0; i < numberOfStrings; i++)
         {
@@ -144,13 +141,14 @@ public class NewPDFTextStripper extends PDFTextStripper{
             g2d.setColor(Color.RED);
 
             g2d.draw (wordbounds.get(i).bound);
-//            System.out.println(wordbounds.get(i).text);
-//            System.out.println("\n");
+            //Iterate through each wordbound object and draw its corresponding bounding box over the page 
+            
         }
         
         String fileName = outputPrefix + (page) + "." + imageFormat;
         System.out.println(fileName);
         success &= ImageIOUtil.writeImage(image, fileName, dpi, quality);
+        //Write out the image to disk 
     }
 	
 }
