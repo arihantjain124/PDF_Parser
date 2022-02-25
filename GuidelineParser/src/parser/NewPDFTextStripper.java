@@ -98,7 +98,7 @@ public class NewPDFTextStripper extends PDFTextStripper{
             return bound;
         }
     }
-	protected void writeLine(List<WordWithTextPositions> line) throws IOException
+	public void writeLine(List<WordWithTextPositions> line) throws IOException
     {
 		super.writeLine(line);
 		
