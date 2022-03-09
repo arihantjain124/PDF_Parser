@@ -284,6 +284,7 @@ public class PageDrawer extends PDFGraphicsStreamEngine
         for (PDAnnotation annotation : getPage().getAnnotations(annotationFilter))
         {
             showAnnotation(annotation);
+            
         }
 
         graphics = null;

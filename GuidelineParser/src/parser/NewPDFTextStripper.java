@@ -20,6 +20,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
+import parser.NewPDFRenderer;
 
 public class NewPDFTextStripper extends PDFTextStripper{
 	
@@ -43,21 +44,25 @@ public class NewPDFTextStripper extends PDFTextStripper{
         for (int i = 0; i < numberofchar; i++)
         {
         	fontsize=positions.get(i).getFontSize();
+//        	System.out.format("%f, %s \n",positions.get(i).getX(),text.charAt(i));
         	if (i==0) {
                 x=positions.get(0).getX();
                 j=0;
-                threshold=(float) (fontsize*threshold);
+                threshold=(float) (10);
         	}
-        	else if (positions.get(i).getX()-x >(fontsize*(1+threshold))) {
-        		System.out.println(text.substring(j, i));
-        		System.out.println(positions.subList(j, i));
+        	else if (positions.get(i).getX()-x >threshold) {
+//        		System.out.println(text.substring(j, i));
+//        		System.out.println(positions.subList(j, i));
         		
             	wordbounds.add(new Wordwithbounds(text.substring(j, i), positions.subList(j, i)));
             	j=i;
             }
         	else if (i==numberofchar-1) {
-        		wordbounds.add(new Wordwithbounds(text.substring(j, i), positions.subList(j, i)));
+//        		System.out.println(text.substring(j, i+1));
+//        		System.out.println(positions.subList(j, i+1));
+        		wordbounds.add(new Wordwithbounds(text.substring(j, i+1), positions.subList(j, i+1)));
         	}
+//        	System.out.format("%f, %s ,%f \n",fontsize,text.charAt(i),positions.get(i).getX()-x);
             x=positions.get(i).getX();
         }
         
@@ -79,9 +84,17 @@ public class NewPDFTextStripper extends PDFTextStripper{
             int numberofchar = textPositions.size();
             x = textPositions.get(0).getX();
             y = textPositions.get(0).getY();
-            w=numberofchar*textPositions.get(0).getWidth();
-            h=textPositions.get(0).getHeight();
-            bound.setRect(x, y-h, w, h);
+            w = textPositions.get(numberofchar-1).getX();
+            h=0;
+            for (int i = 0; i < numberofchar; i++)
+            {
+            	if (h<textPositions.get(i).getHeight()) 
+            	{
+            		h=textPositions.get(i).getHeight();
+            	}
+            }
+            bound.setRect(x, y-h, w-x+5, h);
+//          System.out.format("%s , %f, %s ,%f %s %d \n",text,x,text.charAt(0),w,text.charAt(numberofchar-1),numberofchar);
         }
 
         public String getText()
@@ -110,41 +123,13 @@ public class NewPDFTextStripper extends PDFTextStripper{
         }
 
     }
+	
 	protected void writePage() throws IOException
     {
 		super.writePage();
+		NewPDFRenderer drawer = new NewPDFRenderer(document);
 		//Expending the code of Writepage from PDFtextStripper to render a image to visualily verify bounding boxes
-		
-		int page =13;
-        boolean subsampling = false;
-        int dpi=72;
-        ImageType imageType = null;
-        imageType = ImageType.RGB;
-        PDFRenderer renderer = new PDFRenderer(document);
-        renderer.setSubsamplingAllowed(subsampling);
-        String imageFormat = "jpg";
-        String outputPrefix = "mark1_page_";
-        float quality = (float) 0.7;
-        boolean success = true;
-        BufferedImage image = renderer.renderImageWithDPI(page, dpi, imageType);
-    	Graphics2D g2d = image.createGraphics();
-		//Above code is mostly related to image rendering and bounding boxes are generated in writeline function
-    	
-		int numberOfStrings = wordbounds.size();
-        for (int i = 0; i < numberOfStrings; i++)
-        {
-
-            g2d.setColor(Color.RED);
-
-            g2d.draw (wordbounds.get(i).bound);
-            //Iterate through each wordbound object and draw its corresponding bounding box over the page 
-            
-        }
-        
-        String fileName = outputPrefix + (page) + "." + imageFormat;
-        System.out.println(fileName);
-        success &= ImageIOUtil.writeImage(image, fileName, dpi, quality);
-        //Write out the image to disk 
-    }
+		drawer.draw(wordbounds);
 	
+}
 }

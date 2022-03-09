@@ -463,7 +463,7 @@ public class PDFRenderer
                 new PageDrawerParameters(this, page, subsamplingAllowed, destination,
                         actualRenderingHints, imageDownscalingOptimizationThreshold);
         PageDrawer drawer = createPageDrawer(parameters);
-        drawer.drawPage(graphics, cropBox);
+        drawer.drawPage(graphics, cropBox); 
     }
 
     /**
