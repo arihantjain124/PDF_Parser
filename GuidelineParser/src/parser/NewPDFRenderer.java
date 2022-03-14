@@ -2,41 +2,88 @@ package parser;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.rendering.PageDrawer;
+import org.apache.pdfbox.rendering.PageDrawerParameters;
+import org.apache.pdfbox.rendering.RenderDestination;
 import org.apache.pdfbox.tools.imageio.ImageIOUtil;
+import org.apache.pdfbox.rendering.PageDrawerParameters;
 
-import parser.NewPDFTextStripper.Wordwithbounds;
-
+import parser.NewDataTypes.Wordwithbounds;
+import parser.NewPageDrawer;
 
 public class NewPDFRenderer extends PDFRenderer {
-
-	public NewPDFRenderer(PDDocument document) {
+	
+    BufferedImage image;
+    BufferedImage image1;
+    Graphics2D g2d;
+    float dpi_factor=72;
+    int dpi;
+    float scale;
+    int page;
+    ImageType imageType = ImageType.RGB;
+    protected RenderDestination defaultDestination;
+    
+    
+	public NewPDFRenderer(PDDocument document,int pageIndex,int dpi) {
+		
 		super(document);
-//		System.out.print(this.document);
-		// TODO Auto-generated constructor stub
+		
+		this.scale=dpi/dpi_factor;
+		PDPage page = pageTree.get(pageIndex);
+        PDRectangle cropbBox = page.getCropBox();
+        float widthPt = cropbBox.getWidth();
+        float heightPt = cropbBox.getHeight();
+        int widthPx = (int) Math.max(Math.floor(widthPt * scale), 1);
+        int heightPx = (int) Math.max(Math.floor(heightPt * scale), 1);
+//        System.out.print(widthPx);
+//        System.out.println(heightPx);
+        this.image = new BufferedImage(widthPx, heightPx, BufferedImage.TYPE_INT_RGB);
+        this.image1 = new BufferedImage(widthPx, heightPx, BufferedImage.TYPE_INT_RGB);
+        this.g2d=image.createGraphics();
+        g2d.setBackground(Color.WHITE);
+        g2d.clearRect(0, 0, image.getWidth(), image.getHeight());
+        this.page = pageIndex;
+		this.dpi=dpi;
+		
+		
 	}
-	public void draw(List<Wordwithbounds> wordbounds) throws IOException {
-		int page =20;
-        boolean subsampling = false;
-        int dpi=72;
-        ImageType imageType = null;
-        imageType = ImageType.RGB;
-        PDFRenderer renderer = new PDFRenderer(document);
-        renderer.setSubsamplingAllowed(subsampling);
-        String imageFormat = "jpg";
+	
+
+	
+	public void OutputImage() throws IOException {
+		
         String outputPrefix = "mark1_page_";
+        String imageFormat = "jpg";
         float quality = (float) 0.7;
         boolean success = true;
-//        BufferedImage image = renderer.renderImageWithDPI(page, dpi, imageType);
-        BufferedImage image = new BufferedImage(800,600,BufferedImage.TYPE_INT_RGB);;
-        Graphics2D g2d = image.createGraphics();
-		//Above code is mostly related to image rendering and bounding boxes are generated in writeline function
+        boolean subsampling = false;
+        PDFRenderer renderer = new PDFRenderer(document);
+        renderer.setSubsamplingAllowed(subsampling);
+
+        String fileName = outputPrefix + (page) + "." + imageFormat;
+//        System.out.println(fileName);
+        //Write out the image to disk 
+        success &= ImageIOUtil.writeImage(image, fileName, this.dpi, quality);
+        System.out.println(fileName);
+        System.out.println(success);
+	}
+	
+	
+	
+	public void DrawWordBounds(int pageIndex,List<Wordwithbounds> wordbounds) throws IOException {
+		
+//      BufferedImage image = renderer.renderImageWithDPI(page, dpi, imageType);
+//		Above code is mostly related to image rendering and bounding boxes are generated in writeline function
     	
 		int numberOfStrings = wordbounds.size();
         for (int i = 0; i < numberOfStrings; i++)
@@ -47,11 +94,32 @@ public class NewPDFRenderer extends PDFRenderer {
             //Iterate through each wordbound object and draw its corresponding bounding box over the page 
         }
         
-        
-        String fileName = outputPrefix + (page) + "." + imageFormat;
-//        System.out.println(fileName);
-        success &= ImageIOUtil.writeImage(image, fileName, dpi, quality);
-        //Write out the image to disk 
     }
 
+	
+	
+	
+	public BufferedImage rendergeometry(int pageIndex,List<Wordwithbounds> wordbounds) throws IOException {
+		
+		super.renderImage(pageIndex, scale, imageType, this.getDefaultDestination());
+		
+		PDPage page = pageTree.get(pageIndex-1);
+        
+//		RenderingHints actualRenderingHints = this.getRenderingHints();
+
+		DrawWordBounds(pageIndex,wordbounds);
+		
+//		PageDrawerParameters parameters=new PageDrawerParameters(this, page, subsamplingAllowed, getDefaultDestination(),
+//                getRenderingHints(), imageDownscalingOptimizationThreshold);
+//		System.out.print(this.parameters.getPage());
+        NewPageDrawer drawer = new NewPageDrawer(parameters);
+        Graphics2D temp_g=image1.createGraphics();
+        drawer.drawPage(temp_g,g2d, page.getCropBox(),parameters.getRenderingHints()); 
+        
+        OutputImage();
+        
+		return image;
+		
+	}
+	
 }
