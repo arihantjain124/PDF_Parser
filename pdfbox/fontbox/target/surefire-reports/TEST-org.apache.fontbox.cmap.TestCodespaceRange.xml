@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="org.apache.fontbox.cmap.TestCodespaceRange" time="0.004" tests="3" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="org.apache.fontbox.cmap.TestCodespaceRange" time="0" tests="3" errors="0" skipped="0" failures="0">
   <properties>
     <property name="sun.desktop" value="windows"/>
     <property name="awt.toolkit" value="sun.awt.windows.WToolkit"/>
@@ -17,7 +17,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="IN"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-11.0.14\bin"/>
-    <property name="sun.java.command" value="C:\Users\ariha\AppData\Local\Temp\surefire12405557503297568559\surefirebooter3919888721234202378.jar C:\Users\ariha\AppData\Local\Temp\surefire12405557503297568559 2022-02-25T17-16-37_191-jvmRun1 surefire10361153769098840472tmp surefire_018011203775360511755tmp"/>
+    <property name="sun.java.command" value="C:\Users\ariha\AppData\Local\Temp\surefire2793187155507449643\surefirebooter16706343911345721877.jar C:\Users\ariha\AppData\Local\Temp\surefire2793187155507449643 2022-03-09T16-30-37_965-jvmRun1 surefire4991982506659864201tmp surefire_06671689292035012126tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="D:\Code\HTIC\ge_oncology\pdfbox\fontbox\target\test-classes;D:\Code\HTIC\ge_oncology\pdfbox\fontbox\target\classes;C:\Users\ariha\.m2\repository\commons-logging\commons-logging\1.2\commons-logging-1.2.jar;C:\Users\ariha\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\ariha\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -33,7 +33,7 @@
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment"/>
-    <property name="surefire.real.class.path" value="C:\Users\ariha\AppData\Local\Temp\surefire12405557503297568559\surefirebooter3919888721234202378.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\ariha\AppData\Local\Temp\surefire2793187155507449643\surefirebooter16706343911345721877.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="11.0.14+8-LTS-263"/>
@@ -53,7 +53,7 @@
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
     <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob"/>
     <property name="sun.os.patch.level" value=""/>
-    <property name="java.library.path" value="C:\Program Files\Java\jdk-11.0.14\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Python310\Scripts\;C:\Python310\;C:\Program Files\Java\jdk-11.0.14\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Users\ariha\AppData\Local\Programs\Eclipse Adoptium\jdk-17.0.2.8-hotspot\bin;C:\Users\ariha\AppData\Local\Microsoft\WindowsApps;C:\Users\ariha\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\ariha\AppData\Roaming\npm;C:\adb;C:\Users\ariha\AppData\Local\Microsoft\WindowsApps;C:\Users\ariha\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\ariha\AppData\Roaming\npm;D:\Code\HTIC\apache-maven-3.8.4\bin;;."/>
+    <property name="java.library.path" value="C:\Program Files\Java\jdk-11.0.14\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Python310\Scripts\;C:\Python310\;C:\Program Files\Java\jdk-11.0.14\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Users\ariha\AppData\Local\Programs\Eclipse Adoptium\jdk-17.0.2.8-hotspot\bin;C:\Users\ariha\AppData\Local\Microsoft\WindowsApps;C:\Users\ariha\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\ariha\AppData\Roaming\npm;C:\adb;C:\Program Files (x86)\Bitvise SSH Client;C:\Program Files\MATLAB\R2021b\bin;C:\Users\ariha\AppData\Local\Microsoft\WindowsApps;C:\Users\ariha\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\ariha\AppData\Roaming\npm;D:\Code\HTIC\apache-maven-3.8.4\bin;;."/>
     <property name="java.vendor" value="Oracle Corporation"/>
     <property name="java.vm.info" value="mixed mode"/>
     <property name="java.vm.version" value="11.0.14+8-LTS-263"/>
@@ -61,6 +61,6 @@
     <property name="java.class.version" value="55.0"/>
   </properties>
   <testcase name="testCodeLength" classname="org.apache.fontbox.cmap.TestCodespaceRange" time="0"/>
-  <testcase name="testMatches" classname="org.apache.fontbox.cmap.TestCodespaceRange" time="0.002"/>
+  <testcase name="testMatches" classname="org.apache.fontbox.cmap.TestCodespaceRange" time="0"/>
   <testcase name="testConstructor" classname="org.apache.fontbox.cmap.TestCodespaceRange" time="0"/>
 </testsuite>

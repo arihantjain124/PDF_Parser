@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.apache.pdfbox.tools.imageio.TestImageIOUtils
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.084 s - in org.apache.pdfbox.tools.imageio.TestImageIOUtils
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.389 s - in org.apache.pdfbox.tools.imageio.TestImageIOUtils

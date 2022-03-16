@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.apache.pdfbox.pdmodel.interactive.form.PDAcroFormFromAnnotsTest
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 59.089 s - in org.apache.pdfbox.pdmodel.interactive.form.PDAcroFormFromAnnotsTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 28.259 s - in org.apache.pdfbox.pdmodel.interactive.form.PDAcroFormFromAnnotsTest

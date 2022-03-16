@@ -67,20 +67,21 @@ public class PDFRenderer
          }
      };
 
-    private boolean subsamplingAllowed = false;
+    protected boolean subsamplingAllowed = false;
 
-    private RenderDestination defaultDestination;
+    protected RenderDestination defaultDestination;
 
-    private RenderingHints renderingHints = null;
+    protected RenderingHints renderingHints = null;
 
-    private BufferedImage pageImage;
+    protected BufferedImage pageImage;
 
-    private static boolean kcmsLogged = false;
+    protected static boolean kcmsLogged = false;
 
-    private float imageDownscalingOptimizationThreshold = 0.5f;
+    protected float imageDownscalingOptimizationThreshold = 0.5f;
 
-    private final PDPageTree pageTree;
+    protected final PDPageTree pageTree;
 
+    protected PageDrawerParameters parameters = null;
     /**
      * Creates a new PDFRenderer.
      * @param document the document to render
@@ -172,7 +173,12 @@ public class PDFRenderer
     {
         return renderingHints;
     }
-
+    
+    public PageDrawerParameters getParameters()
+    {
+        return this.parameters;
+    }
+    
     /**
      * Set the rendering hints. Use this to influence rendering quality and speed. If you don't set
      * them yourself or pass null, PDFBox will decide <b><u>at runtime</u></b> depending on the
@@ -348,7 +354,7 @@ public class PDFRenderer
         // the end-user may provide a custom PageDrawer
         RenderingHints actualRenderingHints =
                 renderingHints == null ? createDefaultRenderingHints(g) : renderingHints;
-        PageDrawerParameters parameters =
+        parameters =
                 new PageDrawerParameters(this, page, subsamplingAllowed, destination,
                         actualRenderingHints, imageDownscalingOptimizationThreshold);
         PageDrawer drawer = createPageDrawer(parameters);

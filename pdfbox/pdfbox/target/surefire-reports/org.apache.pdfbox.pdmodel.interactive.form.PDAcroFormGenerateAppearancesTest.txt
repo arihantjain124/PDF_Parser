@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.apache.pdfbox.pdmodel.interactive.form.PDAcroFormGenerateAppearancesTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 27.993 s - in org.apache.pdfbox.pdmodel.interactive.form.PDAcroFormGenerateAppearancesTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.186 s - in org.apache.pdfbox.pdmodel.interactive.form.PDAcroFormGenerateAppearancesTest

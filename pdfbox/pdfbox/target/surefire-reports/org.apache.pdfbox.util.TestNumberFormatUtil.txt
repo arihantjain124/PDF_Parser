@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.apache.pdfbox.util.TestNumberFormatUtil
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.64 s - in org.apache.pdfbox.util.TestNumberFormatUtil
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.573 s - in org.apache.pdfbox.util.TestNumberFormatUtil

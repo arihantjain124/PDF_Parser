@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.apache.pdfbox.examples.pdmodel.TestCreateSignature
 -------------------------------------------------------------------------------
-Tests run: 24, Failures: 0, Errors: 0, Skipped: 6, Time elapsed: 10.403 s - in org.apache.pdfbox.examples.pdmodel.TestCreateSignature
+Tests run: 24, Failures: 0, Errors: 0, Skipped: 6, Time elapsed: 21.904 s - in org.apache.pdfbox.examples.pdmodel.TestCreateSignature
