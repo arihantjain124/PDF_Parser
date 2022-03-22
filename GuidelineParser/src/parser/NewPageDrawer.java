@@ -32,14 +32,14 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 
 public class NewPageDrawer extends PageDrawer{
-	
-	Graphics g;
+
+	Graphics2D g;
 	public NewPageDrawer(PageDrawerParameters parameters) throws IOException {
 		super(parameters);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public void drawPage(Graphics g_temp,Graphics g2d, PDRectangle pageSize,RenderingHints renderingHints) throws IOException {
+	public void drawPage(Graphics2D g_temp,Graphics2D g2d, PDRectangle pageSize,RenderingHints renderingHints) throws IOException {
 
 		this.g=g2d;
 		super.drawPage(g_temp, pageSize);
@@ -47,9 +47,20 @@ public class NewPageDrawer extends PageDrawer{
 	}
 	public void strokePath() throws IOException {
 //		super.strokePath();
-		GeneralPath temp=getLinePath();
+		System.out.print("here");
+		GeneralPath temp = getLinePath();
+//		AffineTransform tx = AffineTransform.getTranslateInstance(0, -612);
+//		temp.transform(tx);
+		AffineTransform at = new AffineTransform();
+		at.concatenate(AffineTransform.getScaleInstance(1, -1));
+		at.concatenate(AffineTransform.getTranslateInstance(0, -612));
+		temp.transform(at);
 //		System.out.println(temp);
-		((Graphics2D) this.g).draw(temp);
+//		((Graphics2D) this.g).draw(temp);
+//		temp.reset();
+		this.g.setComposite(getGraphicsState().getStrokingJavaComposite());
+		this.g.draw(temp);
+//        temp.reset();
 	}
 	
 	public void fillPath(int windingRule) throws IOException {

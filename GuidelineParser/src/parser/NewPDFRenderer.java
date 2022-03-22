@@ -99,15 +99,15 @@ public class NewPDFRenderer extends PDFRenderer {
 	
 	
 	
-	public BufferedImage rendergeometry(int pageIndex,List<Wordwithbounds> wordbounds) throws IOException {
+	public void rendergeometry(int pageIndex,List<Wordwithbounds> wordbounds) throws IOException {
 		
 		super.renderImage(pageIndex, scale, imageType, this.getDefaultDestination());
 		
-		PDPage page = pageTree.get(pageIndex-1);
+		PDPage page = pageTree.get(pageIndex);
         
 //		RenderingHints actualRenderingHints = this.getRenderingHints();
 
-		DrawWordBounds(pageIndex,wordbounds);
+//		DrawWordBounds(pageIndex,wordbounds);
 		
 //		PageDrawerParameters parameters=new PageDrawerParameters(this, page, subsamplingAllowed, getDefaultDestination(),
 //                getRenderingHints(), imageDownscalingOptimizationThreshold);
@@ -116,9 +116,8 @@ public class NewPDFRenderer extends PDFRenderer {
         Graphics2D temp_g=image1.createGraphics();
         drawer.drawPage(temp_g,g2d, page.getCropBox(),parameters.getRenderingHints()); 
         
-        OutputImage();
+//        OutputImage();
         
-		return image;
 		
 	}
 	
