@@ -54,6 +54,7 @@ public class NewPDFRenderer extends PDFRenderer {
         g2d.clearRect(0, 0, image.getWidth(), image.getHeight());
         this.page = pageIndex;
 		this.dpi=dpi;
+        g2d.setColor(Color.RED);
 		
 		
 	}
@@ -89,7 +90,6 @@ public class NewPDFRenderer extends PDFRenderer {
         for (int i = 0; i < numberOfStrings; i++)
         {
 
-            g2d.setColor(Color.RED);
             g2d.draw (wordbounds.get(i).bound);
             //Iterate through each wordbound object and draw its corresponding bounding box over the page 
         }

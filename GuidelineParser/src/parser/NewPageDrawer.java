@@ -27,15 +27,19 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 
 public class NewPageDrawer extends PageDrawer{
-
+	
+	int num_line=0;
+	int count=0;
 	Graphics2D g;
 	public NewPageDrawer(PageDrawerParameters parameters) throws IOException {
 		super(parameters);
+		num_line=0;
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -47,24 +51,41 @@ public class NewPageDrawer extends PageDrawer{
 	}
 	public void strokePath() throws IOException {
 //		super.strokePath();
-		System.out.print("here");
+//		System.out.print("here");
 		GeneralPath temp = getLinePath();
 //		AffineTransform tx = AffineTransform.getTranslateInstance(0, -612);
 //		temp.transform(tx);
 		AffineTransform at = new AffineTransform();
 		at.concatenate(AffineTransform.getScaleInstance(1, -1));
 		at.concatenate(AffineTransform.getTranslateInstance(0, -612));
-		temp.transform(at);
+//		temp.transform(at);
 //		System.out.println(temp);
 //		((Graphics2D) this.g).draw(temp);
+		PathIterator i = temp.getPathIterator(at);
+		float[] coords = new float[6];
+		count=0;
+		while (i.isDone() == false) {
+			count+=1;
+			int k = i.currentSegment(coords);
+//            System.out.format("x = %f ,y = %f \n",coords[0],coords[1]);
+			i.next();
+		}
+		System.out.format("Line Number : %d , Number of Coords : %d \n",num_line,count);
+		if (count>100) {
+			this.g.setComposite(getGraphicsState().getStrokingJavaComposite());
+			this.g.draw(temp);
+	        temp.reset();
+		}
+		num_line+=1;
 //		temp.reset();
-		this.g.setComposite(getGraphicsState().getStrokingJavaComposite());
-		this.g.draw(temp);
+//		this.g.setComposite(getGraphicsState().getStrokingJavaComposite());
+//		this.g.draw(temp);
 //        temp.reset();
 	}
 	
 	public void fillPath(int windingRule) throws IOException {
 //		super.fillPath(windingRule);
+		
 	}
     public void showAnnotation(PDAnnotation annotation) throws IOException{
 //    	super.showAnnotation(annotation);

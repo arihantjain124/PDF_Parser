@@ -80,7 +80,7 @@ public class NewPDFTextStripper extends PDFTextStripper{
 		super.writePage();
 		NewPDFRenderer drawer = new NewPDFRenderer(document,pageIndex,dpi);
 		//Expending the code of Writepage from PDFtextStripper to render a image to visualily verify bounding boxes
-		drawer.DrawWordBounds(pageIndex,wordbounds);
+//		drawer.DrawWordBounds(pageIndex,wordbounds);
 //		drawer.OutputImage();
 //		renderer.renderImageWithDPI(page, dpi, imageType);
 		drawer.rendergeometry(pageIndex,wordbounds);
