@@ -1,5 +1,6 @@
 package parser;
 
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
@@ -7,6 +8,24 @@ import org.apache.pdfbox.text.TextPosition;
 
 public class NewDataTypes {
 	
+	public static class Line
+    {
+		GeneralPath path=new GeneralPath();
+		float[] coord = new float[4];
+		Line(float x1,float y1,float x2,float y2){
+			coord[0]=x1;
+			coord[1]=y1;
+			coord[2]=x2;
+			coord[3]=y2;
+			this.path.moveTo(x1, y1);
+			this.path.lineTo(x2, y2);
+			this.path.closePath();
+		}
+		public GeneralPath getpath()
+        {
+            return path;
+        }
+    }
 	public static class Wordwithbounds
     {
         String text;

@@ -45,8 +45,6 @@ public class NewPDFRenderer extends PDFRenderer {
         float heightPt = cropbBox.getHeight();
         int widthPx = (int) Math.max(Math.floor(widthPt * scale), 1);
         int heightPx = (int) Math.max(Math.floor(heightPt * scale), 1);
-//        System.out.print(widthPx);
-//        System.out.println(heightPx);
         this.image = new BufferedImage(widthPx, heightPx, BufferedImage.TYPE_INT_RGB);
         this.image1 = new BufferedImage(widthPx, heightPx, BufferedImage.TYPE_INT_RGB);
         this.g2d=image.createGraphics();
@@ -72,7 +70,6 @@ public class NewPDFRenderer extends PDFRenderer {
         renderer.setSubsamplingAllowed(subsampling);
 
         String fileName = outputPrefix + (page) + "." + imageFormat;
-//        System.out.println(fileName);
         //Write out the image to disk 
         success &= ImageIOUtil.writeImage(image, fileName, this.dpi, quality);
         System.out.println(fileName);
@@ -82,18 +79,11 @@ public class NewPDFRenderer extends PDFRenderer {
 	
 	
 	public void DrawWordBounds(int pageIndex,List<Wordwithbounds> wordbounds) throws IOException {
-		
-//      BufferedImage image = renderer.renderImageWithDPI(page, dpi, imageType);
-//		Above code is mostly related to image rendering and bounding boxes are generated in writeline function
-    	
 		int numberOfStrings = wordbounds.size();
         for (int i = 0; i < numberOfStrings; i++)
         {
-
             g2d.draw (wordbounds.get(i).bound);
-            //Iterate through each wordbound object and draw its corresponding bounding box over the page 
         }
-        
     }
 
 	
@@ -102,23 +92,10 @@ public class NewPDFRenderer extends PDFRenderer {
 	public void rendergeometry(int pageIndex,List<Wordwithbounds> wordbounds) throws IOException {
 		
 		super.renderImage(pageIndex, scale, imageType, this.getDefaultDestination());
-		
 		PDPage page = pageTree.get(pageIndex);
-        
-//		RenderingHints actualRenderingHints = this.getRenderingHints();
-
-//		DrawWordBounds(pageIndex,wordbounds);
-		
-//		PageDrawerParameters parameters=new PageDrawerParameters(this, page, subsamplingAllowed, getDefaultDestination(),
-//                getRenderingHints(), imageDownscalingOptimizationThreshold);
-//		System.out.print(this.parameters.getPage());
         NewPageDrawer drawer = new NewPageDrawer(parameters);
         Graphics2D temp_g=image1.createGraphics();
         drawer.drawPage(temp_g,g2d, page.getCropBox(),parameters.getRenderingHints()); 
-        
-//        OutputImage();
-        
-		
 	}
 	
 }
