@@ -27,10 +27,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.tools.PDFText2HTML;
 import org.apache.pdfbox.util.Matrix;
-import org.apache.pdfbox.rendering.ImageType;
-import org.apache.pdfbox.rendering.PDFRenderer;
 
-import parser.NewPDFTextStripper;
 
 /**
  * This is the main program that simply parses the pdf document and transforms it
@@ -43,7 +40,6 @@ public final class ExtractText
 {
     private static final Log LOG = LogFactory.getLog(ExtractText.class);
 
-    @SuppressWarnings({"squid:S2068"})
     private static final String PASSWORD = "-password";
     private static final String ENCODING = "-encoding";
     private static final String CONSOLE = "-console";
@@ -99,7 +95,6 @@ public final class ExtractText
         boolean separateBeads = true;
         boolean alwaysNext = false;
         boolean rotationMagic = false;
-        @SuppressWarnings({"squid:S2068"})
         String password = "";
         String encoding = STD_ENCODING;
         String pdfFile = null;
@@ -254,7 +249,7 @@ public final class ExtractText
                     }
                     else
                     {
-                        stripper = new NewPDFTextStripper();
+                        stripper = new NewPDFTextStripper(startPage);
                     }
                     stripper.setSortByPosition(sort);
                     stripper.setShouldSeparateByBeads(separateBeads);

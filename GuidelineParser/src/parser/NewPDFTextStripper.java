@@ -28,14 +28,14 @@ public class NewPDFTextStripper extends PDFTextStripper{
 	
 
 	List<Wordwithbounds> wordbounds=new LinkedList<Wordwithbounds>();
-	int pageIndex = 20;
+	int pageIndex ;
 	int dpi=72;
 	
-	public NewPDFTextStripper() throws IOException {
+	public NewPDFTextStripper(int pageIndex) throws IOException {
 		super();
+		this.pageIndex=pageIndex;
 	}
 	
-
 	public void postiontobound(String text, List<TextPosition> positions) {
         int numberofchar = positions.size();
         float x=0;
@@ -62,7 +62,6 @@ public class NewPDFTextStripper extends PDFTextStripper{
         
 	}
 	
-	
 	public void writeLine(List<WordWithTextPositions> line) throws IOException
     {
 		super.writeLine(line);
@@ -78,9 +77,14 @@ public class NewPDFTextStripper extends PDFTextStripper{
 	protected void writePage() throws IOException
     {
 		super.writePage();
-		NewPDFRenderer drawer = new NewPDFRenderer(document,pageIndex,dpi);
-		drawer.DrawWordBounds(pageIndex,wordbounds);
-		drawer.rendergeometry(pageIndex,wordbounds);
-		drawer.OutputImage();
+//		NewPDFRenderer drawer = new NewPDFRenderer(document,pageIndex,dpi);
+//		drawer.drawWordBounds(pageIndex,wordbounds);
+//		drawer.rendergeometry(pageIndex);
+//		drawer.OutputImage();
 }
+	
+	public List<Wordwithbounds> getWordBounds(){
+		return wordbounds;
+		
+	}
 }

@@ -2,24 +2,27 @@ package parser;
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.pdfbox.text.TextPosition;
 
 public class NewDataTypes {
 	
-	public static class Line
+	public static class GraphObject
     {
 		GeneralPath path=new GeneralPath();
-		float[] coord = new float[4];
-		Line(float x1,float y1,float x2,float y2){
-			coord[0]=x1;
-			coord[1]=y1;
-			coord[2]=x2;
-			coord[3]=y2;
-			this.path.moveTo(x1, y1);
-			this.path.lineTo(x2, y2);
-			this.path.closePath();
+		ArrayList<Float> Targety = new ArrayList<Float>();
+		ArrayList<Float> Targetx = new ArrayList<Float>();
+		GraphObject(GeneralPath Path){
+			this.path=Path;
+		}
+		public void setTarget(float x,float y) {
+			Targetx.add(x);
+			Targety.add(x);
+		}
+		public void getTarget() {
+			
 		}
 		public GeneralPath getpath()
         {
