@@ -1,6 +1,7 @@
 package parser;
 
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,23 +13,33 @@ public class NewDataTypes {
 	public static class GraphObject
     {
 		GeneralPath path=new GeneralPath();
-		ArrayList<Float> Targety = new ArrayList<Float>();
-		ArrayList<Float> Targetx = new ArrayList<Float>();
+		ArrayList<Point2D> Targets = new ArrayList<Point2D>();
+		
 		GraphObject(GeneralPath Path){
 			this.path=Path;
 		}
-		public void setTarget(float x,float y) {
-			Targetx.add(x);
-			Targety.add(x);
+		
+		public void addTarget(float x,float y) {
+			Point2D currPoint = new Point2D.Float(x,y); 
+			Targets.add(currPoint);
 		}
-		public void getTarget() {
+		
+		public void addTarget(Point2D currPoint) {
+			Targets.add(currPoint);
+		}
+		
+		public ArrayList<Point2D> getTarget() {
+			
+			return Targets;
 			
 		}
+		
 		public GeneralPath getpath()
         {
             return path;
         }
     }
+	
 	public static class Wordwithbounds
     {
         String text;
