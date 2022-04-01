@@ -4,7 +4,7 @@
 # Log file
 *.log
 
-pdfbox/target/
+target/
 pdfbox/bin/
 .settings/
 .idea/
