@@ -2,9 +2,7 @@
 <projectDescription>
   <name>pdfbox</name>
   <comment>The Apache PDFBox library is an open source Java tool for working with PDF documents. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
-  <projects>
-    <project>fontbox</project>
-  </projects>
+  <projects/>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>
