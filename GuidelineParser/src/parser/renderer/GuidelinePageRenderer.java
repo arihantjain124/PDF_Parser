@@ -3,6 +3,7 @@ package parser.renderer;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -125,12 +126,21 @@ public class GuidelinePageRenderer extends PDFRenderer {
 			g2d.draw(i.next());
 		}
 	}
+	
 	public void drawWordBounds(List<WordWithBounds> wordbounds) throws IOException {
         g2d.setColor(Color.RED);
 		int numberOfStrings = wordbounds.size();
         for (int i = 0; i < numberOfStrings; i++)
         {
         	g2d.draw (wordbounds.get(i).getbound());
+        }
+    }
+	
+	public void drawBounds(List<Rectangle2D> bounds) throws IOException {
+        g2d.setColor(Color.RED);
+        for (Rectangle2D bound : bounds)
+        {
+        	g2d.draw (bound);
         }
     }
 }

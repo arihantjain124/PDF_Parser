@@ -1,5 +1,6 @@
 package parser;
 
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import org.apache.pdfbox.util.Matrix;
 
 import parser.renderer.GuidelinePageRenderer;
 import parser.text.GuidelineTextStripper;
+import parser.text.TextRegionAnalyser;
 import parser.text.WordWithBounds;
 
 public final class PdfParserNCCN
@@ -214,13 +216,17 @@ public final class PdfParserNCCN
                              stripper, document, output, rotationMagic, alwaysNext);
                 
                 if (true) {
-                    List<WordWithBounds> wordRect = stripper.getWordBounds();
+                    List<WordWithBounds> wordRects = stripper.getWordBounds();
+                    List<Rectangle2D> regionBounds = TextRegionAnalyser.getRegions(wordRects);
+                    
                     GuidelinePageRenderer renderer = new GuidelinePageRenderer(document,startPage,72);
                     renderer.intializeImage();
                     renderer.getGeometry();
                     renderer.drawLines();
                     renderer.drawTriangles();
-                    renderer.drawWordBounds(wordRect);
+                    //renderer.drawWordBounds(wordRects);
+                    renderer.drawBounds(regionBounds);
+                    
                     renderer.OutputImage();
 //                	ArrayList<GeneralPath> lines=renderer.getLines();
 //                	ArrayList<GeneralPath> triangles=renderer.getTriangles();

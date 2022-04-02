@@ -54,7 +54,7 @@ public class GuidelineTextStripper extends PDFTextStripper{
         for (int i = 0; i < numberOfStrings; i++)
         {
             WordWithTextPositions word = line.get(i);
-            positionToBound(word.getText(), word.getTextPositions());
+            wordbounds.add(new WordWithBounds(word.getText(), word.getTextPositions()));
         }
 
     }
