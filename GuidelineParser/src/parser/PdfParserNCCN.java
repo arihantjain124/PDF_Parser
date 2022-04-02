@@ -1,53 +1,31 @@
 package parser;
 
-import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
-import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
-import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification;
-import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
-import org.apache.pdfbox.tools.PDFText2HTML;
 import org.apache.pdfbox.util.Matrix;
-import org.apache.pdfbox.rendering.ImageType;
-import org.apache.pdfbox.rendering.PDFRenderer;
 
-import parser.NewPDFTextStripper;
-import parser.NewDataTypes.Wordwithbounds;
+import parser.renderer.GuidelinePageRenderer;
+import parser.text.GuidelineTextStripper;
+import parser.text.WordWithBounds;
 
-/**
- * This is the main program that simply parses the pdf document and transforms it
- * into text.
- *
- * @author Ben Litchfield
- * @author Tilman Hausherr
- */
 public final class PdfParserNCCN
 {
     private static final Log LOG = LogFactory.getLog(ExtractText.class);
 
-    @SuppressWarnings({"squid:S2068"})
     private static final String PASSWORD = "-password";
     private static final String ENCODING = "-encoding";
     private static final String CONSOLE = "-console";
@@ -56,7 +34,7 @@ public final class PdfParserNCCN
     private static final String SORT = "-sort";
     private static final String IGNORE_BEADS = "-ignoreBeads";
     private static final String DEBUG = "-debug";
-    private static final String HTML = "-html";
+
     private static final String ALWAYSNEXT = "-alwaysNext";
     private static final String ROTATION_MAGIC = "-rotationMagic";
     private static final String STD_ENCODING = "UTF-8";
@@ -98,12 +76,11 @@ public final class PdfParserNCCN
     public void startExtraction( String[] args ) throws IOException
     {
         boolean toConsole = false;
-        boolean toHTML = false;
         boolean sort = false;
         boolean separateBeads = true;
         boolean alwaysNext = false;
         boolean rotationMagic = false;
-        @SuppressWarnings({"squid:S2068"})
+        
         String password = "";
         String encoding = STD_ENCODING;
         String pdfFile = null;
@@ -140,11 +117,6 @@ public final class PdfParserNCCN
                     usage();
                 }
                 startPage = Integer.parseInt( args[i] );
-            }
-            else if( args[i].equals( HTML ) )
-            {
-                toHTML = true;
-                ext = ".html";
             }
             else if( args[i].equals( SORT ) )
             {
@@ -232,8 +204,8 @@ public final class PdfParserNCCN
                     System.err.println("Writing to " + outputFile);
                 }
 
-                NewPDFTextStripper stripper;
-                stripper = new NewPDFTextStripper(startPage);
+                GuidelineTextStripper stripper;
+                stripper = new GuidelineTextStripper(startPage);
                 stripper.setSortByPosition(sort);
                 stripper.setShouldSeparateByBeads(separateBeads);
 
@@ -242,13 +214,13 @@ public final class PdfParserNCCN
                              stripper, document, output, rotationMagic, alwaysNext);
                 
                 if (true) {
-                    List<Wordwithbounds> word_rect=stripper.getWordBounds();
-                    NewPDFRenderer renderer = new NewPDFRenderer(document,startPage,72);
+                    List<WordWithBounds> wordRect = stripper.getWordBounds();
+                    GuidelinePageRenderer renderer = new GuidelinePageRenderer(document,startPage,72);
                     renderer.intializeImage();
                     renderer.getGeometry();
                     renderer.drawLines();
                     renderer.drawTriangles();
-                    renderer.drawWordBounds(word_rect);
+                    renderer.drawWordBounds(wordRect);
                     renderer.OutputImage();
 //                	ArrayList<GeneralPath> lines=renderer.getLines();
 //                	ArrayList<GeneralPath> triangles=renderer.getTriangles();
@@ -266,7 +238,7 @@ public final class PdfParserNCCN
     }
 
     private void extractPages(int startPage, int endPage,
-    		NewPDFTextStripper stripper, PDDocument document, Writer output,
+    		GuidelineTextStripper stripper, PDDocument document, Writer output,
             boolean rotationMagic, boolean alwaysNext) throws IOException
     {
         for (int p = startPage; p <= endPage; ++p)

@@ -1,4 +1,4 @@
-package parser;
+package parser.renderer;
 
 
 import java.io.IOException;
@@ -15,21 +15,21 @@ import java.awt.RenderingHints;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 
-public class NewPageDrawer extends PageDrawer{
+public class GuidelinePageDrawer extends PageDrawer{
 	
 //	private int num_line = 0;
 	private int count = 0;
 	
-	ArrayList<GeneralPath> lines = new ArrayList<GeneralPath>();
-	ArrayList<GeneralPath> triangles = new ArrayList<GeneralPath>();
+	private ArrayList<GeneralPath> lines = new ArrayList<GeneralPath>();
+	private ArrayList<GeneralPath> triangles = new ArrayList<GeneralPath>();
 	
-	public NewPageDrawer(PageDrawerParameters parameters) throws IOException {
+	public GuidelinePageDrawer(PageDrawerParameters parameters) throws IOException {
 		super(parameters);
 //		num_line = 0;
 	}
 
-	public void drawPage(Graphics2D temp_g, PDRectangle pageSize,RenderingHints renderingHints) throws IOException {
-		super.drawPage(temp_g, pageSize);
+	public void drawPage(Graphics2D graphics, PDRectangle pageSize,RenderingHints renderingHints) throws IOException {
+		super.drawPage(graphics, pageSize);
 		
 	}
 
@@ -37,8 +37,8 @@ public class NewPageDrawer extends PageDrawer{
 	public void strokePath() throws IOException {
 
 		float[] coords = new float[6];
-		GeneralPath current_pdf_path = getLinePath();
-		PathIterator i = current_pdf_path.getPathIterator(null);
+		GeneralPath currentPdfPath = getLinePath();
+		PathIterator i = currentPdfPath.getPathIterator(null);
 		count=0;
 		
 		while (i.isDone() == false) {
@@ -50,18 +50,18 @@ public class NewPageDrawer extends PageDrawer{
 		
 		if (count == 3 || count == 2) {
 //			System.out.format("Number of Coords : %d Lines\n",count);
-			lines.add(current_pdf_path);
+			lines.add(currentPdfPath);
 		}
 		
 //		num_line+=1;
-		current_pdf_path.reset();
+		currentPdfPath.reset();
 	}
 
 	@Override
 	public void fillPath(int windingRule) throws IOException {
 		float[] coords = new float[6];
-		GeneralPath current_pdf_path = getLinePath();
-		PathIterator i = current_pdf_path.getPathIterator(null);
+		GeneralPath currentPdfPath = getLinePath();
+		PathIterator i = currentPdfPath.getPathIterator(null);
 		count = 0;
 		
 		while (i.isDone() == false) {
@@ -72,7 +72,7 @@ public class NewPageDrawer extends PageDrawer{
 		
 		if(count == 4) { 	
 //			System.out.format("Number of Coords : %d Triangles\n",count);
-			triangles.add(current_pdf_path);
+			triangles.add(currentPdfPath);
 		}
 		
 		super.fillPath(windingRule);

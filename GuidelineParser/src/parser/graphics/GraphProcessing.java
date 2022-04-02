@@ -1,14 +1,12 @@
-package parser;
+package parser.graphics;
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import parser.NewDataTypes.GraphObject;
-
 public class GraphProcessing {
-	ArrayList<GraphObject> graphLine = new ArrayList<GraphObject>();
+	private ArrayList<GraphObject> graphLine = new ArrayList<GraphObject>();
 	
 	public void checkIntersection(ArrayList<GeneralPath> lines,ArrayList<GeneralPath> triangles) {
 

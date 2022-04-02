@@ -28,6 +28,8 @@ import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.tools.PDFText2HTML;
 import org.apache.pdfbox.util.Matrix;
 
+import parser.text.GuidelineTextStripper;
+
 
 /**
  * This is the main program that simply parses the pdf document and transforms it
@@ -249,7 +251,7 @@ public final class ExtractText
                     }
                     else
                     {
-                        stripper = new NewPDFTextStripper(startPage);
+                        stripper = new GuidelineTextStripper(startPage);
                     }
                     stripper.setSortByPosition(sort);
                     stripper.setShouldSeparateByBeads(separateBeads);
