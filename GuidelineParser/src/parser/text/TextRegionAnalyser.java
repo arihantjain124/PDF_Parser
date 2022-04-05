@@ -23,12 +23,12 @@ public class TextRegionAnalyser {
 		return true;
 	}
 	
-	private static int getOverlappingRegion(ArrayList<Rectangle2D> boundList, Rectangle2D bound) {
+	private static int getOverlappingRegion(ArrayList<RegionWithBound> boundList, Rectangle2D bound) {
 		int regionIndex = -1;
 		
 		for(int i = 0; i < boundList.size(); i++) {
 			
-			Rectangle2D curBound = boundList.get(i);
+			Rectangle2D curBound = boundList.get(i).getBound();
 			if(isOverlapsInX(curBound, bound)) {
 				
 				//Check vertical gaps
@@ -60,9 +60,9 @@ public class TextRegionAnalyser {
 		return regionIndex;
 	}
 
-	public static List<Rectangle2D> getRegions(List<WordWithBounds> linesWithBounds){
+	public static List<RegionWithBound> getRegions(List<WordWithBounds> linesWithBounds){
 		
-		ArrayList<Rectangle2D> regionBoundList = new ArrayList<Rectangle2D>();
+		ArrayList<RegionWithBound> regionBoundList = new ArrayList<RegionWithBound>();
 		
 		for(WordWithBounds line: linesWithBounds) {
 			
@@ -71,14 +71,17 @@ public class TextRegionAnalyser {
 			int overlappingRegionIndex = getOverlappingRegion(regionBoundList, curLineBound); //Check if line is overlapping with any existing regions
 			if(overlappingRegionIndex >= 0) {
 				
-				Rectangle2D oldRegionBound = regionBoundList.get(overlappingRegionIndex);
+				RegionWithBound region = regionBoundList.get(overlappingRegionIndex);
+				Rectangle2D oldRegionBound = region.getBound();
 				Rectangle2D newRegionBound = (Rectangle2D.Float) oldRegionBound.createUnion(curLineBound);
 				
-				regionBoundList.set(overlappingRegionIndex, newRegionBound);
+				region.setBound(newRegionBound);
+				region.addContentLine(line);
+				//regionBoundList.set(overlappingRegionIndex, newRegionBound);
 				
 			}else {
 				//Create a new region
-				regionBoundList.add(curLineBound);
+				regionBoundList.add(new RegionWithBound(curLineBound, line));
 			}
 		}
 		

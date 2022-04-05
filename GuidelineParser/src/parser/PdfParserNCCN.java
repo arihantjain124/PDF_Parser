@@ -21,6 +21,7 @@ import org.apache.pdfbox.util.Matrix;
 
 import parser.renderer.GuidelinePageRenderer;
 import parser.text.GuidelineTextStripper;
+import parser.text.RegionWithBound;
 import parser.text.TextRegionAnalyser;
 import parser.text.WordWithBounds;
 
@@ -217,7 +218,7 @@ public final class PdfParserNCCN
                 
                 if (true) {
                     List<WordWithBounds> wordRects = stripper.getWordBounds();
-                    List<Rectangle2D> regionBounds = TextRegionAnalyser.getRegions(wordRects);
+                    List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects);
                     
                     GuidelinePageRenderer renderer = new GuidelinePageRenderer(document,startPage,72);
                     renderer.intializeImage();
@@ -225,7 +226,7 @@ public final class PdfParserNCCN
                     renderer.drawLines();
                     renderer.drawTriangles();
                     //renderer.drawWordBounds(wordRects);
-                    renderer.drawBounds(regionBounds);
+                    renderer.drawRegionBounds(regionBounds);
                     
                     renderer.OutputImage();
 //                	ArrayList<GeneralPath> lines=renderer.getLines();
