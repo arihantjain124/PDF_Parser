@@ -1,11 +1,13 @@
 package parser;
 
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,6 +21,8 @@ import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.util.Matrix;
 
+import parser.graphics.GraphObject;
+import parser.graphics.GraphProcessing;
 import parser.renderer.GuidelinePageRenderer;
 import parser.text.GuidelineTextStripper;
 import parser.text.TextRegionAnalyser;
@@ -219,21 +223,20 @@ public final class PdfParserNCCN
                     List<WordWithBounds> wordRects = stripper.getWordBounds();
                     List<Rectangle2D> regionBounds = TextRegionAnalyser.getRegions(wordRects);
                     
-                    GuidelinePageRenderer renderer = new GuidelinePageRenderer(document,startPage,72);
+                    GuidelinePageRenderer renderer = new GuidelinePageRenderer(document,startPage - 1 ,72);
                     renderer.intializeImage();
                     renderer.getGeometry();
-                    renderer.drawLines();
-                    renderer.drawTriangles();
-                    //renderer.drawWordBounds(wordRects);
                     renderer.drawBounds(regionBounds);
                     
-                    renderer.OutputImage();
-//                	ArrayList<GeneralPath> lines=renderer.getLines();
-//                	ArrayList<GeneralPath> triangles=renderer.getTriangles();
-                }
-                
-                
+                	ArrayList<GeneralPath> lines = renderer.getLines();
+                	ArrayList<GeneralPath> triangles = renderer.getTriangles();
+                	GraphProcessing graphProc = new GraphProcessing();
+                	graphProc.checkIntersectionToTriangles(lines, triangles);
+                	ArrayList<GraphObject> graphLine = graphProc.getGraphObject();
+                	renderer.drawGraphObject(graphLine);
 
+                    renderer.OutputImage();
+                }
             }
             finally
             {
