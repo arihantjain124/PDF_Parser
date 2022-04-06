@@ -18,6 +18,7 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 
 import parser.graphics.GraphObject;
+import parser.text.RegionWithBound;
 import parser.text.WordWithBounds;
 
 
@@ -140,11 +141,11 @@ public class GuidelinePageRenderer extends PDFRenderer {
         }
     }
 	
-	public void drawBounds(List<Rectangle2D> bounds) throws IOException {
+	public void drawRegionBounds(List<RegionWithBound> regions) throws IOException {
         g2d.setColor(Color.RED);
-        for (Rectangle2D bound : bounds)
+        for (RegionWithBound region : regions)
         {
-        	g2d.draw (bound);
+        	g2d.draw (region.getBound());
         }
     }
 }

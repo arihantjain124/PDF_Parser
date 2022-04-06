@@ -25,6 +25,7 @@ import parser.graphics.GraphObject;
 import parser.graphics.GraphProcessing;
 import parser.renderer.GuidelinePageRenderer;
 import parser.text.GuidelineTextStripper;
+import parser.text.RegionWithBound;
 import parser.text.TextRegionAnalyser;
 import parser.text.WordWithBounds;
 
@@ -221,12 +222,15 @@ public final class PdfParserNCCN
                 
                 if (true) {
                     List<WordWithBounds> wordRects = stripper.getWordBounds();
-                    List<Rectangle2D> regionBounds = TextRegionAnalyser.getRegions(wordRects);
+                    List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects);
                     
                     GuidelinePageRenderer renderer = new GuidelinePageRenderer(document,startPage - 1 ,72);
                     renderer.intializeImage();
                     renderer.getGeometry();
-                    renderer.drawBounds(regionBounds);
+                    renderer.drawLines();
+                    renderer.drawTriangles();
+                    //renderer.drawWordBounds(wordRects);
+                    renderer.drawRegionBounds(regionBounds);
                     
                 	ArrayList<GeneralPath> lines = renderer.getLines();
                 	ArrayList<GeneralPath> triangles = renderer.getTriangles();
