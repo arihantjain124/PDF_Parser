@@ -13,11 +13,11 @@ import java.util.List;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.graphics.state.PDGraphicsState;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 
+import parser.graphics.GraphObject;
 import parser.text.WordWithBounds;
 
 
@@ -32,8 +32,6 @@ public class GuidelinePageRenderer extends PDFRenderer {
 	private float scale;
 	private int page;
 	private ImageType imageType = ImageType.RGB;
-    private PDGraphicsState state = null;
-	
     
     private ArrayList<GeneralPath> lines = new ArrayList<GeneralPath>();
     private ArrayList<GeneralPath> triangles = new ArrayList<GeneralPath>();
@@ -56,7 +54,6 @@ public class GuidelinePageRenderer extends PDFRenderer {
         int heightPx = (int) Math.max(Math.floor(heightPt * scale), 1);
         
         this.image = new BufferedImage(widthPx, heightPx, BufferedImage.TYPE_INT_RGB);
-        
         this.g2d = image.createGraphics();
         g2d.setBackground(Color.WHITE);
         g2d.clearRect(0, 0, image.getWidth(), image.getHeight());
@@ -73,7 +70,7 @@ public class GuidelinePageRenderer extends PDFRenderer {
         String imageFormat = "jpg";
         float quality = (float) 0.7;
         boolean success = true;
-        String fileName = outputPrefix + (page) + "." + imageFormat;
+        String fileName = outputPrefix + (page + 1) + "." + imageFormat;
         
         //Write out the image to disk 
         success &= ImageIOUtil.writeImage(image, fileName, this.dpi, quality);
@@ -87,8 +84,9 @@ public class GuidelinePageRenderer extends PDFRenderer {
 		
 		super.renderImage(this.page, scale, imageType, this.getDefaultDestination());
 		PDPage page = pageTree.get(this.page);
-		
-        GuidelinePageDrawer drawer = new GuidelinePageDrawer(parameters);
+
+        PDRectangle cropbBox = page.getCropBox();
+        GuidelinePageDrawer drawer = new GuidelinePageDrawer(parameters,cropbBox);
         int widthPx = (int) Math.max(Math.floor(page.getCropBox().getWidth() * scale), 1);
         int heightPx = (int) Math.max(Math.floor(page.getCropBox().getHeight() * scale), 1);
         
@@ -96,9 +94,9 @@ public class GuidelinePageRenderer extends PDFRenderer {
         Graphics2D tempGraphics = tempImage.createGraphics();
         drawer.drawPage(tempGraphics, page.getCropBox(),parameters.getRenderingHints()); 
         
-        state = drawer.getGraphicsState();
         triangles = drawer.getTriangles();
         lines = drawer.getLines();
+        
 	}
 	
 	public ArrayList<GeneralPath> getLines(){
@@ -113,19 +111,25 @@ public class GuidelinePageRenderer extends PDFRenderer {
         g2d.setColor(Color.BLACK);
 		Iterator<GeneralPath> i = lines.iterator();
 		while (i.hasNext()) {
-			g2d.setComposite(state.getStrokingJavaComposite());
 			g2d.draw(i.next());
 		}
 	}
 	
-	public void drawTriangles() {
-        g2d.setColor(Color.BLACK);
-		Iterator<GeneralPath> i = triangles.iterator();
+	public void drawGraphObject(ArrayList<GraphObject> graphLine) {
+		g2d.setColor(Color.RED);
+		Iterator<GraphObject> i = graphLine.iterator();
+		
 		while (i.hasNext()) {
-			g2d.setComposite(state.getStrokingJavaComposite());
-			g2d.draw(i.next());
+			g2d.draw(i.next().getpath());
 		}
 	}
+	
+	public void drawTriangles() throws IOException  {
+        g2d.setColor(Color.BLACK);
+		Iterator<GeneralPath> i = triangles.iterator();
+		while (i.hasNext()) 
+			g2d.draw(i.next());
+		}
 	
 	public void drawWordBounds(List<WordWithBounds> wordbounds) throws IOException {
         g2d.setColor(Color.RED);
