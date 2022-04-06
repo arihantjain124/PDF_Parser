@@ -7,25 +7,24 @@ import java.util.ArrayList;
 public class GraphObject
 {
 	private GeneralPath path=new GeneralPath();
-	private ArrayList<Point2D> Targets = new ArrayList<Point2D>();
+	private Point2D source;
+	private Point2D target;
 	
-	GraphObject(GeneralPath Path){
-		this.path=Path;
+	public GraphObject(Point2D source, Point2D target) {
+		this.source = source;
+		this.target = target;
+		this.path.moveTo(source.getX(), source.getY());
+		this.path.lineTo(target.getX(), target.getY());
 	}
-	
-	public void addTarget(float x,float y) {
-		Point2D currPoint = new Point2D.Float(x,y); 
-		Targets.add(currPoint);
+
+	public GraphObject(GeneralPath currLine) {
+		this.path=currLine;
 	}
-	
-	public void addTarget(Point2D currPoint) {
-		Targets.add(currPoint);
+
+	public void setTarget() {
 	}
-	
-	public ArrayList<Point2D> getTarget() {
-		
-		return Targets;
-		
+
+	public void setSource() {
 	}
 	
 	public GeneralPath getpath()
