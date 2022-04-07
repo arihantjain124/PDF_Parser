@@ -1,7 +1,7 @@
 package parser;
 
+import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -215,6 +215,9 @@ public final class PdfParserNCCN
                 stripper = new GuidelineTextStripper(startPage);
                 stripper.setSortByPosition(sort);
                 stripper.setShouldSeparateByBeads(separateBeads);
+                
+                Rectangle rect = new Rectangle( 0, 85, 792, 455 ); //TODO: Hard coding the main content area now.
+                stripper.addRegion( "MainContent", rect );
 
                 // Extract text for main document:
                 extractPages(startPage, Math.min(endPage, document.getNumberOfPages()), 
@@ -227,8 +230,8 @@ public final class PdfParserNCCN
                     GuidelinePageRenderer renderer = new GuidelinePageRenderer(document,startPage - 1 ,72);
                     renderer.intializeImage();
                     renderer.getGeometry();
-                    renderer.drawLines();
-                    renderer.drawTriangles();
+                    //renderer.drawLines();
+                    //renderer.drawTriangles();
                     //renderer.drawWordBounds(wordRects);
                     renderer.drawRegionBounds(regionBounds);
                     
@@ -240,6 +243,41 @@ public final class PdfParserNCCN
                 	renderer.drawGraphObject(graphLine);
 
                     renderer.OutputImage();
+                    
+                    TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
+                    for(RegionWithBound region : regionBounds) {
+                    	
+                    	if(!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
+                    		
+                    		System.out.println("Current Region:");
+                    		System.out.println("===============");
+                    		
+                    		for(WordWithBounds word : region.getContentLines()) {
+                    			System.out.println(word.getText());
+                    		}
+                    		
+                    		for(int prevRegionIndex : region.getPrevRegions()) {
+                    			System.out.println("");
+                    			System.out.println("Prev Region:");
+                        		System.out.println("===============");
+                    			for(WordWithBounds word : regionBounds.get(prevRegionIndex).getContentLines()) {
+                        			System.out.println(word.getText());
+                        		}
+                    		}
+                    		
+                    		for(int nextRegionIndex : region.getNextRegions()) {
+                    			System.out.println("");
+                    			System.out.println("Next Region:");
+                        		System.out.println("===============");
+                    			for(WordWithBounds word : regionBounds.get(nextRegionIndex).getContentLines()) {
+                        			System.out.println(word.getText());
+                        		}
+                    		}
+                    		
+                    		System.out.println("===========================================");
+                    		System.out.println("");
+                    	}
+                    }
                 }
             }
             finally

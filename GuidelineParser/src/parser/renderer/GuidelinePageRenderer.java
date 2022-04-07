@@ -3,7 +3,6 @@ package parser.renderer;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -86,8 +85,7 @@ public class GuidelinePageRenderer extends PDFRenderer {
 		super.renderImage(this.page, scale, imageType, this.getDefaultDestination());
 		PDPage page = pageTree.get(this.page);
 
-        PDRectangle cropbBox = page.getCropBox();
-        GuidelinePageDrawer drawer = new GuidelinePageDrawer(parameters,cropbBox);
+        GuidelinePageDrawer drawer = new GuidelinePageDrawer(parameters);
         int widthPx = (int) Math.max(Math.floor(page.getCropBox().getWidth() * scale), 1);
         int heightPx = (int) Math.max(Math.floor(page.getCropBox().getHeight() * scale), 1);
         

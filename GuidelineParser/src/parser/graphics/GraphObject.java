@@ -2,7 +2,6 @@ package parser.graphics;
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 
 public class GraphObject
 {
@@ -21,10 +20,12 @@ public class GraphObject
 		this.path=currLine;
 	}
 
-	public void setTarget() {
+	public Point2D getTarget() {
+		return target;
 	}
 
-	public void setSource() {
+	public Point2D getSource() {
+		return source;
 	}
 	
 	public GeneralPath getpath()

@@ -1,8 +1,11 @@
 package parser.text;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+
+import parser.graphics.GraphObject;
 
 public class TextRegionAnalyser {
 	
@@ -86,5 +89,80 @@ public class TextRegionAnalyser {
 		}
 		
 		return regionBoundList;
+	}
+	
+	public static void generateTextRegionAssociation(List<GraphObject> arrows, List<RegionWithBound> regions) {
+		
+		for(GraphObject arrow : arrows) {
+			Point2D source = arrow.getSource();
+			Point2D target = arrow.getTarget();
+			
+			double minDistFromSource = Double.MAX_VALUE, minDistFromTarget = Double.MAX_VALUE;
+			int minDistFromSourceIndex = -1, minDistFromTargetIndex = -1;
+			
+			for(int regionIndex = 0; regionIndex < regions.size(); regionIndex++) {
+				
+				RegionWithBound region = regions.get(regionIndex);
+				
+				double distFromSource = distanceBoxPoint(source, region.getBound());
+				if(distFromSource < minDistFromSource) {
+					minDistFromSource =  distFromSource;
+					minDistFromSourceIndex = regionIndex;
+				}
+					
+				double distFromTarget = distanceBoxPoint(target, region.getBound());
+				if(distFromTarget < minDistFromTarget) {
+					minDistFromTarget =  distFromTarget;
+					minDistFromTargetIndex = regionIndex;
+				}
+			}
+			
+			if(minDistFromSourceIndex >= 0 && minDistFromTargetIndex >= 0) {
+				regions.get(minDistFromSourceIndex).addNextRegion(minDistFromTargetIndex);
+				regions.get(minDistFromTargetIndex).addPrevRegion(minDistFromSourceIndex);
+			}
+		}
+	}
+	
+	private static double distanceBoxPoint(Point2D point, Rectangle2D rect) {
+			
+		if (point.getX() < rect.getMinX()) {
+			
+			if (point.getY() < rect.getMinY()) {
+				return hypot(rect.getMinX() - point.getX(), rect.getMinY() - point.getY());
+			}
+			
+			if (point.getY() <= rect.getMaxY()) {
+				return rect.getMinX() - point.getX();
+			}
+			
+			return hypot(rect.getMinX() - point.getX(), rect.getMaxY() - point.getY());
+			
+		} else if (point.getX() <= rect.getMaxX()) {
+			
+			if (point.getY() < rect.getMinY()) {
+				return rect.getMinY() - point.getY();
+			}
+			
+			if (point.getY() <= rect.getMaxY()) {
+				return 0;
+			}
+			
+			return point.getY() - rect.getMaxY();
+		} else {
+			if (point.getY() < rect.getMinY()) {
+				return hypot(rect.getMaxX() - point.getX(), rect.getMinY() - point.getY());
+			}
+			
+			if (point.getY() <= rect.getMaxY()) {
+				return point.getX() - rect.getMaxX();
+			}
+			
+			return hypot(rect.getMaxX() - point.getX(), rect.getMaxY() - point.getY());
+		}
+	}
+	
+	private static double hypot(double x, double y) {
+		return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 	}
 }
