@@ -242,42 +242,11 @@ public final class PdfParserNCCN
                 	ArrayList<GraphObject> graphLine = graphProc.getGraphObject();
                 	renderer.drawGraphObject(graphLine);
 
-                    renderer.OutputImage();
+//                    renderer.OutputImage();
                     
                     TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
-                    for(RegionWithBound region : regionBounds) {
-                    	
-                    	if(!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
-                    		
-                    		System.out.println("Current Region:");
-                    		System.out.println("===============");
-                    		
-                    		for(WordWithBounds word : region.getContentLines()) {
-                    			System.out.println(word.getText());
-                    		}
-                    		
-                    		for(int prevRegionIndex : region.getPrevRegions()) {
-                    			System.out.println("");
-                    			System.out.println("Prev Region:");
-                        		System.out.println("===============");
-                    			for(WordWithBounds word : regionBounds.get(prevRegionIndex).getContentLines()) {
-                        			System.out.println(word.getText());
-                        		}
-                    		}
-                    		
-                    		for(int nextRegionIndex : region.getNextRegions()) {
-                    			System.out.println("");
-                    			System.out.println("Next Region:");
-                        		System.out.println("===============");
-                    			for(WordWithBounds word : regionBounds.get(nextRegionIndex).getContentLines()) {
-                        			System.out.println(word.getText());
-                        		}
-                    		}
-                    		
-                    		System.out.println("===========================================");
-                    		System.out.println("");
-                    	}
-                    }
+                    JsonExport.generateTextRegionJson(graphLine, regionBounds,startPage - 1);
+
                 }
             }
             finally
