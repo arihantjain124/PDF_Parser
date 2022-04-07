@@ -4,7 +4,6 @@ package parser.renderer;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.graphics.state.PDGraphicsState;
 
 import org.apache.pdfbox.rendering.PageDrawer;
 import org.apache.pdfbox.rendering.PageDrawerParameters;
@@ -12,6 +11,7 @@ import org.apache.pdfbox.rendering.PageDrawerParameters;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 
@@ -22,22 +22,27 @@ public class GuidelinePageDrawer extends PageDrawer{
 	
 	private ArrayList<GeneralPath> lines = new ArrayList<GeneralPath>();
 	private ArrayList<GeneralPath> triangles = new ArrayList<GeneralPath>();
+	AffineTransform at = new AffineTransform();
 	
-	public GuidelinePageDrawer(PageDrawerParameters parameters) throws IOException {
+	
+	
+	public GuidelinePageDrawer(PageDrawerParameters parameters, PDRectangle pageSize) throws IOException {
 		super(parameters);
+		int pageHeight = (int) pageSize.getHeight() * -1;
+		at.concatenate(AffineTransform.getScaleInstance(1, -1));
+		at.concatenate(AffineTransform.getTranslateInstance(0, pageHeight));
 //		num_line = 0;
 	}
 
 	public void drawPage(Graphics2D graphics, PDRectangle pageSize,RenderingHints renderingHints) throws IOException {
 		super.drawPage(graphics, pageSize);
-		
 	}
 
 	@Override
 	public void strokePath() throws IOException {
-
 		float[] coords = new float[6];
 		GeneralPath currentPdfPath = getLinePath();
+		currentPdfPath.transform(at);
 		PathIterator i = currentPdfPath.getPathIterator(null);
 		count=0;
 		
@@ -50,7 +55,7 @@ public class GuidelinePageDrawer extends PageDrawer{
 		
 		if (count == 3 || count == 2) {
 //			System.out.format("Number of Coords : %d Lines\n",count);
-			lines.add(currentPdfPath);
+			lines.add(new GeneralPath(currentPdfPath));
 		}
 		
 //		num_line+=1;
@@ -61,6 +66,7 @@ public class GuidelinePageDrawer extends PageDrawer{
 	public void fillPath(int windingRule) throws IOException {
 		float[] coords = new float[6];
 		GeneralPath currentPdfPath = getLinePath();
+		currentPdfPath.transform(at);
 		PathIterator i = currentPdfPath.getPathIterator(null);
 		count = 0;
 		
@@ -72,7 +78,7 @@ public class GuidelinePageDrawer extends PageDrawer{
 		
 		if(count == 4) { 	
 //			System.out.format("Number of Coords : %d Triangles\n",count);
-			triangles.add(currentPdfPath);
+			triangles.add(new GeneralPath(currentPdfPath));
 		}
 		
 		super.fillPath(windingRule);
@@ -87,7 +93,4 @@ public class GuidelinePageDrawer extends PageDrawer{
 		return triangles;
 	}
 	
-	public PDGraphicsState getstate() {
-		return getGraphicsState();
-	}
 }
