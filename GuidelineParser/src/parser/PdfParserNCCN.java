@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +24,7 @@ import org.apache.pdfbox.util.Matrix;
 
 import parser.graphics.GraphObject;
 import parser.graphics.GraphProcessing;
+import parser.json.JsonExport;
 import parser.renderer.GuidelinePageRenderer;
 import parser.text.FootnoteAnalyser;
 import parser.text.GuidelineTextStripper;
@@ -227,7 +229,10 @@ public final class PdfParserNCCN
                 if (true) {
                     List<WordWithBounds> wordRects = stripper.getWordBounds();
                     
-                    FootnoteAnalyser.footnotes(wordRects);
+                    HashMap<String, String> footnoteDefinitions = FootnoteAnalyser.analyseFootnotes(wordRects);
+            		for (String key : footnoteDefinitions.keySet()) {
+            			System.out.println(key + " " + footnoteDefinitions.get(key));
+            		}
                     
                     List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects);
                     

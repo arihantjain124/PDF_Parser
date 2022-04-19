@@ -1,6 +1,5 @@
-package parser;
+package parser.json;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -19,7 +18,8 @@ import parser.text.WordWithBounds;
 
 public class JsonExport {
 	
-	static void generateTextRegionJson(ArrayList<GraphObject> graphLine, List<RegionWithBound>  regionBounds, int pageIndex) throws JsonIOException, IOException {
+	public static void generateTextRegionJson(ArrayList<GraphObject> graphLine, List<RegionWithBound>  regionBounds, int pageIndex) 
+			throws JsonIOException, IOException {
 		
 		GsonBuilder builder = new GsonBuilder(); 
 		builder.setPrettyPrinting(); 

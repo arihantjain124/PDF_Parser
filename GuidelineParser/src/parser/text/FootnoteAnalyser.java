@@ -2,6 +2,8 @@ package parser.text;
 
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,10 +14,12 @@ public class FootnoteAnalyser {
 	private static final int MAX_FOOTNOTE_LENGTH = 3; //TODO: Add in configuration
 	private static final int FOOTNOTE_HEIGHT_DIFF = 2; //TODO: Add in configuration
 
-	public static HashMap<String, String> footnotes(List<WordWithBounds> line) throws IOException {
+	public static HashMap<String, String> analyseFootnotes(List<WordWithBounds> line) throws IOException {
 		
 		HashMap<String, String> footnoteDefinitions = new HashMap<String, String>();
 		int numberOfStrings = line.size();
+		
+		ArrayList<Integer> footnoteLineIndices = new ArrayList<Integer>();
 
 		StringBuilder previousLineFootnoteDefKey = new StringBuilder();
 		for (int i = 0; i < numberOfStrings; i++) {
@@ -31,6 +35,8 @@ public class FootnoteAnalyser {
 				
 				previousLineFootnoteDefKey.setLength(0);
 				previousLineFootnoteDefKey.append(key);
+				
+				footnoteLineIndices.add(i);
 			}else {
 				
 				if(previousLineFootnoteDefKey.length() <= 0 ) {
@@ -78,15 +84,20 @@ public class FootnoteAnalyser {
 		        	String footnoteText = oldText + curLineText;
 		        	
 		        	footnoteDefinitions.put(key, footnoteText);
+		        	footnoteLineIndices.add(i);
 		        	
 		        }else {
 		        	previousLineFootnoteDefKey.setLength(0);
 		        }
 			}
 		}
-
-		for (String key : footnoteDefinitions.keySet()) {
-			System.out.println(key + " " + footnoteDefinitions.get(key));
+		
+		if(!footnoteLineIndices.isEmpty()) {
+			
+			Collections.sort(footnoteLineIndices, Collections.reverseOrder());
+			for(int index : footnoteLineIndices) {
+				line.remove(index);
+			}
 		}
 
 		return footnoteDefinitions;
