@@ -24,15 +24,12 @@ public class JsonExport {
 		GsonBuilder builder = new GsonBuilder(); 
 		builder.setPrettyPrinting(); 
 		Gson gson = builder.create();
-		GraphJsonObject currJsonObject = new GraphJsonObject();
 		
-		
-		String outputPrefix = "NCCN_NSCL_pdf_";
-        String filePath = outputPrefix + (pageIndex + 1) + ".json";
-        Writer writer = Files.newBufferedWriter(Paths.get(filePath));
+        List<GraphJsonObject> graphJsonObjectList = new ArrayList<GraphJsonObject>();
         
 	    for(RegionWithBound region : regionBounds) {
 
+	    	GraphJsonObject currJsonObject = new GraphJsonObject();
 	    	currJsonObject.setIndex(regionBounds.indexOf(region));
         	
         	if(!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
@@ -48,12 +45,18 @@ public class JsonExport {
     			
             	currJsonObject.setType("object");
             	
-            	gson.toJson(currJsonObject, writer);
+            	graphJsonObjectList.add(currJsonObject);
 
 	    	}
         	
-	    } 
+	    }
+	    
+		String outputPrefix = "NCCN_NSCL_pdf_";
+        String filePath = outputPrefix + (pageIndex + 1) + ".json";
+        Writer writer = Files.newBufferedWriter(Paths.get(filePath));
+        
+	    gson.toJson(graphJsonObjectList, writer);
 
         writer.close();
-        }
-	}
+    }
+}
