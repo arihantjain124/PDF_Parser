@@ -52,7 +52,7 @@ public class JsonExport {
 	    }
 	    
 		String outputPrefix = "NCCN_NSCL_pdf_";
-        String filePath = outputPrefix + (pageIndex + 1) + ".json";
+        String filePath = outputPrefix + pageIndex + ".json";
         Writer writer = Files.newBufferedWriter(Paths.get(filePath));
         
 	    gson.toJson(graphJsonObjectList, writer);

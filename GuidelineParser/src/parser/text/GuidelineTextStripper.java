@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
@@ -50,6 +51,13 @@ public class GuidelineTextStripper extends PDFTextStripper{
         }
         
 	}
+	
+	@Override
+    protected void startPage(PDPage page) throws IOException
+    {
+		super.startPage(page);
+		wordbounds.clear();
+    }
 	
 	@Override
 	public void writeLine(List<WordWithTextPositions> line) throws IOException
