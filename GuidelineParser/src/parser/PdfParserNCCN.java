@@ -24,6 +24,7 @@ import org.apache.pdfbox.util.Matrix;
 import parser.graphics.GraphObject;
 import parser.graphics.GraphProcessing;
 import parser.renderer.GuidelinePageRenderer;
+import parser.text.FootnoteAnalyser;
 import parser.text.GuidelineTextStripper;
 import parser.text.RegionWithBound;
 import parser.text.TextRegionAnalyser;
@@ -225,6 +226,9 @@ public final class PdfParserNCCN
                 
                 if (true) {
                     List<WordWithBounds> wordRects = stripper.getWordBounds();
+                    
+                    FootnoteAnalyser.footnotes(wordRects);
+                    
                     List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects);
                     
                     GuidelinePageRenderer renderer = new GuidelinePageRenderer(document,startPage - 1 ,72);
