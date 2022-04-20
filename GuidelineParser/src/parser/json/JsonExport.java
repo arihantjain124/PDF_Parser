@@ -2,35 +2,34 @@ package parser.json;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 
-import parser.graphics.GraphJsonObject;
-import parser.graphics.GraphObject;
+import parser.page.PageInfo;
 import parser.text.RegionWithBound;
 import parser.text.WordWithBounds;
 
 public class JsonExport {
 	
-	public static void generateTextRegionJson(ArrayList<GraphObject> graphLine, List<RegionWithBound>  regionBounds, int pageIndex) 
-			throws JsonIOException, IOException {
+public static void generateJsonGraphObject(List<RegionWithBound>  regionBounds,HashMap<String, PageInfo> pageHashMap,List<GraphJsonObject> allGraphObject) throws JsonIOException, IOException {
 		
-		GsonBuilder builder = new GsonBuilder(); 
-		builder.setPrettyPrinting(); 
-		Gson gson = builder.create();
-		
-        List<GraphJsonObject> graphJsonObjectList = new ArrayList<GraphJsonObject>();
+		GraphJsonObject currJsonObject = new GraphJsonObject();
+		String regexForPageId = "[A-Z]{4}-[1-9]+";//TODO: config
+        Pattern pattern = Pattern.compile(regexForPageId);
+        
+        Matcher matcher = null;    
         
 	    for(RegionWithBound region : regionBounds) {
-
-	    	GraphJsonObject currJsonObject = new GraphJsonObject();
-	    	currJsonObject.setIndex(regionBounds.indexOf(region));
+	    	
+	    	currJsonObject = new GraphJsonObject();
+	    	int index = regionBounds.indexOf(region);
+	    	currJsonObject.setIndex(index);
         	
         	if(!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
 
@@ -40,23 +39,44 @@ public class JsonExport {
         		}
         		
         		currJsonObject.setConent(currentContent);
-    			currJsonObject.addPrevIndex(region.getPrevRegions());
-    			currJsonObject.addNextIndex(region.getNextRegions());
-    			
+        		
+        		for(int prevRegionIndex : region.getPrevRegions()) {
+        			currJsonObject.addPrevIndex(prevRegionIndex);
+        		}
+
+        		for(int nextRegionIndex : region.getNextRegions()) {
+        			currJsonObject.addNextIndex(nextRegionIndex);
+        		}
+        		
+    			matcher = pattern.matcher(currentContent);
+        		if (matcher.groupCount() >= 0)
+        		{
+        			while(matcher.find()) {
+        				PageInfo currPageInfo = pageHashMap.get(matcher.group());
+        				if (currPageInfo != null) {
+        				currJsonObject.addNextIndex(currPageInfo.getStartRegionIndices());
+        				for(int linkPrevPage : currPageInfo.getStartRegionIndices()) {
+        					regionBounds.get(linkPrevPage).addPrevRegion(index);
+                		}
+        				}
+        			}
+        			
+        		}
+    		
+        		
             	currJsonObject.setType("object");
-            	
-            	graphJsonObjectList.add(currJsonObject);
 
+            	allGraphObject.add(currJsonObject);
 	    	}
-        	
 	    }
-	    
-		String outputPrefix = "NCCN_NSCL_pdf_";
-        String filePath = outputPrefix + pageIndex + ".json";
-        Writer writer = Files.newBufferedWriter(Paths.get(filePath));
-        
-	    gson.toJson(graphJsonObjectList, writer);
 
-        writer.close();
-    }
+        }
+	
+	public static void generateJson(List<GraphJsonObject> allGraphObject,Writer writer) throws JsonIOException, IOException {
+       
+	   GsonBuilder builder = new GsonBuilder();
+       builder.setPrettyPrinting();
+       Gson gson = builder.create();
+	   gson.toJson(allGraphObject, writer);
+	   }
 }

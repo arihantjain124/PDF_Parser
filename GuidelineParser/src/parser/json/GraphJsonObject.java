@@ -1,4 +1,4 @@
-package parser.graphics;
+package parser.json;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,8 @@ public class GraphJsonObject {
 
 	
 	public void setIndex(int index) {
+		nConnections = new ArrayList<>();
+		pConnections = new ArrayList<>();
 	      this.index = index;
 		}
 
@@ -30,7 +32,7 @@ public class GraphJsonObject {
 	
 
 	public void addNextIndex(List<Integer> nIndex) {
-	      this.nConnections = nIndex;
+	      this.nConnections.addAll(nIndex);
 	   }
 	
 
