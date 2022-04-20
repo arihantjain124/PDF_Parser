@@ -31,6 +31,10 @@ public class PageInfo {
 		return pageKey;
 	}
 	
+	public void addStartRegionIndex(int index){
+		startRegionIndices.add(index);
+	}
+	
 	public List<Integer> getStartRegionIndices(){
 		return startRegionIndices;
 	}

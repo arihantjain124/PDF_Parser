@@ -47,12 +47,15 @@ public class PageProcessor {
     	HashMap<String, PageInfo> pageHashMap = new HashMap<String, PageInfo>();
     	HashMap<String, HashMap<String, String>> documentFootnotes = new HashMap<String, HashMap<String, String>>();
     	
+    	HashMap<String, List<RegionWithBound>> documentRegions = new HashMap<String, List<RegionWithBound>>();
+    	
         for (int p = startPage; p <= endPage; ++p)
         {        	
             try
             {
             	String pageKey = extractKey(document, p);
-            	pageHashMap.put(pageKey, new PageInfo(p, pageKey));
+            	PageInfo curPageInfo = new PageInfo(p, pageKey);
+            	pageHashMap.put(pageKey, curPageInfo);
             	
             	mainContentStripper.setStartPage(p);
                 mainContentStripper.setEndPage(p);
@@ -84,7 +87,10 @@ public class PageProcessor {
 	            	
 	            	if(!graphLine.isEmpty()) {
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
-	            		JsonExport.generateTextRegionJson(graphLine, regionBounds, p);
+	            		
+	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo);
+	            		documentRegions.put(pageKey, newRegionList);
+	            		JsonExport.generateTextRegionJson(graphLine, newRegionList, p);
 	            	}
             	}
             }
@@ -93,6 +99,44 @@ public class PageProcessor {
                 LOG.error("Failed to process page " + p, ex);
             }
         }
+    }
+    
+    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo){
+    	
+    	ArrayList<RegionWithBound> flowRegions = new ArrayList<RegionWithBound>();
+    	HashMap<Integer, Integer> oldVsNewIndex = new HashMap<Integer, Integer>();
+    	
+    	for(int i = 0; i < allRegions.size(); i++) {
+    		
+    		RegionWithBound region = allRegions.get(i);
+    		if(!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
+    			
+    			int newIndex = flowRegions.size();
+    			oldVsNewIndex.put(i, newIndex);
+    			
+    			flowRegions.add(region);
+    			
+    			if(!region.getNextRegions().isEmpty() & region.getPrevRegions().isEmpty()) {
+    				//This is a first region in the flow.
+    				pageInfo.addStartRegionIndex(newIndex);
+    			}
+    		}
+    	}
+    	
+    	for(RegionWithBound region : flowRegions) {
+    		
+    		List<Integer> nextRegions = region.getNextRegions();
+    		List<Integer> prevRegions = region.getPrevRegions();
+    		
+    		for(int i = 0; i < prevRegions.size(); i++) {
+    			prevRegions.set(i, oldVsNewIndex.get(prevRegions.get(i)));
+    		}
+    		for(int i = 0; i < nextRegions.size(); i++) {
+    			nextRegions.set(i, oldVsNewIndex.get(nextRegions.get(i)));
+    		}
+    	}
+    	
+    	return flowRegions;
     }
 	
 }
