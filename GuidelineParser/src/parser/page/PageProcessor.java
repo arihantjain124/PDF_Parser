@@ -4,8 +4,6 @@ import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,10 +31,8 @@ public class PageProcessor {
 	
     private static final Log LOG = LogFactory.getLog(PageProcessor.class);
     
-	Rectangle pageKeyAreaRect = new Rectangle( 700, 560, 92, 52 );//TODO: Hard coding the content area for key now.
+    private static final Rectangle pageKeyAreaRect = new Rectangle( 700, 560, 92, 52 );//TODO: Hard coding the content area for key now.
 
-	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
-	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
     private String extractKey(PDDocument doc, int pageIndex) throws IOException
 	{
     	PDFTextStripperByArea pageKeyStripper = new PDFTextStripperByArea();
@@ -57,17 +53,16 @@ public class PageProcessor {
         return null;
 	}
 
-    public void processPages(int startPage, int endPage, GuidelineTextStripper mainContentStripper, PDDocument document, Writer output) throws IOException {
+    public void processPages(int startPage, int endPage, GuidelineTextStripper mainContentStripper, PDDocument document, Writer output) 
+    		throws IOException {
     	
     	HashMap<String, PageInfo> pageHashMap = new HashMap<String, PageInfo>();
     	HashMap<String, HashMap<String, String>> documentFootnotes = new HashMap<String, HashMap<String, String>>();
     	
-    	HashMap<String, List<RegionWithBound>> documentRegions = new HashMap<String, List<RegionWithBound>>();
-    	
     	int indexOffset = 0;
-    	String filePath = "NCCN_NSCL_pdf.json";
-        Writer writer = Files.newBufferedWriter(Paths.get(filePath));
 
+    	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
+    	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
     	
     	for (int p = startPage; p <= endPage; ++p)
         {        	
@@ -109,8 +104,8 @@ public class PageProcessor {
 	            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
 	            		
-	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset);
-	            		documentRegions.put(pageKey, newRegionList);
+	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo, indexOffset);
+
 	            		indexOffset = indexOffset + newRegionList.size();
 	            		allRegionList.addAll(newRegionList);
 	            	}
@@ -121,13 +116,12 @@ public class PageProcessor {
                 LOG.error("Failed to process page " + p, ex);
             }
         }
-    	JsonExport.generateJsonGraphObject(allRegionList,pageHashMap,allGraphObject);
-        JsonExport.generateJson( allGraphObject, writer);
-        
-        writer.close();
+    	
+    	JsonExport.generateJsonGraphObject(allRegionList, pageHashMap, allGraphObject);
+        JsonExport.generateJson(allGraphObject);
     }
     
-    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo,int indexOffset){
+    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, int indexOffset){
     	
     	ArrayList<RegionWithBound> flowRegions = new ArrayList<RegionWithBound>();
     	HashMap<Integer, Integer> oldVsNewIndex = new HashMap<Integer, Integer>();
@@ -137,7 +131,7 @@ public class PageProcessor {
     		RegionWithBound region = allRegions.get(i);
     		if(!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
     			
-    			int newIndex = flowRegions.size()+indexOffset;
+    			int newIndex = flowRegions.size() + indexOffset;
     			oldVsNewIndex.put(i, newIndex);
     			
     			flowRegions.add(region);
