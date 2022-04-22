@@ -87,8 +87,10 @@ public class JsonExport {
 	
 		
 	
-	public static void generateJson(List allJsonObject,Writer writer) throws JsonIOException, IOException {
-       
+	public static void generateJson(List allJsonObject,String filePath,int startPage,int endPage, String prefix) throws JsonIOException, IOException {
+
+		String JsonFilePath = filePath + "/NCCN_NSCL" + prefix + "_" + startPage + "_"+ endPage + ".json";
+        Writer writer = Files.newBufferedWriter(Paths.get(JsonFilePath));
         try {
 			GsonBuilder builder = new GsonBuilder();
 			builder.setPrettyPrinting();

@@ -2,6 +2,7 @@ package parser.page;
 
 import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -71,13 +72,15 @@ public class PageProcessor {
     	HashMap<String, HashMap<String, String>> documentFootnotes = new HashMap<String, HashMap<String, String>>();
     	
     	int indexOffset = 0;
-    	String filePath = "jsonexport/NCCN_NSCL_pdf_";
-        Writer writer = Files.newBufferedWriter(Paths.get(filePath + startPage + "_"+ endPage + ".json"));
-        Writer footnoteWriter = Files.newBufferedWriter(Paths.get(filePath + "footnotes" + startPage + "_"+ endPage + ".json"));
-
-        writer.write("{\n \"NCCN\": ");
-
-        footnoteWriter.write("{\n \"FootNotes\": ");
+    	
+    	String filePath = "jsonexport/";
+    	
+    	if (!Paths.get(filePath).toFile().isDirectory()){
+    		System.out.println("No Folder for jsonexport");
+    		File f = new File(filePath); 
+    		f.mkdir();
+            System.out.println("Folder created");
+    	}
 
     	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
     	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
@@ -137,13 +140,10 @@ public class PageProcessor {
             }
         }
     	JsonExport.generateJsonGraphObject(allRegionList,pageHashMap,allGraphObject);
-        JsonExport.generateJson(allGraphObject, writer);
-        JsonExport.generateJson(allFootNoteObject,footnoteWriter);
+    	
+        JsonExport.generateJson(allGraphObject, filePath,startPage,endPage,"Graph");
+        JsonExport.generateJson(allFootNoteObject,filePath,startPage,endPage,"FootNote");
 
-        writer.write("\n}");
-        writer.close();
-        footnoteWriter.write("\n}");
-        footnoteWriter.close();
     }
     
     private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, int indexOffset){
