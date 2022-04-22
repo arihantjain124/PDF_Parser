@@ -18,7 +18,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.PDFTextStripperByArea;
 
-import parser.FootNotes;
 import parser.config.ConfigProperty;
 import parser.graphics.GraphObject;
 import parser.graphics.GraphProcessing;
@@ -36,10 +35,10 @@ public class PageProcessor {
 	
     private static final Log LOG = LogFactory.getLog(PageProcessor.class);
     
-	
 	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
 	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
 	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
+
     private String extractKey(PDDocument doc, int pageIndex) throws IOException
 	{
     	
@@ -65,12 +64,11 @@ public class PageProcessor {
         return null;
 	}
 
-    public void processPages(int startPage, int endPage, GuidelineTextStripper mainContentStripper, PDDocument document, Writer output) throws IOException {
+    public void processPages(int startPage, int endPage, GuidelineTextStripper mainContentStripper, PDDocument document, Writer output) 
+    		throws IOException {
     	
     	HashMap<String, PageInfo> pageHashMap = new HashMap<String, PageInfo>();
     	HashMap<String, HashMap<String, String>> documentFootnotes = new HashMap<String, HashMap<String, String>>();
-    	
-    	HashMap<String, List<RegionWithBound>> documentRegions = new HashMap<String, List<RegionWithBound>>();
     	
     	int indexOffset = 0;
     	String filePath = "jsonexport/NCCN_NSCL_pdf_";
@@ -80,6 +78,9 @@ public class PageProcessor {
         writer.write("{\n \"NCCN\": ");
 
         footnoteWriter.write("{\n \"FootNotes\": ");
+
+    	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
+    	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
     	
     	for (int p = startPage; p <= endPage; ++p)
         {        	
@@ -123,9 +124,7 @@ public class PageProcessor {
 	            	if(!graphLine.isEmpty()) {
 	            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
-	            		
 	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset);
-	            		documentRegions.put(pageKey, newRegionList);
 	            	
 	            		indexOffset = indexOffset + newRegionList.size();
 	            		allRegionList.addAll(newRegionList);
@@ -147,7 +146,7 @@ public class PageProcessor {
         footnoteWriter.close();
     }
     
-    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo,int indexOffset){
+    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, int indexOffset){
     	
     	ArrayList<RegionWithBound> flowRegions = new ArrayList<RegionWithBound>();
     	HashMap<Integer, Integer> oldVsNewIndex = new HashMap<Integer, Integer>();
@@ -157,7 +156,7 @@ public class PageProcessor {
     		RegionWithBound region = allRegions.get(i);
     		if(!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
     			
-    			int newIndex = flowRegions.size()+indexOffset;
+    			int newIndex = flowRegions.size() + indexOffset;
     			oldVsNewIndex.put(i, newIndex);
     			
     			flowRegions.add(region);
