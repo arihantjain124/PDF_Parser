@@ -12,9 +12,9 @@ public class FootNotes {
 	
 	List<WordWithBounds> line;
 	
-	public FootNotes(List<WordWithBounds> line)
+	public FootNotes()
 	{
-		this.line=null;
+		this.line = null;
 	}
 	public HashMap<String,String> footnotes(List<WordWithBounds> line)throws IOException
     {
@@ -63,12 +63,7 @@ public class FootNotes {
             	DiffrenceList.put(key,word.getText().substring(2));
             }
             
-          
         }
-		
-		/*for(String key : DiffrenceList.keySet()) {
-            System.out.println(key + " " + DiffrenceList.get(key));
-           }*/
 		
          return DiffrenceList;  
     

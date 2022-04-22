@@ -12,7 +12,9 @@ import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.util.Matrix;
 
+import parser.config.ConfigProperty;
 import parser.page.PageProcessor;
+import parser.renderer.GuidelinePageRenderer;
 import parser.text.GuidelineTextStripper;
 
 public final class PdfParserNCCN
@@ -187,10 +189,10 @@ public final class PdfParserNCCN
                 stripper = new GuidelineTextStripper(startPage);
                 stripper.setSortByPosition(sort);
                 stripper.setShouldSeparateByBeads(separateBeads);
+                String[] regionOfInterest = ConfigProperty.getProperty("regionOfInterest").split("[,]");
+                Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
+                stripper.addRegion( "MainContent", mainContentRect );
                 
-                Rectangle rect = new Rectangle( 0, 85, 792, 455 ); //TODO: Hard coding the main content area now.
-                stripper.addRegion( "MainContent", rect );
-
                 PageProcessor pageProcessor = new PageProcessor();
                 pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper, document, output);
             }
