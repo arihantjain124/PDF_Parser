@@ -11,17 +11,18 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 
+import parser.config.ConfigProperty;
 import parser.page.PageInfo;
 import parser.text.RegionWithBound;
 import parser.text.WordWithBounds;
 
 public class JsonExport {
 	
-public static void generateJsonGraphObject(List<RegionWithBound>  regionBounds,HashMap<String, PageInfo> pageHashMap,List<GraphJsonObject> allGraphObject) throws JsonIOException, IOException {
+	public static void generateJsonGraphObject(List<RegionWithBound>  regionBounds,HashMap<String, PageInfo> pageHashMap,List<GraphJsonObject> allGraphObject) throws JsonIOException, IOException {
 		
 		GraphJsonObject currJsonObject = new GraphJsonObject();
-		String regexForPageId = "[A-Z]{4}-[1-9]+";//TODO: config
-        Pattern pattern = Pattern.compile(regexForPageId);
+
+        Pattern pattern = Pattern.compile(ConfigProperty.getProperty("regexForPageKey"));
         
         Matcher matcher = null;    
         
@@ -62,21 +63,30 @@ public static void generateJsonGraphObject(List<RegionWithBound>  regionBounds,H
         			}
         			
         		}
-    		
-        		
             	currJsonObject.setType("object");
-
             	allGraphObject.add(currJsonObject);
 	    	}
 	    }
 
         }
 	
-	public static void generateJson(List<GraphJsonObject> allGraphObject,Writer writer) throws JsonIOException, IOException {
+	public static void generateJsonFootNote(HashMap<String, String> pageFootnotes ,List<FootNotesJsonObject> allFootNoteObject) {
+		
+		for (String key : pageFootnotes.keySet()) {
+			FootNotesJsonObject currFootNotesJsonObject = new FootNotesJsonObject();
+			currFootNotesJsonObject.SetFootNoteKey(key);
+			currFootNotesJsonObject.setFootNoteContent(pageFootnotes.get(key));
+			allFootNoteObject.add(currFootNotesJsonObject);
+		}
+	}
+	
+	
+	public static void generateJson(List allJsonObject,Writer writer) throws JsonIOException, IOException {
        
 	   GsonBuilder builder = new GsonBuilder();
        builder.setPrettyPrinting();
        Gson gson = builder.create();
-	   gson.toJson(allGraphObject, writer);
+	   gson.toJson(allJsonObject, writer);
+	   
 	   }
 }
