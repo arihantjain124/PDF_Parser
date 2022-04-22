@@ -18,8 +18,11 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.PDFTextStripperByArea;
 
+import parser.FootNotes;
+import parser.config.ConfigProperty;
 import parser.graphics.GraphObject;
 import parser.graphics.GraphProcessing;
+import parser.json.FootNotesJsonObject;
 import parser.json.GraphJsonObject;
 import parser.json.JsonExport;
 import parser.renderer.GuidelinePageRenderer;
@@ -33,17 +36,22 @@ public class PageProcessor {
 	
     private static final Log LOG = LogFactory.getLog(PageProcessor.class);
     
-	Rectangle pageKeyAreaRect = new Rectangle( 700, 560, 92, 52 );//TODO: Hard coding the content area for key now.
-
+	
 	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
 	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
+	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
     private String extractKey(PDDocument doc, int pageIndex) throws IOException
 	{
+    	
     	PDFTextStripperByArea pageKeyStripper = new PDFTextStripperByArea();
     	pageKeyStripper.setSortByPosition( true );
-    	pageKeyStripper.addRegion( "keyArea", pageKeyAreaRect);
+    	
+    	String[] regionofPageKey = ConfigProperty.getProperty("regionofPageKey").split("[,]");
+        Rectangle pageKeyRect = new Rectangle(Integer.valueOf(regionofPageKey[0]),Integer.valueOf(regionofPageKey[1]),Integer.valueOf(regionofPageKey[2]),Integer.valueOf(regionofPageKey[3]));
+    	
+    	pageKeyStripper.addRegion( "keyArea",pageKeyRect);
 
-		String regexForPageId = "[A-Z]{4}-[1-9]+";//TODO: config
+		String regexForPageId = ConfigProperty.getProperty("regexForPageKey");
         Pattern pattern = Pattern.compile(regexForPageId);
         
 		PDPage firstPage = doc.getPage(pageIndex - 1);
@@ -65,9 +73,13 @@ public class PageProcessor {
     	HashMap<String, List<RegionWithBound>> documentRegions = new HashMap<String, List<RegionWithBound>>();
     	
     	int indexOffset = 0;
-    	String filePath = "NCCN_NSCL_pdf.json";
-        Writer writer = Files.newBufferedWriter(Paths.get(filePath));
+    	String filePath = "jsonexport/NCCN_NSCL_pdf_";
+        Writer writer = Files.newBufferedWriter(Paths.get(filePath + startPage + "_"+ endPage + ".json"));
+        Writer footnoteWriter = Files.newBufferedWriter(Paths.get(filePath + "footnotes" + startPage + "_"+ endPage + ".json"));
 
+        writer.write("{\n \"NCCN\": ");
+
+        footnoteWriter.write("{\n \"FootNotes\": ");
     	
     	for (int p = startPage; p <= endPage; ++p)
         {        	
@@ -85,10 +97,13 @@ public class PageProcessor {
                 List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
                 
                 HashMap<String, String> pageFootnotes = FootnoteAnalyser.analyseFootnotes(wordRects);
+
+            	JsonExport.generateJsonFootNote(pageFootnotes,allFootNoteObject);
+                
                 documentFootnotes.put(pageKey, pageFootnotes);
-        		for (String key : pageFootnotes.keySet()) {
+//        		for (String key : pageFootnotes.keySet()) {
 //        			System.out.println(key + " " + pageFootnotes.get(key));
-        		}
+//        		}
                 
                 List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects);
                 
@@ -111,6 +126,7 @@ public class PageProcessor {
 	            		
 	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset);
 	            		documentRegions.put(pageKey, newRegionList);
+	            	
 	            		indexOffset = indexOffset + newRegionList.size();
 	            		allRegionList.addAll(newRegionList);
 	            	}
@@ -122,9 +138,13 @@ public class PageProcessor {
             }
         }
     	JsonExport.generateJsonGraphObject(allRegionList,pageHashMap,allGraphObject);
-        JsonExport.generateJson( allGraphObject, writer);
-        
+        JsonExport.generateJson(allGraphObject, writer);
+        JsonExport.generateJson(allFootNoteObject,footnoteWriter);
+
+        writer.write("\n}");
         writer.close();
+        footnoteWriter.write("\n}");
+        footnoteWriter.close();
     }
     
     private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo,int indexOffset){
