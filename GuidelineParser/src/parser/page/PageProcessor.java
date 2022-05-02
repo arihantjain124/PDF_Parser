@@ -5,13 +5,13 @@ import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,7 +84,7 @@ public class PageProcessor {
 
     	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
     	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
-    	
+    	List<RegionWithBound> labels = new ArrayList<RegionWithBound>();
     	for (int p = startPage; p <= endPage; ++p)
         {        	
             try
@@ -128,8 +128,13 @@ public class PageProcessor {
 	            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
 	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset);
-	            	
+	            		
+	            		labels = regionBounds.stream().distinct().filter(x -> !(newRegionList.contains(x))).collect(Collectors.toList());
+	            
 	            		indexOffset = indexOffset + newRegionList.size();
+
+	                	JsonExport.generateJsonGraphObject(newRegionList,pageHashMap,allGraphObject,labels);
+	                	
 	            		allRegionList.addAll(newRegionList);
 	            	}
             	}
@@ -139,8 +144,6 @@ public class PageProcessor {
                 LOG.error("Failed to process page " + p, ex);
             }
         }
-    	JsonExport.generateJsonGraphObject(allRegionList,pageHashMap,allGraphObject);
-    	
         JsonExport.generateJson(allGraphObject, filePath,startPage,endPage,"Graph");
         JsonExport.generateJson(allFootNoteObject,filePath,startPage,endPage,"FootNote");
 

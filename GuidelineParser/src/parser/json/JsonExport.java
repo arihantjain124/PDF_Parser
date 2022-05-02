@@ -1,5 +1,7 @@
 package parser.json;
 
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -21,7 +23,7 @@ import parser.text.WordWithBounds;
 public class JsonExport {
 	
 	public static void generateJsonGraphObject(List<RegionWithBound> regionBounds,
-			HashMap<String, PageInfo> pageHashMap, List<GraphJsonObject> allGraphObject)
+			HashMap<String, PageInfo> pageHashMap, List<GraphJsonObject> allGraphObject,List<RegionWithBound> labels)
 			throws JsonIOException, IOException {
 
 		GraphJsonObject currJsonObject = new GraphJsonObject();
@@ -33,7 +35,12 @@ public class JsonExport {
 
 			currJsonObject = new GraphJsonObject();
 			int index = regionBounds.indexOf(region);
+			
 			currJsonObject.setIndex(index);
+			
+			
+			
+			
 
 			if (!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
 
@@ -66,6 +73,25 @@ public class JsonExport {
 						}
 					}
 				}
+				
+				
+				double currentRegionY = region.getBound().getY();
+				
+				for (RegionWithBound labelbox : labels) {
+					
+					Rectangle2D currRect = labelbox.getBound();
+					Rectangle2D transformedRect = new Rectangle();
+					transformedRect.setRect(currRect.getX(),currentRegionY,currRect.getWidth(),currRect.getHeight());
+					
+					if (region.getBound().intersects(transformedRect)) {
+						String currentLabel = "";
+						for (WordWithBounds word : labelbox.getContentLines()) {
+							currentLabel = currentLabel + word.getText();
+						}
+						currJsonObject.addLabel(currentLabel);
+					}
+				}
+				
 
 				currJsonObject.setType("object");
 

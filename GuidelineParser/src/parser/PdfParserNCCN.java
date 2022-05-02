@@ -14,7 +14,6 @@ import org.apache.pdfbox.util.Matrix;
 
 import parser.config.ConfigProperty;
 import parser.page.PageProcessor;
-import parser.renderer.GuidelinePageRenderer;
 import parser.text.GuidelineTextStripper;
 
 public final class PdfParserNCCN

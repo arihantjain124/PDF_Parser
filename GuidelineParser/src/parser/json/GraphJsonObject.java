@@ -13,15 +13,22 @@ public class GraphJsonObject {
 	
 	private List<Integer> nConnections = null;
 	
+	private List<String> labels = null;
+	
 	private String type;
 
 	
 	public void setIndex(int index) {
 		nConnections = new ArrayList<>();
 		pConnections = new ArrayList<>();
+		labels = new ArrayList<>();
 	      this.index = index;
 		}
 
+	public void addLabel(String label) {
+		labels.add(label);
+	}
+	
 	public void setConent(String content) {
 	      this.content = content;
 	   }
