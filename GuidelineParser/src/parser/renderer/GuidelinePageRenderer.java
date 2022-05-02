@@ -3,7 +3,6 @@ package parser.renderer;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -153,7 +152,7 @@ public class GuidelinePageRenderer extends PDFRenderer {
         }
     }
 	public void drawRegionOfInterest() throws IOException {
-		String[] regionOfInterest = ConfigProperty.getProperty("regionOfInterest").split("[,]");
+		String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");
         Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
         g2d.draw (mainContentRect);
 	}

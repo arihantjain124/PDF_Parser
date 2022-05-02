@@ -14,7 +14,6 @@ import org.apache.pdfbox.util.Matrix;
 
 import parser.config.ConfigProperty;
 import parser.page.PageProcessor;
-import parser.renderer.GuidelinePageRenderer;
 import parser.text.GuidelineTextStripper;
 
 public final class PdfParserNCCN
@@ -189,7 +188,7 @@ public final class PdfParserNCCN
                 stripper = new GuidelineTextStripper(startPage);
                 stripper.setSortByPosition(sort);
                 stripper.setShouldSeparateByBeads(separateBeads);
-                String[] regionOfInterest = ConfigProperty.getProperty("regionOfInterest").split("[,]");
+                String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");
                 Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
                 stripper.addRegion( "MainContent", mainContentRect );
                 

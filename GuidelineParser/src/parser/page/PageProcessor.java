@@ -2,11 +2,8 @@ package parser.page;
 
 import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,12 +43,12 @@ public class PageProcessor {
     	PDFTextStripperByArea pageKeyStripper = new PDFTextStripperByArea();
     	pageKeyStripper.setSortByPosition( true );
     	
-    	String[] regionofPageKey = ConfigProperty.getProperty("regionofPageKey").split("[,]");
+    	String[] regionofPageKey = ConfigProperty.getProperty("page.key.region").split("[,]");
         Rectangle pageKeyRect = new Rectangle(Integer.valueOf(regionofPageKey[0]),Integer.valueOf(regionofPageKey[1]),Integer.valueOf(regionofPageKey[2]),Integer.valueOf(regionofPageKey[3]));
     	
     	pageKeyStripper.addRegion( "keyArea",pageKeyRect);
 
-		String regexForPageId = ConfigProperty.getProperty("regexForPageKey");
+		String regexForPageId = ConfigProperty.getProperty("page.key.regex");
         Pattern pattern = Pattern.compile(regexForPageId);
         
 		PDPage firstPage = doc.getPage(pageIndex - 1);
@@ -72,15 +69,6 @@ public class PageProcessor {
     	HashMap<String, HashMap<String, String>> documentFootnotes = new HashMap<String, HashMap<String, String>>();
     	
     	int indexOffset = 0;
-    	
-    	String filePath = "jsonexport/";
-    	
-    	if (!Paths.get(filePath).toFile().isDirectory()){
-    		System.out.println("No Folder for jsonexport");
-    		File f = new File(filePath); 
-    		f.mkdir();
-            System.out.println("Folder created");
-    	}
 
     	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
     	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
@@ -141,8 +129,8 @@ public class PageProcessor {
         }
     	JsonExport.generateJsonGraphObject(allRegionList,pageHashMap,allGraphObject);
     	
-        JsonExport.generateJson(allGraphObject, filePath,startPage,endPage,"Graph");
-        JsonExport.generateJson(allFootNoteObject,filePath,startPage,endPage,"FootNote");
+        JsonExport.writeJson(allGraphObject, startPage, endPage, "Graph");
+        JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
 
     }
     

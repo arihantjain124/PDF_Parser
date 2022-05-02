@@ -1,5 +1,6 @@
 package parser.json;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -25,7 +26,7 @@ public class JsonExport {
 			throws JsonIOException, IOException {
 
 		GraphJsonObject currJsonObject = new GraphJsonObject();
-		Pattern pattern = Pattern.compile(ConfigProperty.getProperty("regexForPageKey"));
+		Pattern pattern = Pattern.compile(ConfigProperty.getProperty("page.key.regex"));
 
 		Matcher matcher = null;
 
@@ -87,20 +88,30 @@ public class JsonExport {
 	
 		
 	
-	public static void generateJson(List allJsonObject,String filePath,int startPage,int endPage, String prefix) throws JsonIOException, IOException {
+	public static void writeJson(List<?> allJsonObject, int startPage, int endPage, String prefix)
+			throws JsonIOException, IOException {
 
-		String JsonFilePath = filePath + "/NCCN_NSCL" + prefix + "_" + startPage + "_"+ endPage + ".json";
-        Writer writer = Files.newBufferedWriter(Paths.get(JsonFilePath));
-        try {
+		String filePath = "jsonexport/";
+
+		if (!Paths.get(filePath).toFile().isDirectory()) {
+			//System.out.println("No Folder for jsonexport");
+			File f = new File(filePath);
+			f.mkdir();
+			//System.out.println("Folder created");
+		}
+
+		String JsonFilePath = filePath + "/NCCN_NSCL" + prefix + "_" + startPage + "_" + endPage + ".json";
+		Writer writer = Files.newBufferedWriter(Paths.get(JsonFilePath));
+		try {
 			GsonBuilder builder = new GsonBuilder();
 			builder.setPrettyPrinting();
 			Gson gson = builder.create();
 			gson.toJson(allJsonObject, writer);
-        }finally {
+		} finally {
 			writer.close();
 		}
-	   
-	   }
+
+	}
 
 	
 
