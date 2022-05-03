@@ -1,38 +1,23 @@
 package parser;
 
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.pdfbox.cos.COSArray;
-import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.util.Matrix;
 
-import parser.graphics.GraphObject;
-import parser.graphics.GraphProcessing;
-import parser.renderer.GuidelinePageRenderer;
+import parser.config.ConfigProperty;
+import parser.page.PageProcessor;
 import parser.text.GuidelineTextStripper;
-import parser.text.RegionWithBound;
-import parser.text.TextRegionAnalyser;
-import parser.text.WordWithBounds;
 
 public final class PdfParserNCCN
 {
-    private static final Log LOG = LogFactory.getLog(ExtractText.class);
-
     private static final String PASSWORD = "-password";
     private static final String ENCODING = "-encoding";
     private static final String CONSOLE = "-console";
@@ -42,8 +27,6 @@ public final class PdfParserNCCN
     private static final String IGNORE_BEADS = "-ignoreBeads";
     private static final String DEBUG = "-debug";
 
-    private static final String ALWAYSNEXT = "-alwaysNext";
-    private static final String ROTATION_MAGIC = "-rotationMagic";
     private static final String STD_ENCODING = "UTF-8";
 
     /*
@@ -85,8 +68,6 @@ public final class PdfParserNCCN
         boolean toConsole = false;
         boolean sort = false;
         boolean separateBeads = true;
-        boolean alwaysNext = false;
-        boolean rotationMagic = false;
         
         String password = "";
         String encoding = STD_ENCODING;
@@ -132,14 +113,6 @@ public final class PdfParserNCCN
             else if( args[i].equals( IGNORE_BEADS ) )
             {
                 separateBeads = false;
-            }
-            else if (args[i].equals(ALWAYSNEXT))
-            {
-                alwaysNext = true;
-            }
-            else if (args[i].equals(ROTATION_MAGIC))
-            {
-                rotationMagic = true;
             }
             else if( args[i].equals( DEBUG ) )
             {
@@ -215,89 +188,17 @@ public final class PdfParserNCCN
                 stripper = new GuidelineTextStripper(startPage);
                 stripper.setSortByPosition(sort);
                 stripper.setShouldSeparateByBeads(separateBeads);
-
-                // Extract text for main document:
-                extractPages(startPage, Math.min(endPage, document.getNumberOfPages()), 
-                             stripper, document, output, rotationMagic, alwaysNext);
+                String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");
+                Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
+                stripper.addRegion( "MainContent", mainContentRect );
                 
-                if (true) {
-                    List<WordWithBounds> wordRects = stripper.getWordBounds();
-                    List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects);
-                    
-                    GuidelinePageRenderer renderer = new GuidelinePageRenderer(document,startPage - 1 ,72);
-                    renderer.intializeImage();
-                    renderer.getGeometry();
-                    renderer.drawLines();
-                    renderer.drawTriangles();
-                    //renderer.drawWordBounds(wordRects);
-                    renderer.drawRegionBounds(regionBounds);
-                    
-                	ArrayList<GeneralPath> lines = renderer.getLines();
-                	ArrayList<GeneralPath> triangles = renderer.getTriangles();
-                	GraphProcessing graphProc = new GraphProcessing();
-                	graphProc.checkIntersectionToTriangles(lines, triangles);
-                	ArrayList<GraphObject> graphLine = graphProc.getGraphObject();
-                	renderer.drawGraphObject(graphLine);
-
-                    renderer.OutputImage();
-                }
+                PageProcessor pageProcessor = new PageProcessor();
+                pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper, document, output);
             }
             finally
             {
                 IOUtils.closeQuietly(output);
                 IOUtils.closeQuietly(document);
-            }
-        }
-    }
-
-    private void extractPages(int startPage, int endPage,
-    		GuidelineTextStripper stripper, PDDocument document, Writer output,
-            boolean rotationMagic, boolean alwaysNext) throws IOException
-    {
-        for (int p = startPage; p <= endPage; ++p)
-        {
-            stripper.setStartPage(p);
-            stripper.setEndPage(p);
-            try
-            {
-                if (rotationMagic)
-                {
-                    PDPage page = document.getPage(p - 1);
-                    int rotation = page.getRotation();
-                    page.setRotation(0);
-                    AngleCollector angleCollector = new AngleCollector();
-                    angleCollector.setStartPage(p);
-                    angleCollector.setEndPage(p);
-                    angleCollector.writeText(document, new NullWriter());
-                    // rotation magic
-                    for (int angle : angleCollector.getAngles())
-                    {
-                        // prepend a transformation
-                        // (we could skip these parts for angle 0, but it doesn't matter much)
-                        PDPageContentStream cs = new PDPageContentStream(document, page,
-                                PDPageContentStream.AppendMode.PREPEND, false);
-                        cs.transform(Matrix.getRotateInstance(-Math.toRadians(angle), 0, 0));
-                        cs.close();
-
-                        stripper.writeText(document, output);
-
-                        // remove prepended transformation
-                        ((COSArray) page.getCOSObject().getItem(COSName.CONTENTS)).remove(0);
-                    }
-                    page.setRotation(rotation);
-                }
-                else
-                {
-                    stripper.writeText(document, output);
-                }
-            }
-            catch (IOException ex)
-            {
-                if (!alwaysNext)
-                {
-                    throw ex;
-                }
-                LOG.error("Failed to process page " + p, ex);
             }
         }
     }

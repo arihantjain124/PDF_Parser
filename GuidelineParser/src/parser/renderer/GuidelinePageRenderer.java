@@ -2,8 +2,8 @@ package parser.renderer;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 
+import parser.config.ConfigProperty;
 import parser.graphics.GraphObject;
 import parser.text.RegionWithBound;
 import parser.text.WordWithBounds;
@@ -86,8 +87,7 @@ public class GuidelinePageRenderer extends PDFRenderer {
 		super.renderImage(this.page, scale, imageType, this.getDefaultDestination());
 		PDPage page = pageTree.get(this.page);
 
-        PDRectangle cropbBox = page.getCropBox();
-        GuidelinePageDrawer drawer = new GuidelinePageDrawer(parameters,cropbBox);
+        GuidelinePageDrawer drawer = new GuidelinePageDrawer(parameters);
         int widthPx = (int) Math.max(Math.floor(page.getCropBox().getWidth() * scale), 1);
         int heightPx = (int) Math.max(Math.floor(page.getCropBox().getHeight() * scale), 1);
         
@@ -130,8 +130,11 @@ public class GuidelinePageRenderer extends PDFRenderer {
 		Iterator<GeneralPath> i = triangles.iterator();
 		while (i.hasNext()) 
 			g2d.draw(i.next());
+		
 		}
 	
+	
+
 	public void drawWordBounds(List<WordWithBounds> wordbounds) throws IOException {
         g2d.setColor(Color.RED);
 		int numberOfStrings = wordbounds.size();
@@ -148,4 +151,9 @@ public class GuidelinePageRenderer extends PDFRenderer {
         	g2d.draw (region.getBound());
         }
     }
+	public void drawRegionOfInterest() throws IOException {
+		String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");
+        Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
+        g2d.draw (mainContentRect);
+	}
 }
