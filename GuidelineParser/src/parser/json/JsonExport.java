@@ -39,10 +39,6 @@ public class JsonExport {
 			int index = regionBounds.indexOf(region);
 			
 			currJsonObject.setIndex(index);
-			
-			
-			
-			
 
 			if (!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
 
@@ -75,8 +71,7 @@ public class JsonExport {
 						}
 					}
 				}
-				
-				
+								
 				double currentRegionY = region.getBound().getY();
 				
 				for (RegionWithBound labelbox : labels) {
@@ -94,7 +89,6 @@ public class JsonExport {
 					}
 				}
 				
-
 				currJsonObject.setType("object");
 
 				allGraphObject.add(currJsonObject);
