@@ -3,6 +3,7 @@ package parser.text;
 
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +19,8 @@ public class GuidelineTextStripper extends PDFTextStripper{
 	private int pageIndex ;
 	private int dpi=72;
 	
+	private static final int WIDTH_FACTOR_HEURISTICS_FOR_GAP = 4;
+	
 	private final Map<String, Rectangle2D> regionArea = new HashMap<String, Rectangle2D>();
 	
 	public GuidelineTextStripper(int pageIndex) throws IOException {
@@ -27,29 +30,47 @@ public class GuidelineTextStripper extends PDFTextStripper{
 	
 	private void positionToBound(String text, List<TextPosition> positions) {
         
-		int numberofchar = positions.size();
-        float x = 0;
-        float threshold = (float) 10;
-        int j = 0;
+		int numberOfTextPos = positions.size();
+		
+        StringBuilder lineBuilder = new StringBuilder();
+        List<TextPosition> wordPositions = new ArrayList<TextPosition>();
         
-        for (int i = 0; i < numberofchar; i++)
+        for (int i = 0; i < numberOfTextPos; i++)
         {
-        	if (i == 0) {
-                x = positions.get(0).getX();
-                j = 0;
-                threshold = (float) (10);
+        	if(wordPositions.isEmpty()) {
+        		lineBuilder.append(positions.get(i).getUnicode());
+                wordPositions.add(positions.get(i));
+        		continue;
         	}
-        	else if (positions.get(i).getX() - x > threshold) {
+        	
+        	TextPosition curTextPos = positions.get(i);
+        	TextPosition prevTextPos = positions.get(i - 1);
+        	
+        	float gapSize = -1;
+        	if(curTextPos.getEndX() >  prevTextPos.getEndX()) {
         		
-            	wordbounds.add(new WordWithBounds(text.substring(j, i), positions.subList(j, i)));
-            	j = i;
-            }
-        	else if (i == numberofchar - 1) {
-        		wordbounds.add(new WordWithBounds(text.substring(j, i+1), positions.subList(j, i+1)));
+        		gapSize = curTextPos.getEndX() -  prevTextPos.getEndX();
+        		
+        	}else if (wordPositions.get(0).getX() > curTextPos.getEndX()) {
+        		
+        		gapSize = wordPositions.get(0).getX() - curTextPos.getEndX();
         	}
-        	x = positions.get(i).getX();
+        	
+        	if(curTextPos.getUnicode().trim().length() > 0 && (gapSize > WIDTH_FACTOR_HEURISTICS_FOR_GAP * curTextPos.getWidth())) {
+        		
+        		wordbounds.add(new WordWithBounds(lineBuilder.toString(), wordPositions));//Create a new WordWithBounds up to previous text position.
+        		
+                lineBuilder = new StringBuilder();
+                wordPositions.clear();
+                i--; //re-process the cur text position;
+        		
+        	}else {
+        		lineBuilder.append(curTextPos.getUnicode());
+                wordPositions.add(curTextPos);
+        	}
         }
         
+        wordbounds.add(new WordWithBounds(lineBuilder.toString(), wordPositions));
 	}
 	
 	@Override
@@ -68,7 +89,7 @@ public class GuidelineTextStripper extends PDFTextStripper{
         for (int i = 0; i < numberOfStrings; i++)
         {
             WordWithTextPositions word = line.get(i);
-            wordbounds.add(new WordWithBounds(word.getText(), word.getTextPositions()));
+            positionToBound(word.getText(), word.getTextPositions());
         }
 
     }
