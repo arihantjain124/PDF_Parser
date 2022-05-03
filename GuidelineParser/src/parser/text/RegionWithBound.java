@@ -10,6 +10,7 @@ public class RegionWithBound {
 	
 	private List<WordWithBounds> contentLines = new ArrayList<WordWithBounds>();
 	private List<Integer> nextRegions = new ArrayList<Integer>();
+	private String pageKey = "";
 	private List<Integer> prevRegions = new ArrayList<Integer>();
 	
 	public RegionWithBound(Rectangle2D bound, WordWithBounds line) {
@@ -19,6 +20,14 @@ public class RegionWithBound {
 	
 	public Rectangle2D getBound() {
 		return bound;
+	}
+	
+	public void setPageKey(String newPageKey) {
+		this.pageKey = newPageKey;
+	}
+	
+	public String getPageKey() {
+		return pageKey;
 	}
 	
 	public void setBound(Rectangle2D newBound) {

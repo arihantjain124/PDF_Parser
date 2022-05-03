@@ -73,11 +73,13 @@ public class PageProcessor {
 
     	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
     	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
-    	List<RegionWithBound> labels = new ArrayList<RegionWithBound>();
+    	HashMap<String, List<RegionWithBound>> labelsHashMap = new HashMap<String, List<RegionWithBound>>();
+    	
     	for (int p = startPage; p <= endPage; ++p)
         {        	
             try
             {
+            	List<RegionWithBound> labels = new ArrayList<RegionWithBound>();
             	String pageKey = extractKey(document, p);
             	PageInfo curPageInfo = new PageInfo(p, pageKey);
             	pageHashMap.put(pageKey, curPageInfo);
@@ -116,15 +118,15 @@ public class PageProcessor {
 	            	if(!graphLine.isEmpty()) {
 	            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
-	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset);
+	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset,pageKey);
 	            		
+	            		if (newRegionList.size()>0) 
+	            		{
 	            		labels = regionBounds.stream().distinct().filter(x -> !(newRegionList.contains(x))).collect(Collectors.toList());
-	            
 	            		indexOffset = indexOffset + newRegionList.size();
-
-	                	JsonExport.generateJsonGraphObject(newRegionList,pageHashMap,allGraphObject,labels);
-	                	
+	            		labelsHashMap.put(pageKey, labels);
 	            		allRegionList.addAll(newRegionList);
+	            		}
 	            	}
             	}
             }
@@ -133,14 +135,15 @@ public class PageProcessor {
                 LOG.error("Failed to process page " + p, ex);
             }
         }
-	
+
+    	JsonExport.generateJsonGraphObject(allRegionList,pageHashMap,allGraphObject,labelsHashMap);
         JsonExport.writeJson(allGraphObject, startPage, endPage, "Graph");
         JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
 
 
     }
     
-    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, int indexOffset){
+    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, int indexOffset,String pageKey){
     	
     	ArrayList<RegionWithBound> flowRegions = new ArrayList<RegionWithBound>();
     	HashMap<Integer, Integer> oldVsNewIndex = new HashMap<Integer, Integer>();
@@ -173,6 +176,8 @@ public class PageProcessor {
     		for(int i = 0; i < nextRegions.size(); i++) {
     			nextRegions.set(i, oldVsNewIndex.get(nextRegions.get(i)));
     		}
+    		
+    		region.setPageKey(pageKey);
     	}
     	
     	return flowRegions;

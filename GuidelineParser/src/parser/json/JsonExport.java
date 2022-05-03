@@ -25,7 +25,7 @@ import parser.text.WordWithBounds;
 public class JsonExport {
 	
 	public static void generateJsonGraphObject(List<RegionWithBound> regionBounds,
-			HashMap<String, PageInfo> pageHashMap, List<GraphJsonObject> allGraphObject,List<RegionWithBound> labels)
+			HashMap<String, PageInfo> pageHashMap, List<GraphJsonObject> allGraphObject,HashMap<String, List<RegionWithBound>> labelsHashMap)
 			throws JsonIOException, IOException {
 
 		GraphJsonObject currJsonObject = new GraphJsonObject();
@@ -74,7 +74,8 @@ public class JsonExport {
 								
 				double currentRegionY = region.getBound().getY();
 				
-				for (RegionWithBound labelbox : labels) {
+				List<RegionWithBound> currentPageLabels = labelsHashMap.get(region.getPageKey());
+				for (RegionWithBound labelbox : currentPageLabels) {
 					
 					Rectangle2D currRect = labelbox.getBound();
 					Rectangle2D transformedRect = new Rectangle();
