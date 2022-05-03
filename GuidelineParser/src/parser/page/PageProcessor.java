@@ -79,7 +79,6 @@ public class PageProcessor {
         {        	
             try
             {
-            	List<RegionWithBound> labels = new ArrayList<RegionWithBound>();
             	String pageKey = extractKey(document, p);
             	PageInfo curPageInfo = new PageInfo(p, pageKey);
             	pageHashMap.put(pageKey, curPageInfo);
@@ -122,10 +121,10 @@ public class PageProcessor {
 	            		
 	            		if (newRegionList.size()>0) 
 	            		{
-	            		labels = regionBounds.stream().distinct().filter(x -> !(newRegionList.contains(x))).collect(Collectors.toList());
-	            		indexOffset = indexOffset + newRegionList.size();
-	            		labelsHashMap.put(pageKey, labels);
-	            		allRegionList.addAll(newRegionList);
+	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> !(newRegionList.contains(x))).collect(Collectors.toList());
+		            		indexOffset = indexOffset + newRegionList.size();
+		            		labelsHashMap.put(pageKey, labels);
+		            		allRegionList.addAll(newRegionList);
 	            		}
 	            	}
             	}
