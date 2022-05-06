@@ -1,10 +1,13 @@
 package parser.graphics;
 
 import java.awt.geom.Point2D;
+import java.io.IOException;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import parser.config.ConfigProperty;
 
 public class GraphProcessing {
 	private ArrayList<GraphObject> graphLine = new ArrayList<GraphObject>();
@@ -37,7 +40,7 @@ public class GraphProcessing {
 	
 
 	
-	public void checkIntersectionToTriangles(ArrayList<GeneralPath> lines,ArrayList<GeneralPath> triangles) {
+	public void checkIntersectionToTriangles(ArrayList<GeneralPath> lines,ArrayList<GeneralPath> triangles) throws NumberFormatException, IOException {
 
 		Iterator<GeneralPath> lineIterator = lines.iterator();
 		//Iterating over all lines in the page
@@ -87,6 +90,10 @@ public class GraphProcessing {
 					graphLine.add(new GraphObject(lineCoor.get(3 - indexSum), lineCoor.get(targets.get(0))));
 					graphLine.add(new GraphObject(lineCoor.get(3 - indexSum), lineCoor.get(targets.get(1))));
 				}
+			}
+			double scale = Double.parseDouble(ConfigProperty.getProperty("graph.line.scale"));
+			for (GraphObject currGraphLine : graphLine) {
+				currGraphLine.extrapolatePath(scale);
 			}
         }
 	}

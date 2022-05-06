@@ -95,6 +95,7 @@ public class PageProcessor {
             	JsonExport.generateJsonFootNote(pageFootnotes,allFootNoteObject);
                 
                 documentFootnotes.put(pageKey, pageFootnotes);
+                
 //        		for (String key : pageFootnotes.keySet()) {
 //        			System.out.println(key + " " + pageFootnotes.get(key));
 //        		}
@@ -113,15 +114,13 @@ public class PageProcessor {
             		GraphProcessing graphProc = new GraphProcessing();
 	            	graphProc.checkIntersectionToTriangles(lines, triangles);
 	            	ArrayList<GraphObject> graphLine = graphProc.getGraphObject();
-	            	
 	            	if(!graphLine.isEmpty()) {
 	            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
 	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset,pageKey);
-	            		
 	            		if (newRegionList.size()>0) 
 	            		{
-	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> !(newRegionList.contains(x))).collect(Collectors.toList());
+	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());
 		            		indexOffset = indexOffset + newRegionList.size();
 		            		labelsHashMap.put(pageKey, labels);
 		            		allRegionList.addAll(newRegionList);
