@@ -91,7 +91,8 @@ public class JsonExport {
 				}
 				
 				currJsonObject.setType("object");
-
+				currJsonObject.setPageKey(region.getPageKey());
+				currJsonObject.setPageNo(region.getPageNo());
 				allGraphObject.add(currJsonObject);
 			}
 		}

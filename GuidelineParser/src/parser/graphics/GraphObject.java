@@ -21,33 +21,10 @@ public class GraphObject
 
 	private void intializePath() {
 		path=new GeneralPath();
-		
-		tX = target.getX();
-		tY = target.getY();
-		sX = source.getX();
-		sY = source.getY();
-		
-		this.path.moveTo(source.getX(), source.getY());
-		this.path.lineTo(target.getX(), target.getY());
-		
-	}
-	private double extrapolate(double x)
-	{
-		double slope = (tY - sY)/(tX - sX);
-		double y = sY + (slope * (x - sX));
-	    return y;
+		path.moveTo(source.getX(), source.getY());
+		path.lineTo(target.getX(), target.getY());
 	}
 	
-	
-	public void extrapolatePath(double factor) {
-		
-		double currentX = source.getX() * (1-(factor/100));
-		source.setLocation(currentX,extrapolate(currentX));
-		currentX = target.getX() * (1+(factor/100));
-		target.setLocation(currentX,extrapolate(currentX));
-		intializePath();
-		
-	}
 	public Point2D getTarget() {
 		return target;
 	}

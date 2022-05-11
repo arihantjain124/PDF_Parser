@@ -74,7 +74,6 @@ public class PageProcessor {
     	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
     	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
     	HashMap<String, List<RegionWithBound>> labelsHashMap = new HashMap<String, List<RegionWithBound>>();
-    	
     	for (int p = startPage; p <= endPage; ++p)
         {        	
             try
@@ -114,10 +113,13 @@ public class PageProcessor {
             		GraphProcessing graphProc = new GraphProcessing();
 	            	graphProc.checkIntersectionToTriangles(lines, triangles);
 	            	ArrayList<GraphObject> graphLine = graphProc.getGraphObject();
+	            	renderer.drawListGraphObject(graphLine);
+	            	renderer.drawRegionBounds(regionBounds);
+	            	renderer.OutputImage();
 	            	if(!graphLine.isEmpty()) {
 	            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
-	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset,pageKey);
+	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset,pageKey,p);
 	            		if (newRegionList.size()>0) 
 	            		{
 	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());
@@ -141,7 +143,7 @@ public class PageProcessor {
 
     }
     
-    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, int indexOffset,String pageKey){
+    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, int indexOffset,String pageKey,int pageNo){
     	
     	ArrayList<RegionWithBound> flowRegions = new ArrayList<RegionWithBound>();
     	HashMap<Integer, Integer> oldVsNewIndex = new HashMap<Integer, Integer>();
@@ -176,6 +178,7 @@ public class PageProcessor {
     		}
     		
     		region.setPageKey(pageKey);
+    		region.setPageNo(pageNo);
     	}
     	
     	return flowRegions;

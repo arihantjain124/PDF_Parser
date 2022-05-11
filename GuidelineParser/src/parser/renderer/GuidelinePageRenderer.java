@@ -116,10 +116,14 @@ public class GuidelinePageRenderer extends PDFRenderer {
 		}
 	}
 	
-	public void drawGraphObject(ArrayList<GraphObject> graphLine) {
+	public void drawGraphObject(GraphObject graphLine) {
+		g2d.setColor(Color.RED);
+		g2d.draw(graphLine.getpath());
+	}
+	
+	public void drawListGraphObject(ArrayList<GraphObject> graphLine) {
 		g2d.setColor(Color.RED);
 		Iterator<GraphObject> i = graphLine.iterator();
-		
 		while (i.hasNext()) {
 			g2d.draw(i.next().getpath());
 		}

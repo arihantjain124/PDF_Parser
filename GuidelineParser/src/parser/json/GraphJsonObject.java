@@ -6,7 +6,12 @@ import java.util.List;
 public class GraphJsonObject {
 	
 	private int index;
+	
 
+	private String pageKey;
+
+	private int pageNo;
+	
 	private String content;
 
 	private List<Integer> pConnections = null;
@@ -23,7 +28,15 @@ public class GraphJsonObject {
 		labels = new ArrayList<>();
 		this.index = index;
 	}
-
+	
+	public void setPageKey(String key) {
+		this.pageKey = key;
+	}
+	
+	public void setPageNo(int pageNo) {
+		this.pageNo = pageNo;
+	}
+	
 	public void addLabel(String label) {
 		labels.add(label);
 	}

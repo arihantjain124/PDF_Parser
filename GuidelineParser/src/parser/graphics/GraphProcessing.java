@@ -7,7 +7,6 @@ import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import parser.config.ConfigProperty;
 
 public class GraphProcessing {
 	private ArrayList<GraphObject> graphLine = new ArrayList<GraphObject>();
@@ -90,10 +89,6 @@ public class GraphProcessing {
 					graphLine.add(new GraphObject(lineCoor.get(3 - indexSum), lineCoor.get(targets.get(0))));
 					graphLine.add(new GraphObject(lineCoor.get(3 - indexSum), lineCoor.get(targets.get(1))));
 				}
-			}
-			double scale = Double.parseDouble(ConfigProperty.getProperty("graph.line.scale"));
-			for (GraphObject currGraphLine : graphLine) {
-				currGraphLine.extrapolatePath(scale);
 			}
         }
 	}
