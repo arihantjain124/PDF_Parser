@@ -115,7 +115,7 @@ public class PageProcessor {
 	            	ArrayList<GraphObject> graphLine = graphProc.getGraphObject();
 	            	renderer.drawListGraphObject(graphLine);
 	            	renderer.drawRegionBounds(regionBounds);
-	            	renderer.OutputImage();
+	            	//renderer.OutputImage();
 	            	if(!graphLine.isEmpty()) {
 	            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
