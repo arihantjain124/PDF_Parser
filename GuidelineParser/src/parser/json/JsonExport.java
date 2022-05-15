@@ -103,7 +103,7 @@ public class JsonExport {
 		
 		for (String key : pageFootnotes.keySet()) {
 			FootNotesJsonObject currFootNotesJsonObject = new FootNotesJsonObject();
-			currFootNotesJsonObject.SetFootNoteKey(key);
+			currFootNotesJsonObject.setFootNoteKey(key);
 			currFootNotesJsonObject.setFootNoteContent(pageFootnotes.get(key));
 			allFootNoteObject.add(currFootNotesJsonObject);
 		}
@@ -135,7 +135,36 @@ public class JsonExport {
 		}
 
 	}
-
 	
+	public static void writeJsonLD(GuidelineContent guidelineContent, int startPage, int endPage, String prefix)
+			throws JsonIOException, IOException {
 
+		String filePath = "jsonexport/";
+
+		if (!Paths.get(filePath).toFile().isDirectory()) {
+			//System.out.println("No Folder for jsonexport");
+			File f = new File(filePath);
+			f.mkdir();
+			//System.out.println("Folder created");
+		}
+
+		String JsonFilePath = filePath + "/NCCN_NSCL" + prefix + "_" + startPage + "_" + endPage + ".json";
+		Writer writer = Files.newBufferedWriter(Paths.get(JsonFilePath));
+		try {
+			Gson gson = gson();
+			writer.append(gson.toJson(guidelineContent, GuidelineContent.class));
+		} finally {
+			writer.close();
+		}
+
+	}	
+	
+    private static Gson gson() {
+        return new GsonBuilder()
+                .registerTypeAdapter(GuidelineContent.class, GuidelineContentSerializer.INSTANCE)
+                .registerTypeAdapter(GraphJsonObject.class, GraphJsonObjectSerializer.INSTANCE)
+                .registerTypeAdapter(FootNotesJsonObject.class, FootNotesJsonObjectSerializer.INSTANCE)
+                .setPrettyPrinting()
+                .create();
+    }
 }

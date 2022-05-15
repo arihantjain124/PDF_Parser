@@ -6,7 +6,7 @@ public class FootNotesJsonObject {
 
 	private String content;
 	
-	public void SetFootNoteKey(String key) {
+	public void setFootNoteKey(String key) {
 		this.footNoteKey = key;
 	}
 	
@@ -14,5 +14,11 @@ public class FootNotesJsonObject {
 		this.content = content;
 	}
 
-
+	public String getFootNoteKey() {
+		return this.footNoteKey;
+	}
+	
+	public String getFootNoteContent() {
+		return this.content;
+	}
 }

@@ -41,11 +41,15 @@ public class ConfigProperty
 		}
 	}
 
-	public static String getProperty(String key) throws IOException{
+	public static String getProperty(String key){
 
 		if(configProperty == null){
 			configProperty =  new ConfigProperty();
-			configProperty.loadProperty();
+			try {
+				configProperty.loadProperty();
+			} catch (IOException e) {
+				System.out.println("Exception: " + e);
+			}
 		}
 
 		return configProperty.fetchProperty(key);

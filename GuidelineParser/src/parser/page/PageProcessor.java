@@ -22,6 +22,7 @@ import parser.graphics.GraphObject;
 import parser.graphics.GraphProcessing;
 import parser.json.FootNotesJsonObject;
 import parser.json.GraphJsonObject;
+import parser.json.GuidelineContent;
 import parser.json.JsonExport;
 import parser.renderer.GuidelinePageRenderer;
 import parser.text.FootnoteAnalyser;
@@ -33,10 +34,6 @@ import parser.text.WordWithBounds;
 public class PageProcessor {
 	
     private static final Log LOG = LogFactory.getLog(PageProcessor.class);
-    
-	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
-	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
-	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
 
     private String extractKey(PDDocument doc, int pageIndex) throws IOException
 	{
@@ -74,6 +71,9 @@ public class PageProcessor {
     	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
     	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
     	HashMap<String, List<RegionWithBound>> labelsHashMap = new HashMap<String, List<RegionWithBound>>();
+    	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
+    	
+    	HashMap<String, String> docFootnotes = new HashMap<String, String>();
     	for (int p = startPage; p <= endPage; ++p)
         {        	
             try
@@ -90,8 +90,7 @@ public class PageProcessor {
                 List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
                 
                 HashMap<String, String> pageFootnotes = FootnoteAnalyser.analyseFootnotes(wordRects);
-
-            	JsonExport.generateJsonFootNote(pageFootnotes,allFootNoteObject);
+                pageFootnotes.forEach(docFootnotes::putIfAbsent);
                 
                 documentFootnotes.put(pageKey, pageFootnotes);
                 
@@ -136,9 +135,16 @@ public class PageProcessor {
             }
         }
 
-    	JsonExport.generateJsonGraphObject(allRegionList,pageHashMap,allGraphObject,labelsHashMap);
-        JsonExport.writeJson(allGraphObject, startPage, endPage, "Graph");
-        JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
+    	JsonExport.generateJsonGraphObject(allRegionList, pageHashMap, allGraphObject, labelsHashMap);
+
+    	JsonExport.generateJsonFootNote(docFootnotes, allFootNoteObject);
+    	
+    	GuidelineContent guidelineContentObjs = new GuidelineContent();
+    	guidelineContentObjs.setGraphObjects(allGraphObject);
+    	guidelineContentObjs.setFootNotesJsonObject(allFootNoteObject);
+    	
+        JsonExport.writeJsonLD(guidelineContentObjs, startPage, endPage, "Graph");
+        //JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
 
 
     }

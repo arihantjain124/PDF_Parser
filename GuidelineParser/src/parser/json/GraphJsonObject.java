@@ -7,7 +7,6 @@ public class GraphJsonObject {
 	
 	private int index;
 	
-
 	private String pageKey;
 
 	private int pageNo;
@@ -29,20 +28,40 @@ public class GraphJsonObject {
 		this.index = index;
 	}
 	
+	public int getIndex() {
+		return index;
+	}
+	
 	public void setPageKey(String key) {
 		this.pageKey = key;
+	}
+	
+	public String getPageKey() {
+		return pageKey;
 	}
 	
 	public void setPageNo(int pageNo) {
 		this.pageNo = pageNo;
 	}
 	
+	public int getPageNo() {
+		return pageNo;
+	}
+	
 	public void addLabel(String label) {
 		labels.add(label);
+	}
+	
+	public List<String> getLabels(){
+		return labels;
 	}
 
 	public void setConent(String content) {
 		this.content = content;
+	}
+	
+	public String getConent() {
+		return this.content;
 	}
 
 	public void addPrevIndex(List<Integer> pIndex) {
@@ -60,8 +79,20 @@ public class GraphJsonObject {
 	public void addNextIndex(int nIndex) {
 		this.nConnections.add(nIndex);
 	}
+	
+	public List<Integer> getPConnections(){
+		return pConnections;
+	}
+	
+	public List<Integer> getNConnections(){
+		return nConnections;
+	}
 
 	public void setType(String type) {
 		this.type = type;
+	}
+	
+	public String getType() {
+		return this.type;
 	}
 }
