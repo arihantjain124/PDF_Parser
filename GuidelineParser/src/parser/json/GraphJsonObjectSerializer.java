@@ -28,23 +28,39 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 		
 		JsonArray labels = new JsonArray();
 		for(String label : graphJsonObject.getLabels()) {
-			labels.add(label);
+			labels.add("nccn:" + label);
 		}		
 		json.add("@type", labels);
 		
 		json.addProperty("nccn:content", graphJsonObject.getConent());
 
-		JsonArray prev = new JsonArray();
-		for(Integer index : graphJsonObject.getPConnections()) {
-			prev.add(ID_URL + index);
-		}		
-		json.add("nccn:prev", prev);
+		if(!graphJsonObject.getPConnections().isEmpty()) {
+			JsonArray prev = new JsonArray();
+			for(Integer index : graphJsonObject.getPConnections()) {
+				prev.add(ID_URL + index);
+			}		
+			json.add("nccn:prev", prev);
+		}
 		
-		JsonArray next = new JsonArray();
-		for(Integer index : graphJsonObject.getNConnections()) {
-			next.add(ID_URL + index);
-		}		
-		json.add("nccn:next", next);
+		if(!graphJsonObject.getNConnections().isEmpty()) {
+			JsonArray next = new JsonArray();
+			for(Integer index : graphJsonObject.getNConnections()) {
+				next.add(ID_URL + index);
+			}		
+			json.add("nccn:next", next);
+		}
+		
+		if(!graphJsonObject.getChildren().isEmpty()) {
+			JsonArray children = new JsonArray();
+			for(Integer index : graphJsonObject.getChildren()) {
+				children.add(ID_URL + index);
+			}		
+			json.add("nccn:contains", children);
+		}
+		
+		if(graphJsonObject.getParent() >= 0) {
+			json.addProperty("nccn:parent", graphJsonObject.getParent());
+		}
 		
 		return json;
 	}

@@ -32,6 +32,7 @@ public final class GuidelineContentSerializer implements JsonSerializer<Guidelin
         contextObj.add("nccn:next", genericRefObj);
         contextObj.add("nccn:prev", genericRefObj);
         contextObj.add("nccn:contains", genericRefObj);
+        contextObj.add("nccn:parent", genericRefObj);
         contextObj.add("nccn:reference", genericRefObj);
         
         json.add("@context", contextObj);

@@ -40,7 +40,8 @@ public class JsonExport {
 			
 			currJsonObject.setIndex(index);
 
-			if (!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
+			if (!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty() || 
+					(region.getParentRegionIndex() >= 0)) {
 
 				String currentContent = "";
 				for (WordWithBounds word : region.getContentLines()) {
@@ -55,6 +56,10 @@ public class JsonExport {
 
 				for (int nextRegionIndex : region.getNextRegions()) {
 					currJsonObject.addNextIndex(nextRegionIndex);
+				}
+				
+				for (int childRegionIndex : region.getChildRegions()) {
+					currJsonObject.addChild(childRegionIndex);
 				}
 
 				matcher = pattern.matcher(currentContent);
@@ -93,6 +98,7 @@ public class JsonExport {
 				currJsonObject.setType("object");
 				currJsonObject.setPageKey(region.getPageKey());
 				currJsonObject.setPageNo(region.getPageNo());
+				currJsonObject.setParent(region.getParentRegionIndex());
 				allGraphObject.add(currJsonObject);
 			}
 		}

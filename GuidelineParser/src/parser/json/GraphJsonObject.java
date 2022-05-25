@@ -20,11 +20,17 @@ public class GraphJsonObject {
 	private List<String> labels = null;
 
 	private String type;
+	
+	private List<Integer> children = null;
+	
+	private int parent;
 
 	public void setIndex(int index) {
 		nConnections = new ArrayList<>();
 		pConnections = new ArrayList<>();
 		labels = new ArrayList<>();
+		children = new ArrayList<>();
+		parent = -1;
 		this.index = index;
 	}
 	
@@ -80,12 +86,28 @@ public class GraphJsonObject {
 		this.nConnections.add(nIndex);
 	}
 	
+	public void addChild(int cIndex) {
+		this.children.add(cIndex);
+	}
+
+	public void setParent(int parentIndex) {
+		this.parent = parentIndex;
+	}
+	
 	public List<Integer> getPConnections(){
 		return pConnections;
 	}
 	
 	public List<Integer> getNConnections(){
 		return nConnections;
+	}
+	
+	public List<Integer> getChildren(){
+		return children;
+	}
+	
+	public int getParent() {
+		return this.parent;
 	}
 
 	public void setType(String type) {

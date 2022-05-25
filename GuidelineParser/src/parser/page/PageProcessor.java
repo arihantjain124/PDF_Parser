@@ -122,8 +122,11 @@ public class PageProcessor {
 	            		if (newRegionList.size()>0) 
 	            		{
 	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());
-		            		indexOffset = indexOffset + newRegionList.size();
 		            		labelsHashMap.put(pageKey, labels);
+		            		
+		            		TextRegionAnalyser.generateChildRegions(newRegionList);
+		            		indexOffset = indexOffset + newRegionList.size();
+		            		
 		            		allRegionList.addAll(newRegionList);
 	            		}
 	            	}

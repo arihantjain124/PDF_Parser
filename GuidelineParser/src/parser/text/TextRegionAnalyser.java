@@ -165,4 +165,55 @@ public class TextRegionAnalyser {
 	private static double hypot(double x, double y) {
 		return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 	}
+	
+	public static void generateChildRegions(List<RegionWithBound> regionList) {
+		
+		int curRegionCount = regionList.size();
+		for(int i = 0; i < curRegionCount; i++) {
+			
+			RegionWithBound parentRegion = regionList.get(i);
+			List<WordWithBounds> contentLines = parentRegion.getContentLines();					
+			int numLines = contentLines.size();
+			
+			boolean hasBulletedLines = false;
+			List<WordWithBounds> curChildList = new ArrayList<WordWithBounds>();
+			
+			for(int l = 0; l < numLines; l++) {
+				WordWithBounds curLine = contentLines.get(l);
+				
+				if(curLine.getText().startsWith("\u2022")) {
+					hasBulletedLines = true;
+					
+					if(curChildList.size() > 0) {
+						createChildRegion(curChildList, parentRegion, i, regionList);
+						curChildList.clear();
+					}
+					
+				}
+				
+				curChildList.add(curLine);
+			}
+			
+			if(hasBulletedLines) {
+				if(curChildList.size() > 0) {// Create a new child node using the remaining lines					
+					createChildRegion(curChildList, parentRegion, i, regionList);
+					curChildList.clear();
+				}
+				parentRegion.resetContentLine();
+			}
+			
+		}
+		
+	}
+	
+	private static void createChildRegion(List<WordWithBounds> contentList, RegionWithBound parentRegion, int parentIndex, 
+			List<RegionWithBound> mainRegionList) {
+		
+		RegionWithBound newRegion = new RegionWithBound(contentList, parentIndex);
+		newRegion.setPageKey(parentRegion.getPageKey());
+		newRegion.setPageNo(parentRegion.getPageNo());
+		int newRegionIndex = mainRegionList.size();
+		mainRegionList.add(newRegion);
+		parentRegion.addChildRegion(newRegionIndex);
+	}
 }
