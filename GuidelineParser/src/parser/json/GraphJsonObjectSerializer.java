@@ -59,7 +59,8 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 		}
 		
 		if(graphJsonObject.getParent() >= 0) {
-			json.addProperty("nccn:parent", graphJsonObject.getParent());
+			int parentIndex = graphJsonObject.getParent();
+			json.addProperty("nccn:parent", ID_URL + parentIndex);
 		}
 		
 		return json;
