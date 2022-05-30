@@ -16,6 +16,8 @@ public class RegionWithBound {
 	private List<Integer> childRegions = new ArrayList<Integer>();
 	private int parentRegionIndex = -1;
 	
+	private ArrayList<String> footnoteRefs = new ArrayList<String>();
+	
 	public RegionWithBound(Rectangle2D bound, WordWithBounds line) {
 		this.bound = bound;
 		this.contentLines.add(line);
@@ -96,5 +98,13 @@ public class RegionWithBound {
 	
 	public int getParentRegionIndex() {
 		return parentRegionIndex;
+	}
+	
+	public void addFootnoteRefs(List<String> footnoteRefs) {
+		this.footnoteRefs.addAll(footnoteRefs);
+	}
+	
+	public List<String> getFootnoteRefs() {
+		return footnoteRefs;
 	}
 }

@@ -63,6 +63,14 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 			json.addProperty("nccn:parent", ID_URL + parentIndex);
 		}
 		
+		if(!graphJsonObject.getFootnoteRefs().isEmpty()) {
+			JsonArray references = new JsonArray();
+			for(String footnoteKey : graphJsonObject.getFootnoteRefs()) {
+				references.add(ID_URL + footnoteKey);
+			}		
+			json.add("nccn:reference", references);
+		}
+		
 		return json;
 	}
 

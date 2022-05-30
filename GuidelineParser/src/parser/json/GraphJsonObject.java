@@ -24,12 +24,15 @@ public class GraphJsonObject {
 	private List<Integer> children = null;
 	
 	private int parent;
+	
+	private List<String> footnoteRefs = null;
 
 	public void setIndex(int index) {
 		nConnections = new ArrayList<>();
 		pConnections = new ArrayList<>();
 		labels = new ArrayList<>();
 		children = new ArrayList<>();
+		footnoteRefs = new ArrayList<String>();
 		parent = -1;
 		this.index = index;
 	}
@@ -116,5 +119,13 @@ public class GraphJsonObject {
 	
 	public String getType() {
 		return this.type;
+	}
+	
+	public void addFootnoteRefs(List<String> footnoteRefs) {
+		this.footnoteRefs.addAll(footnoteRefs);
+	}
+	
+	public List<String> getFootnoteRefs(){
+		return footnoteRefs;
 	}
 }

@@ -99,6 +99,7 @@ public class JsonExport {
 				currJsonObject.setPageKey(region.getPageKey());
 				currJsonObject.setPageNo(region.getPageNo());
 				currJsonObject.setParent(region.getParentRegionIndex());
+				currJsonObject.addFootnoteRefs(region.getFootnoteRefs());
 				allGraphObject.add(currJsonObject);
 			}
 		}
