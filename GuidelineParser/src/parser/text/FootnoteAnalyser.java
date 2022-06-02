@@ -164,12 +164,25 @@ public class FootnoteAnalyser {
 	public static void analyzeAllFootNoteReferences(List<RegionWithBound> allRegionList) {
 		 
 		for(RegionWithBound region : allRegionList) {
-			ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines());
+			ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), false);
 			region.addFootnoteRefs(footnoteRefList);
 		}
 	}
 	
-	private static ArrayList<String> analyzeFootNoteReferences(List<WordWithBounds> lines)
+	public static void analyzeAllFootNoteReferences(HashMap<String, List<RegionWithBound>> labelsHashMap) {
+		
+		for(String key : labelsHashMap.keySet()) {
+			
+			List<RegionWithBound> regions = labelsHashMap.get(key);
+			
+			for(RegionWithBound region : regions) {
+				ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), true);
+				region.addFootnoteRefs(footnoteRefList);
+			}
+		}
+	}
+	
+	private static ArrayList<String> analyzeFootNoteReferences(List<WordWithBounds> lines, boolean removeFootnote)
 	{
 		
 		HashSet<String> footnoteRefSet = new HashSet<String>();
@@ -235,7 +248,11 @@ public class FootnoteAnalyser {
 				
 				int startInText = strBuilder.indexOf(footNoteSubStr, curRange.start);//line.getText() & line.getTextPositions() may not be in sync because of ligatures. Hence re-calculate the indices.
 				int endInText = startInText + (curRange.end - curRange.start);
-				strBuilder.replace(startInText, endInText + 1, "{" + footNoteSubStr.trim() + "}");
+				if(removeFootnote) {
+					strBuilder.replace(startInText, endInText + 1, "");
+				}else {
+					strBuilder.replace(startInText, endInText + 1, "{" + footNoteSubStr.trim() + "}");
+				}
 				
 				//strBuilder.replace(curRange.start, curRange.end + 1, "{" + footNoteSubStr.trim() + "}");
 				//System.out.println(footNoteSubStr);

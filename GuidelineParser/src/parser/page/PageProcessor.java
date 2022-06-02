@@ -139,6 +139,7 @@ public class PageProcessor {
         }
 
     	FootnoteAnalyser.analyzeAllFootNoteReferences(allRegionList);
+    	FootnoteAnalyser.analyzeAllFootNoteReferences(labelsHashMap);
     	JsonExport.generateJsonGraphObject(allRegionList, pageHashMap, allGraphObject, labelsHashMap);
 
     	JsonExport.generateJsonFootNote(docFootnotes, allFootNoteObject);
