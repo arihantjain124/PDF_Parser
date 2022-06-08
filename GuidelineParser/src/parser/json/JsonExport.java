@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,14 +25,94 @@ import parser.text.WordWithBounds;
 
 public class JsonExport {
 	
+	public static void generateStagingJsonObject(List<RegionWithBound> regionBounds,List<StagingJsonObject> allStagingObject)
+			throws JsonIOException, IOException {
+		
+		List<Pattern> stagingRegex= new ArrayList<>();
+		
+		boolean noStagingInfo = true;
+		
+		stagingRegex.add(Pattern.compile(ConfigProperty.getProperty("Tscore.regex")));
+		stagingRegex.add(Pattern.compile(ConfigProperty.getProperty("Mscore.regex")));
+		stagingRegex.add(Pattern.compile(ConfigProperty.getProperty("Nscore.regex")));
+		stagingRegex.add(Pattern.compile(ConfigProperty.getProperty("StageScore.regex")));
+
+
+        Matcher matcher = null;
+        
+		for (RegionWithBound region : regionBounds) {
+			noStagingInfo = true;
+			StagingJsonObject currJsonObject = new StagingJsonObject();
+
+			int index = regionBounds.indexOf(region);
+			
+			currJsonObject.setIndex(index);
+
+			if (!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
+
+				String currentContent = "";
+				for (WordWithBounds word : region.getContentLines()) {
+					currentContent = currentContent + word.getText();
+				}
+				currJsonObject.setConent(currentContent);
+				for(int i=0 ; i<4 ; i++) 
+				{
+					int temp = 0;
+					Pattern currPattern = stagingRegex.get(i);
+					matcher = currPattern.matcher(currentContent);
+					while (matcher.find()) {
+					    temp++;
+					}
+					if (temp>0) {
+						noStagingInfo = false;
+						matcher = currPattern.matcher(currentContent);
+						while (matcher.find()) {
+							switch(i)
+							{
+							case 0:
+								currJsonObject.setTScore(matcher.group());
+								break;
+							case 1:
+								currJsonObject.setMScore(matcher.group());
+								break;
+							case 2:
+								currJsonObject.setNScore(matcher.group());
+								break;
+							case 3:
+								currJsonObject.setStageScore(matcher.group());
+								break;
+							}
+							
+							}
+					}
+				}
+				if(!noStagingInfo)
+				allStagingObject.add(currJsonObject);
+			}
+		}
+		
+	}
+	
+	
 	public static void generateJsonGraphObject(List<RegionWithBound> regionBounds,
 			HashMap<String, PageInfo> pageHashMap, List<GraphJsonObject> allGraphObject,HashMap<String, List<RegionWithBound>> labelsHashMap)
 			throws JsonIOException, IOException {
 
 		GraphJsonObject currJsonObject = new GraphJsonObject();
-		Pattern pattern = Pattern.compile(ConfigProperty.getProperty("page.key.regex"));
 
-		Matcher matcher = null;
+		Pattern pageKeyRegex = Pattern.compile(ConfigProperty.getProperty("page.key.regex"));
+		
+		List<Pattern> stagingRegex= new ArrayList<>();
+		
+		
+		stagingRegex.add(Pattern.compile(ConfigProperty.getProperty("Tscore.regex")));
+		stagingRegex.add(Pattern.compile(ConfigProperty.getProperty("Mscore.regex")));
+		stagingRegex.add(Pattern.compile(ConfigProperty.getProperty("Nscore.regex")));
+		stagingRegex.add(Pattern.compile(ConfigProperty.getProperty("StageScore.regex")));
+
+
+        Matcher matcher = null;
+		Matcher pageKeymatcher = null;
 
 		for (RegionWithBound region : regionBounds) {
 
@@ -46,9 +127,38 @@ public class JsonExport {
 				for (WordWithBounds word : region.getContentLines()) {
 					currentContent = currentContent + word.getText();
 				}
-
+			
 				currJsonObject.setConent(currentContent);
-
+				
+				for(int i=0 ; i<4 ; i++) 
+				{
+					int temp = 0;
+					Pattern currPattern = stagingRegex.get(i);
+					matcher = currPattern.matcher(currentContent);
+					while (matcher.find()) {
+					    temp++;
+					}
+					if (temp>0) {
+						matcher = currPattern.matcher(currentContent);
+						while (matcher.find()) {
+							switch(i)
+							{
+							case 0:
+								currJsonObject.setTScore(matcher.group());
+								break;
+							case 1:
+								currJsonObject.setMScore(matcher.group());
+								break;
+							case 2:
+								currJsonObject.setNScore(matcher.group());
+								break;
+							case 3:
+								currJsonObject.setStageScore(matcher.group());
+								break;
+							}	
+						}
+					}
+				}
 				for (int prevRegionIndex : region.getPrevRegions()) {
 					currJsonObject.addPrevIndex(prevRegionIndex);
 				}
@@ -57,11 +167,11 @@ public class JsonExport {
 					currJsonObject.addNextIndex(nextRegionIndex);
 				}
 
-				matcher = pattern.matcher(currentContent);
-				if (matcher.groupCount() >= 0) {
+				pageKeymatcher = pageKeyRegex.matcher(currentContent);
+				if (pageKeymatcher.groupCount() >= 0) {
 					
-					while (matcher.find()) {
-						PageInfo currPageInfo = pageHashMap.get(matcher.group());
+					while (pageKeymatcher.find()) {
+						PageInfo currPageInfo = pageHashMap.get(pageKeymatcher.group());
 						
 						if (currPageInfo != null) {
 							currJsonObject.addNextIndex(currPageInfo.getStartRegionIndices());
@@ -89,7 +199,6 @@ public class JsonExport {
 						currJsonObject.addLabel(currentLabel);
 					}
 				}
-				
 				currJsonObject.setType("object");
 				currJsonObject.setPageKey(region.getPageKey());
 				currJsonObject.setPageNo(region.getPageNo());

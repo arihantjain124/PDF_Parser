@@ -1,7 +1,9 @@
 package parser.json;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GraphJsonObject {
 	
@@ -18,6 +20,14 @@ public class GraphJsonObject {
 	private List<Integer> nConnections = null;
 
 	private List<String> labels = null;
+	
+	private Set<String> stageScore = null;
+	
+	private Set<String> tScore = null;
+	
+	private Set<String> mScore = null;
+	
+	private Set<String> nScore = null;
 
 	private String type;
 
@@ -25,6 +35,10 @@ public class GraphJsonObject {
 		nConnections = new ArrayList<>();
 		pConnections = new ArrayList<>();
 		labels = new ArrayList<>();
+		stageScore = new HashSet<> ();
+		tScore = new HashSet<> ();
+		mScore = new HashSet<> ();
+		nScore = new HashSet<> ();
 		this.index = index;
 	}
 	
@@ -95,4 +109,38 @@ public class GraphJsonObject {
 	public String getType() {
 		return this.type;
 	}
+	
+	public void setTScore(String tScore) {
+		this.tScore.add(tScore);
+	}
+	
+	public void setMScore(String mScore) {
+		this.mScore.add(mScore);
+	}
+	
+	public void setNScore(String nScore) {
+		this.nScore.add(nScore);
+	}
+	
+	public void setStageScore(String stageScore) {
+		this.stageScore.add(stageScore);
+	}
+	
+	public Set<String> getStageScore() {
+		return stageScore;
+	}
+	
+	public Set<String> getTScore() {
+		return tScore;
+	}
+
+	public Set<String> getMScore() {
+		return mScore;
+	}
+	
+	public Set<String> getNScore() {
+		return nScore;
+	}
+	
+
 }
