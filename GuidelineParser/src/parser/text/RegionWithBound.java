@@ -13,10 +13,27 @@ public class RegionWithBound {
 	private String pageKey = "";
 	private int pageNo;
 	private List<Integer> prevRegions = new ArrayList<Integer>();
+	private List<Integer> childRegions = new ArrayList<Integer>();
+	private int parentRegionIndex = -1;
+	
+	private ArrayList<String> footnoteRefs = new ArrayList<String>();
 	
 	public RegionWithBound(Rectangle2D bound, WordWithBounds line) {
 		this.bound = bound;
 		this.contentLines.add(line);
+	}
+	
+	public RegionWithBound(List<WordWithBounds> lines, int parentIndex) {
+		
+		Rectangle2D regionBound = lines.get(0).getbound();
+		for(int i = 1; i < lines.size(); i++) {
+			Rectangle2D curBound = lines.get(i).getbound();
+			regionBound = (Rectangle2D.Float) regionBound.createUnion(curBound);
+		}
+		
+		this.bound = regionBound;
+		this.contentLines.addAll(lines);
+		this.parentRegionIndex = parentIndex;
 	}
 	
 	public Rectangle2D getBound() {
@@ -47,6 +64,10 @@ public class RegionWithBound {
 		contentLines.add(line);
 	}
 	
+	public void resetContentLine() {
+		contentLines.clear();
+	}
+	
 	public List<WordWithBounds> getContentLines() {
 		return contentLines;
 	}
@@ -65,5 +86,25 @@ public class RegionWithBound {
 	
 	public List<Integer> getPrevRegions() {
 		return prevRegions;
+	}
+	
+	public List<Integer> getChildRegions() {
+		return childRegions;
+	}
+	
+	public void addChildRegion(int childRegionIndex) {
+		childRegions.add(childRegionIndex);
+	}
+	
+	public int getParentRegionIndex() {
+		return parentRegionIndex;
+	}
+	
+	public void addFootnoteRefs(List<String> footnoteRefs) {
+		this.footnoteRefs.addAll(footnoteRefs);
+	}
+	
+	public List<String> getFootnoteRefs() {
+		return footnoteRefs;
 	}
 }

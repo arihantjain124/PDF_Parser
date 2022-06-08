@@ -121,7 +121,8 @@ public class JsonExport {
 			
 			currJsonObject.setIndex(index);
 
-			if (!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
+			if (!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty() || 
+					(region.getParentRegionIndex() >= 0)) {
 
 				String currentContent = "";
 				for (WordWithBounds word : region.getContentLines()) {
@@ -166,6 +167,10 @@ public class JsonExport {
 				for (int nextRegionIndex : region.getNextRegions()) {
 					currJsonObject.addNextIndex(nextRegionIndex);
 				}
+				
+				for (int childRegionIndex : region.getChildRegions()) {
+					currJsonObject.addChild(childRegionIndex);
+				}
 
 				pageKeymatcher = pageKeyRegex.matcher(currentContent);
 				if (pageKeymatcher.groupCount() >= 0) {
@@ -202,6 +207,8 @@ public class JsonExport {
 				currJsonObject.setType("object");
 				currJsonObject.setPageKey(region.getPageKey());
 				currJsonObject.setPageNo(region.getPageNo());
+				currJsonObject.setParent(region.getParentRegionIndex());
+				currJsonObject.addFootnoteRefs(region.getFootnoteRefs());
 				allGraphObject.add(currJsonObject);
 			}
 		}

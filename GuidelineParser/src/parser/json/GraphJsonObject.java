@@ -30,6 +30,12 @@ public class GraphJsonObject {
 	private Set<String> nScore = null;
 
 	private String type;
+	
+	private List<Integer> children = null;
+	
+	private int parent;
+	
+	private List<String> footnoteRefs = null;
 
 	public void setIndex(int index) {
 		nConnections = new ArrayList<>();
@@ -39,6 +45,9 @@ public class GraphJsonObject {
 		tScore = new HashSet<> ();
 		mScore = new HashSet<> ();
 		nScore = new HashSet<> ();
+		children = new ArrayList<>();
+		footnoteRefs = new ArrayList<String>();
+		parent = -1;
 		this.index = index;
 	}
 	
@@ -94,12 +103,28 @@ public class GraphJsonObject {
 		this.nConnections.add(nIndex);
 	}
 	
+	public void addChild(int cIndex) {
+		this.children.add(cIndex);
+	}
+
+	public void setParent(int parentIndex) {
+		this.parent = parentIndex;
+	}
+	
 	public List<Integer> getPConnections(){
 		return pConnections;
 	}
 	
 	public List<Integer> getNConnections(){
 		return nConnections;
+	}
+	
+	public List<Integer> getChildren(){
+		return children;
+	}
+	
+	public int getParent() {
+		return this.parent;
 	}
 
 	public void setType(String type) {
@@ -141,6 +166,11 @@ public class GraphJsonObject {
 	public Set<String> getNScore() {
 		return nScore;
 	}
+	public void addFootnoteRefs(List<String> footnoteRefs) {
+		this.footnoteRefs.addAll(footnoteRefs);
+	}
 	
-
+	public List<String> getFootnoteRefs(){
+		return footnoteRefs;
+	}
 }

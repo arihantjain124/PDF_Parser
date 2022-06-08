@@ -122,8 +122,11 @@ public class PageProcessor {
 	            		if (newRegionList.size()>0) 
 	            		{
 	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());
-		            		indexOffset = indexOffset + newRegionList.size();
 		            		labelsHashMap.put(pageKey, labels);
+		            		
+		            		TextRegionAnalyser.generateChildRegions(newRegionList, allRegionList.size());
+		            		indexOffset = indexOffset + newRegionList.size();
+		            		
 		            		allRegionList.addAll(newRegionList);
 	            		}
 
@@ -136,6 +139,8 @@ public class PageProcessor {
             }
         }
 
+    	FootnoteAnalyser.analyzeAllFootNoteReferences(allRegionList);
+    	FootnoteAnalyser.analyzeAllFootNoteReferences(labelsHashMap);
     	JsonExport.generateJsonGraphObject(allRegionList, pageHashMap, allGraphObject, labelsHashMap);
 //    	JsonExport.generateStagingJsonObject(allRegionList, allStagingObject);
     	JsonExport.generateJsonFootNote(docFootnotes, allFootNoteObject);
