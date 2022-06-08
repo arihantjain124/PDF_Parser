@@ -16,6 +16,7 @@ import org.apache.pdfbox.text.TextPosition;
 public class GuidelineTextStripper extends PDFTextStripper{
 
 	private List<WordWithBounds> wordbounds = new LinkedList<WordWithBounds>();
+	private List<WordWithBounds> capitalWordbounds = new LinkedList<WordWithBounds>();
 	private int pageIndex ;
 	private int dpi=72;
 	
@@ -58,6 +59,9 @@ public class GuidelineTextStripper extends PDFTextStripper{
         	
         	if(curTextPos.getUnicode().trim().length() > 0 && (gapSize > WIDTH_FACTOR_HEURISTICS_FOR_GAP * curTextPos.getWidth())) {
         		
+        		if(Character.isUpperCase((lineBuilder.charAt(0)))) {
+        			capitalWordbounds.add(new WordWithBounds(lineBuilder.toString(), wordPositions));//Create a new WordWithBounds up to previous text position.
+        		}
         		wordbounds.add(new WordWithBounds(lineBuilder.toString(), wordPositions));//Create a new WordWithBounds up to previous text position.
         		
                 lineBuilder = new StringBuilder();
@@ -69,7 +73,10 @@ public class GuidelineTextStripper extends PDFTextStripper{
                 wordPositions.add(curTextPos);
         	}
         }
-        
+
+		if(Character.isUpperCase((lineBuilder.charAt(0)))) {
+			capitalWordbounds.add(new WordWithBounds(lineBuilder.toString(), wordPositions));//Create a new WordWithBounds up to previous text position.
+		}
         wordbounds.add(new WordWithBounds(lineBuilder.toString(), wordPositions));
 	}
 	
@@ -78,6 +85,7 @@ public class GuidelineTextStripper extends PDFTextStripper{
     {
 		super.startPage(page);
 		wordbounds.clear();
+		capitalWordbounds.clear();
     }
 	
 	@Override
@@ -98,10 +106,6 @@ public class GuidelineTextStripper extends PDFTextStripper{
 	protected void writePage() throws IOException
     {
 		super.writePage();
-//		NewPDFRenderer drawer = new NewPDFRenderer(document,pageIndex,dpi);
-//		drawer.drawWordBounds(pageIndex,wordbounds);
-//		drawer.rendergeometry(pageIndex);
-//		drawer.OutputImage();
     }
 	
 	@Override
@@ -136,6 +140,11 @@ public class GuidelineTextStripper extends PDFTextStripper{
 	
 	public List<WordWithBounds> getWordBounds(){
 		return wordbounds;
+		
+	}
+	
+	public List<WordWithBounds> getCapitalWordBounds(){
+		return capitalWordbounds;
 		
 	}
 }
