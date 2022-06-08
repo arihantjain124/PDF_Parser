@@ -1,5 +1,6 @@
 package parser.page;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import parser.json.FootNotesJsonObject;
 import parser.json.GraphJsonObject;
 import parser.json.GuidelineContent;
 import parser.json.JsonExport;
+import parser.json.StagingJsonObject;
 import parser.renderer.GuidelinePageRenderer;
 import parser.text.FootnoteAnalyser;
 import parser.text.GuidelineTextStripper;
@@ -72,6 +74,7 @@ public class PageProcessor {
     	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
     	HashMap<String, List<RegionWithBound>> labelsHashMap = new HashMap<String, List<RegionWithBound>>();
     	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
+    	List<StagingJsonObject> allStagingObject = new ArrayList<StagingJsonObject>();
     	
     	HashMap<String, String> docFootnotes = new HashMap<String, String>();
     	for (int p = startPage; p <= endPage; ++p)
@@ -89,15 +92,13 @@ public class PageProcessor {
                 
                 List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
                 
+                List<WordWithBounds> capitalWordRects = mainContentStripper.getCapitalWordBounds();
+                
                 HashMap<String, String> pageFootnotes = FootnoteAnalyser.analyseFootnotes(wordRects);
                 pageFootnotes.forEach(docFootnotes::putIfAbsent);
                 
                 documentFootnotes.put(pageKey, pageFootnotes);
-                
-//        		for (String key : pageFootnotes.keySet()) {
-//        			System.out.println(key + " " + pageFootnotes.get(key));
-//        		}
-                
+                                
                 List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects);
                 
                 GuidelinePageRenderer renderer = new GuidelinePageRenderer(document, p - 1 ,72);
@@ -106,15 +107,14 @@ public class PageProcessor {
                 
             	ArrayList<GeneralPath> lines = renderer.getLines();
             	ArrayList<GeneralPath> triangles = renderer.getTriangles();
-            	
             	if(!lines.isEmpty() && !triangles.isEmpty()) {
 	            	
             		GraphProcessing graphProc = new GraphProcessing();
 	            	graphProc.checkIntersectionToTriangles(lines, triangles);
 	            	ArrayList<GraphObject> graphLine = graphProc.getGraphObject();
-	            	renderer.drawListGraphObject(graphLine);
-	            	renderer.drawRegionBounds(regionBounds);
-	            	//renderer.OutputImage();
+	            	ArrayList<GraphObject> verticalLine = graphProc.getVerticalLines(lines);
+	            	ArrayList<GraphObject> graphVerticalLine = graphProc.getVerticalLinesGraphObject(graphLine);
+	            	ArrayList<GraphObject> pairVerticalLine = graphProc.pairVerticalLine(verticalLine);
 	            	if(!graphLine.isEmpty()) {
 	            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
@@ -126,6 +126,7 @@ public class PageProcessor {
 		            		labelsHashMap.put(pageKey, labels);
 		            		allRegionList.addAll(newRegionList);
 	            		}
+
 	            	}
             	}
             }
@@ -136,7 +137,7 @@ public class PageProcessor {
         }
 
     	JsonExport.generateJsonGraphObject(allRegionList, pageHashMap, allGraphObject, labelsHashMap);
-
+//    	JsonExport.generateStagingJsonObject(allRegionList, allStagingObject);
     	JsonExport.generateJsonFootNote(docFootnotes, allFootNoteObject);
     	
     	GuidelineContent guidelineContentObjs = new GuidelineContent();
@@ -144,7 +145,8 @@ public class PageProcessor {
     	guidelineContentObjs.setFootNotesJsonObject(allFootNoteObject);
     	
         JsonExport.writeJsonLD(guidelineContentObjs, startPage, endPage, "Graph");
-        //JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
+        JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
+//        JsonExport.writeJson(allStagingObject, startPage, endPage, "Staging");
 
 
     }
