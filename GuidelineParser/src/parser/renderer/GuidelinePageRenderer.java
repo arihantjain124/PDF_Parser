@@ -66,7 +66,7 @@ public class GuidelinePageRenderer extends PDFRenderer {
 //        g2d.translate(-pageSize.getLowerLeftX(), -pageSize.getLowerLeftY());
 	}
 	
-	public void OutputImage() throws IOException {
+	public void OutputImage(boolean debug) throws IOException {
         
 		String outputPrefix = "mark1_page_";
         String imageFormat = "jpg";
@@ -76,8 +76,11 @@ public class GuidelinePageRenderer extends PDFRenderer {
         
         //Write out the image to disk 
         success &= ImageIOUtil.writeImage(image, fileName, this.dpi, quality);
-        System.out.println(fileName);
-        System.out.println(success);
+        if (debug == true) {
+            System.out.println(fileName);
+            System.out.println(success);
+        	
+        }
 	}
 		
 	
@@ -108,29 +111,37 @@ public class GuidelinePageRenderer extends PDFRenderer {
 		return triangles;
 	}
 	
-	public void drawLines() {
-        g2d.setColor(Color.BLACK);
+	public void drawLines(Color color) {
+        g2d.setColor(color);
 		Iterator<GeneralPath> i = lines.iterator();
 		while (i.hasNext()) {
 			g2d.draw(i.next());
 		}
 	}
 	
-	public void drawGraphObject(GraphObject graphLine) {
-		g2d.setColor(Color.RED);
+	public void drawGraphObject(GraphObject graphLine, Color color) {
+		g2d.setColor(color);
 		g2d.draw(graphLine.getpath());
 	}
 	
-	public void drawListGraphObject(ArrayList<GraphObject> graphLine) {
-		g2d.setColor(Color.RED);
+	public void drawArrayListGraphObject(ArrayList<GraphObject> graphLine, Color color) {
+		g2d.setColor(color);
 		Iterator<GraphObject> i = graphLine.iterator();
 		while (i.hasNext()) {
 			g2d.draw(i.next().getpath());
 		}
 	}
 	
-	public void drawTriangles() throws IOException  {
-        g2d.setColor(Color.BLACK);
+	public void drawListGraphObject(List<GraphObject> graphLine, Color color) {
+		g2d.setColor(color);
+		Iterator<GraphObject> i = graphLine.iterator();
+		while (i.hasNext()) {
+			g2d.draw(i.next().getpath());
+		}
+	}
+	
+	public void drawTriangles(Color color) throws IOException  {
+        g2d.setColor(color);
 		Iterator<GeneralPath> i = triangles.iterator();
 		while (i.hasNext()) 
 			g2d.draw(i.next());
@@ -139,8 +150,8 @@ public class GuidelinePageRenderer extends PDFRenderer {
 	
 	
 
-	public void drawWordBounds(List<WordWithBounds> wordbounds) throws IOException {
-        g2d.setColor(Color.RED);
+	public void drawWordBounds(List<WordWithBounds> wordbounds, Color color) throws IOException {
+        g2d.setColor(color);
 		int numberOfStrings = wordbounds.size();
         for (int i = 0; i < numberOfStrings; i++)
         {
@@ -148,14 +159,15 @@ public class GuidelinePageRenderer extends PDFRenderer {
         }
     }
 	
-	public void drawRegionBounds(List<RegionWithBound> regions) throws IOException {
-        g2d.setColor(Color.RED);
+	public void drawRegionBounds(List<RegionWithBound> regions , Color color) throws IOException {
+        g2d.setColor(color);
         for (RegionWithBound region : regions)
         {
         	g2d.draw (region.getBound());
         }
     }
-	public void drawRegionOfInterest() throws IOException {
+	public void drawRegionOfInterest(Color color) throws IOException {
+        g2d.setColor(color);
 		String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");
         Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
         g2d.draw (mainContentRect);
