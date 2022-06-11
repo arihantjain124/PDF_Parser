@@ -6,7 +6,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.regex.Pattern;
 
 
 public class GraphProcessing {

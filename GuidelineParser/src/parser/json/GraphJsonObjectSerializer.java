@@ -32,29 +32,37 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 		}		
 		json.add("@type", labels);
 		
-		JsonArray stage = new JsonArray();
-		for(String label : graphJsonObject.getStageScore()) {
-			stage.add(label);
-		}		
-		json.add("Stage", stage);
+		if(!graphJsonObject.getStageScore().isEmpty()) {
+			JsonArray stage = new JsonArray();
+			for(String label : graphJsonObject.getStageScore()) {
+				stage.add(label);
+			}		
+			json.add("Stage", stage);
+		}
 		
-		JsonArray tScore = new JsonArray();
-		for(String label : graphJsonObject.getTScore()) {
-			tScore.add(label);
-		}		
-		json.add("T-Score", tScore);
+		if(!graphJsonObject.getTScore().isEmpty()) {
+			JsonArray tScore = new JsonArray();
+			for(String label : graphJsonObject.getTScore()) {
+				tScore.add(label);
+			}		
+			json.add("T-Score", tScore);
+		}
 
-		JsonArray mScore = new JsonArray();
-		for(String label : graphJsonObject.getMScore()) {
-			mScore.add(label);
-		}		
-		json.add("M-Score", mScore);
+		if(!graphJsonObject.getMScore().isEmpty()) {
+			JsonArray mScore = new JsonArray();
+			for(String label : graphJsonObject.getMScore()) {
+				mScore.add(label);
+			}		
+			json.add("M-Score", mScore);
+		}
 		
-		JsonArray nScore = new JsonArray();
-		for(String label : graphJsonObject.getNScore()) {
-			nScore.add(label);
-		}		
-		json.add("N-Score", nScore);
+		if(!graphJsonObject.getNScore().isEmpty()) {
+			JsonArray nScore = new JsonArray();
+			for(String label : graphJsonObject.getNScore()) {
+				nScore.add(label);
+			}		
+			json.add("N-Score", nScore);
+		}
 		
 		
 		json.addProperty("nccn:content", graphJsonObject.getConent());

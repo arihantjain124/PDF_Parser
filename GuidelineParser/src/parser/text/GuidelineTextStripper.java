@@ -17,8 +17,8 @@ public class GuidelineTextStripper extends PDFTextStripper{
 
 	private List<WordWithBounds> wordbounds = new LinkedList<WordWithBounds>();
 	private List<WordWithBounds> capitalWordbounds = new LinkedList<WordWithBounds>();
-	private int pageIndex ;
-	private int dpi=72;
+	//private int pageIndex ;
+	//private int dpi=72;
 	
 	private static final int WIDTH_FACTOR_HEURISTICS_FOR_GAP = 4;
 	
@@ -26,7 +26,7 @@ public class GuidelineTextStripper extends PDFTextStripper{
 	
 	public GuidelineTextStripper(int pageIndex) throws IOException {
 		super();
-		this.pageIndex = pageIndex;
+		//this.pageIndex = pageIndex;
 	}
 	
 	private void positionToBound(String text, List<TextPosition> positions) {

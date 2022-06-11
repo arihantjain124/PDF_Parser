@@ -1,13 +1,9 @@
 package parser.json;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class StagingJsonObject {
-	
-	private int index;
 	
 	private Set<String> stageScore = null;
 	
@@ -24,11 +20,14 @@ public class StagingJsonObject {
 		tScore = new HashSet<> ();
 		mScore = new HashSet<> ();
 		nScore = new HashSet<> ();
-		this.index = index;
 	}
 	
 	public void setConent(String content) {
 		this.content = content;
+	}
+	
+	public String getConent() {
+		return content;
 	}
 
 	public void setTScore(String tScore) {
