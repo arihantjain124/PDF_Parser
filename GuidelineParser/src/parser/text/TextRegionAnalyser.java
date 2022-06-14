@@ -97,8 +97,8 @@ public class TextRegionAnalyser {
 			Point2D source = arrow.getSource();
 			Point2D target = arrow.getTarget();
 			
-			double minDistFromSource = Double.MAX_VALUE, minDistFromTarget = Double.MAX_VALUE;
-			int minDistFromSourceIndex = -1, minDistFromTargetIndex = -1;
+			double minDistFromSource = Double.MAX_VALUE, minDistFromTarget = Double.MAX_VALUE, minDistFromTarget2nd = Double.MAX_VALUE;
+			int minDistFromSourceIndex = -1, minDistFromTargetIndex = -1, minDistFromTargetIndex2nd = -1;
 			
 			for(int regionIndex = 0; regionIndex < regions.size(); regionIndex++) {
 				
@@ -112,12 +112,25 @@ public class TextRegionAnalyser {
 					
 				double distFromTarget = distanceBoxPoint(target, region.getBound());
 				if(distFromTarget < minDistFromTarget) {
-					minDistFromTarget =  distFromTarget;
+					
+					minDistFromTarget2nd =  minDistFromTarget;//First min becoms second min
+					minDistFromTargetIndex2nd = minDistFromTargetIndex;
+					
+					minDistFromTarget =  distFromTarget;//Update first min
 					minDistFromTargetIndex = regionIndex;
+				}else if(distFromTarget < minDistFromTarget2nd) {
+					minDistFromTarget2nd =  distFromTarget;
+					minDistFromTargetIndex2nd = regionIndex;
 				}
 			}
 			
 			if(minDistFromSourceIndex >= 0 && minDistFromTargetIndex >= 0) {
+				
+				if(minDistFromSourceIndex == minDistFromTargetIndex) {
+					//System.out.println("Same region as source and target for page " + p);
+					minDistFromTargetIndex = minDistFromTargetIndex2nd;
+				}
+				
 				regions.get(minDistFromSourceIndex).addNextRegion(minDistFromTargetIndex);
 				regions.get(minDistFromTargetIndex).addPrevRegion(minDistFromSourceIndex);
 			}
