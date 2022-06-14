@@ -7,6 +7,8 @@ import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import parser.config.ConfigProperty;
+
 
 public class GraphProcessing {
 	private ArrayList<GraphObject> graphLine = new ArrayList<GraphObject>();
@@ -181,6 +183,11 @@ public class GraphProcessing {
 				}
 			}
         }
+        
+        double extrapolateLength = Double.parseDouble(ConfigProperty.getProperty("graph.line.traingle.height"));
+        for (GraphObject currGraphLine : graphLine) {
+			currGraphLine.extrapolateTarget(extrapolateLength);
+		}
 	}
 	
 	
