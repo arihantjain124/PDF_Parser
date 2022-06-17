@@ -15,8 +15,13 @@ public class RegionWithBound {
 	private List<Integer> prevRegions = new ArrayList<Integer>();
 	private List<Integer> childRegions = new ArrayList<Integer>();
 	private int parentRegionIndex = -1;
+	private boolean isImaginary = false;
 	
 	private ArrayList<String> footnoteRefs = new ArrayList<String>();
+	
+	public RegionWithBound(Rectangle2D bound) {
+		this.bound = bound;
+	}
 	
 	public RegionWithBound(Rectangle2D bound, WordWithBounds line) {
 		this.bound = bound;
@@ -106,5 +111,13 @@ public class RegionWithBound {
 	
 	public List<String> getFootnoteRefs() {
 		return footnoteRefs;
+	}
+	
+	public void setIsImaginary(boolean imaginary) {
+		isImaginary = imaginary;
+	}
+	
+	public boolean isImaginary() {
+		return isImaginary;
 	}
 }

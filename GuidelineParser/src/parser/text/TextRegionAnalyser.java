@@ -1,11 +1,16 @@
 package parser.text;
 
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
 import parser.graphics.GraphObject;
+import parser.graphics.GraphProcessing;
+import parser.graphics.VerticalGraphObject;
+import parser.graphics.VerticalGraphObject.RegionType;
+import parser.renderer.UtilRenderer;
 
 public class TextRegionAnalyser {
 	
@@ -63,7 +68,9 @@ public class TextRegionAnalyser {
 		return regionIndex;
 	}
 
-	public static List<RegionWithBound> getRegions(List<WordWithBounds> linesWithBounds){
+	//Group lines to create regions
+	public static List<RegionWithBound> getRegions(List<WordWithBounds> linesWithBounds, ArrayList<GeneralPath> graphLines, 
+			String pageKey, int p){
 		
 		ArrayList<RegionWithBound> regionBoundList = new ArrayList<RegionWithBound>();
 		
@@ -88,7 +95,232 @@ public class TextRegionAnalyser {
 			}
 		}
 		
+		analyzeRegionsUsingVerticalLines(regionBoundList, graphLines, pageKey, p); 
 		return regionBoundList;
+	}
+	
+	private static void analyzeRegionsUsingVerticalLines(ArrayList<RegionWithBound> regions, ArrayList<GeneralPath> graphLines, 
+			String pageKey, int p) {
+		
+		GraphProcessing graphProc = new GraphProcessing();
+		ArrayList<VerticalGraphObject> verticalLines = graphProc.getVerticalLines(graphLines);
+		
+		UtilRenderer renderer = new UtilRenderer();
+		renderer.intializeImage(792, 612);
+		
+		ArrayList<RegionWithBound> newRegionsToBeAdded = new ArrayList<RegionWithBound>();
+		ArrayList<RegionWithBound> oldRegionsToBeDeleted = new ArrayList<RegionWithBound>();
+		
+		//Step 1: Use vertical lines to break regions if required.
+		for(int regionIndex = 0; regionIndex < regions.size(); regionIndex++) {
+			
+			RegionWithBound region = regions.get(regionIndex);
+			Rectangle2D regionBound = new Rectangle2D.Double(region.getBound().getX(), region.getBound().getY(), 
+					region.getBound().getWidth() - 2, region.getBound().getHeight());
+			
+			ArrayList<VerticalGraphObject> leftLines = new ArrayList<VerticalGraphObject>();
+			ArrayList<VerticalGraphObject> rightLines = new ArrayList<VerticalGraphObject>();
+			ArrayList<VerticalGraphObject> betweenLines = new ArrayList<VerticalGraphObject>();
+			
+			for(int lineIndex = 0; lineIndex < verticalLines.size(); lineIndex++) {
+				
+				VerticalGraphObject verticalLine = verticalLines.get(lineIndex);
+				
+				if(isOverlapInY(regionBound, verticalLine.getpath().getBounds2D())) {
+					
+					if((regionBound.getMinX() >= verticalLine.getSource().getX()) 
+							&& (regionBound.getMinX() - verticalLine.getSource().getX()) <= 10) {//10 is a heuristic number
+						
+						leftLines.add(verticalLine);
+					}else if((verticalLine.getSource().getX() >= regionBound.getMaxX()) 
+							&& (verticalLine.getSource().getX() - regionBound.getMaxX()) <= 10) {
+						
+						rightLines.add(verticalLine);
+					}else if((verticalLine.getSource().getX() >= regionBound.getMinX()) 
+							&& (verticalLine.getSource().getX() <= regionBound.getMaxX())) {
+						
+						betweenLines.add(verticalLine);
+					}
+				}
+			}
+			
+			ArrayList<RegionWithBound> newRegions = null;
+			if((leftLines.size() == 1) && (rightLines.size() == 1)) {
+				
+				//Use smaller line to break.
+				if(leftLines.get(0).getpath().getBounds2D().getHeight() < rightLines.get(0).getpath().getBounds2D().getHeight()) {
+					newRegions = breakRegionUsingVerticalLines(region, leftLines);
+				}else {
+					newRegions = breakRegionUsingVerticalLines(region, rightLines);
+				}
+			
+			}else if((leftLines.size() == 1) && (betweenLines.size() == 1)) {
+				
+				//Use smaller line to break.
+				if(leftLines.get(0).getpath().getBounds2D().getHeight() < betweenLines.get(0).getpath().getBounds2D().getHeight()) {
+					newRegions = breakRegionUsingVerticalLines(region, leftLines);
+				}else {
+					newRegions = breakRegionUsingVerticalLines(region, betweenLines);
+				}
+				
+			}else if(leftLines.size() > rightLines.size()) {
+				//renderer.drawRect(regionBound, java.awt.Color.RED);
+				
+				newRegions = breakRegionUsingVerticalLines(region, leftLines);
+				
+			}else if(rightLines.size() > leftLines.size()) {
+				//renderer.drawRect(regionBound, java.awt.Color.BLUE);
+				newRegions = breakRegionUsingVerticalLines(region, rightLines);
+			}
+			
+			if(newRegions != null && newRegions.size() > 1) {
+				newRegionsToBeAdded.addAll(newRegions);
+				oldRegionsToBeDeleted.add(region);
+			}
+		}
+		
+		regions.removeAll(oldRegionsToBeDeleted);
+		regions.addAll(newRegionsToBeAdded);
+		
+		//Step 2: Get associated regions of vertical lines. 
+		for(int regionIndex = 0; regionIndex < regions.size(); regionIndex++) {
+			
+			RegionWithBound region = regions.get(regionIndex);
+			Rectangle2D regionBound = new Rectangle2D.Double(region.getBound().getX(), region.getBound().getY(), 
+					region.getBound().getWidth() - 2, region.getBound().getHeight());
+			
+			for(int lineIndex = 0; lineIndex < verticalLines.size(); lineIndex++) {
+				
+				VerticalGraphObject verticalLine = verticalLines.get(lineIndex);
+				
+				if(isOverlapInY(regionBound, verticalLine.getpath().getBounds2D())) {
+					
+					if((regionBound.getMinX() >= verticalLine.getSource().getX()) 
+							&& (regionBound.getMinX() - verticalLine.getSource().getX()) <= 10) //10 is a heuristic number
+					{
+						//Associate the region with the current vertical line. Line is left to the region
+						verticalLine.addLeftAssociatedRegion(region);
+					}
+					else if((verticalLine.getSource().getX() >= regionBound.getMaxX()) 
+							&& (verticalLine.getSource().getX() - regionBound.getMaxX()) <= 20) 
+					{	
+						//Associate the region with the current vertical line. Line is right to the region
+						verticalLine.addRightAssociatedRegion(region);
+					}
+					else if((verticalLine.getSource().getX() >= regionBound.getMinX()) 
+							&& (verticalLine.getSource().getX() <= regionBound.getMaxX())) 
+					{
+						//Associate the region with the current vertical line. Line is in between the region
+						verticalLine.addBetweenAssociatedRegion(region);
+					}
+				}
+			}
+		}
+		
+		//Step 3: Create imaginary nodes.
+		for(VerticalGraphObject verticalLine : verticalLines) {
+			
+			double lineHeight = verticalLine.getpath().getBounds2D().getHeight();
+			
+			ArrayList<RegionWithBound> associatedRegions = verticalLine.getAssociatedRegions(RegionType.ALL);
+			boolean isCoveredByRegion = false;
+			for(RegionWithBound region : associatedRegions) {
+				double regionHeight = region.getBound().getHeight();
+				if(Math.abs(lineHeight - regionHeight) <= 0.2*lineHeight) {//line is almost covered by a single region
+					isCoveredByRegion = true;
+					break;
+				}
+			}
+			
+			if(!isCoveredByRegion) {
+				renderer.drawGraphObject(verticalLine, java.awt.Color.RED);
+				
+				Rectangle2D verticalLineBound = verticalLine.getpath().getBounds2D();
+				Rectangle2D newRegionBound = new Rectangle2D.Double(verticalLineBound.getX() - 1, verticalLineBound.getY(), 
+						verticalLineBound.getWidth() + 1, verticalLineBound.getHeight());
+				RegionWithBound newRegion = new RegionWithBound(newRegionBound);
+				newRegion.setPageKey(pageKey);
+				newRegion.setPageNo(p);
+				newRegion.setIsImaginary(true);
+				int newRegionIndex = regions.size();
+				regions.add(newRegion);
+				
+				ArrayList<RegionWithBound> leftAssociatedRegions = verticalLine.getAssociatedRegions(RegionType.LEFT);
+				for(RegionWithBound associatedRegion : leftAssociatedRegions) 
+				{			
+					int associatedRegionIndex = regions.indexOf(associatedRegion);
+					newRegion.addNextRegion(associatedRegionIndex);//Line is left to the region
+					associatedRegion.addPrevRegion(newRegionIndex);
+				}
+				
+				ArrayList<RegionWithBound> rightAssociatedRegions = verticalLine.getAssociatedRegions(RegionType.RIGHT);
+				for(RegionWithBound associatedRegion : rightAssociatedRegions) 
+				{					
+					int associatedRegionIndex = regions.indexOf(associatedRegion);
+					newRegion.addPrevRegion(associatedRegionIndex);//Line is right to the region
+					associatedRegion.addNextRegion(newRegionIndex);
+				}
+			}			
+		}
+		//renderer.drawRegionBounds(regions, java.awt.Color.RED);	
+		//renderer.outputImage(p, true);
+	}
+	
+	private static ArrayList<RegionWithBound> breakRegionUsingVerticalLines(RegionWithBound region, ArrayList<VerticalGraphObject> verticalLines) {
+		
+		ArrayList<RegionWithBound> newRegions = new ArrayList<RegionWithBound>();
+		
+		ArrayList<WordWithBounds> allContentLines = new ArrayList<WordWithBounds>();
+		allContentLines.addAll(region.getContentLines());
+		
+		for(VerticalGraphObject verticalLine : verticalLines) {
+			
+			Rectangle2D verticalLineBound = verticalLine.getpath().getBounds2D();
+			
+			ArrayList<WordWithBounds> curContentLines = new ArrayList<WordWithBounds>();
+			for(WordWithBounds contentLine : allContentLines) {
+				if(isOverlapInY(contentLine.getbound(), verticalLineBound)) {
+					curContentLines.add(contentLine);
+				}
+			}
+			
+			if(!curContentLines.isEmpty()) {
+				RegionWithBound newRegion = new RegionWithBound(curContentLines, -1);
+				newRegions.add(newRegion);
+				
+				allContentLines.removeAll(curContentLines);
+			}
+		}
+		
+		if(!allContentLines.isEmpty()) {
+			RegionWithBound newRegion = new RegionWithBound(allContentLines, -1);
+			newRegions.add(newRegion);
+		}
+		
+		return newRegions;
+	}
+	
+	private static boolean isOverlapInY(Rectangle2D bound1, Rectangle2D bound2) {
+        double bounds1Ystart = bound1.getY();
+        double bounds1Yend = bounds1Ystart + bound1.getHeight();
+        
+        double bounds2Ystart = bound2.getY();
+        double bounds2Yend = bounds2Ystart + bound2.getHeight();
+        
+        if (bounds2Yend < bounds1Ystart || bounds2Ystart > bounds1Yend) {
+        	//No overlap in Y
+        	return false;
+        }else {
+        	
+        	Rectangle2D intersectionRect = bound1.createIntersection(bound2);
+        	double minHeight = Math.min(bound1.getHeight(), bound2.getHeight());
+        	
+        	if(intersectionRect.getHeight() >= 0.1*minHeight) { //At least 10% overlap
+        		return true;
+        	}else {
+        		return false;
+        	}
+        }
 	}
 	
 	public static void generateTextRegionAssociation(List<GraphObject> arrows, List<RegionWithBound> regions) {
@@ -125,6 +357,11 @@ public class TextRegionAnalyser {
 			}
 			
 			if(minDistFromSourceIndex >= 0 && minDistFromTargetIndex >= 0) {
+				
+				if(Math.abs(minDistFromTarget - minDistFromTarget2nd) <= 1 && regions.get(minDistFromTargetIndex2nd).isImaginary()) {
+					//Give preference to imaginary in this case as both are close to target and imaginary didn't exist in PDF
+					minDistFromTargetIndex = minDistFromTargetIndex2nd;
+				}
 				
 				if(minDistFromSourceIndex == minDistFromTargetIndex) {
 					//System.out.println("Same region as source and target for page " + p);

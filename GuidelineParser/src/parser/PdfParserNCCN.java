@@ -194,6 +194,12 @@ public final class PdfParserNCCN
                 
                 PageProcessor pageProcessor = new PageProcessor();
                 pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper, document, output);
+                
+                //Use the following code to generate JSON of individual pages when input is page range.
+                //for (int p = startPage; p <= endPage; ++p)
+                //{ 
+                //	pageProcessor.processPages(p, Math.min(p, document.getNumberOfPages()), stripper, document, output);
+                //}
             }
             finally
             {

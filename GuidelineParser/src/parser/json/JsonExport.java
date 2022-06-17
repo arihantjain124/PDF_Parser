@@ -125,8 +125,12 @@ public class JsonExport {
 					(region.getParentRegionIndex() >= 0)) {
 
 				String currentContent = "";
-				for (WordWithBounds word : region.getContentLines()) {
-					currentContent = currentContent + word.getText();
+				if(region.isImaginary()) {
+					currentContent = "IMAGINARY NODE";
+				}else {
+					for (WordWithBounds word : region.getContentLines()) {
+						currentContent = currentContent + word.getText();
+					}
 				}
 			
 				currJsonObject.setConent(currentContent);

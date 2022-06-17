@@ -93,8 +93,6 @@ public class PageProcessor {
                 pageFootnotes.forEach(docFootnotes::putIfAbsent);
                 
                 documentFootnotes.put(pageKey, pageFootnotes);
-                                
-                List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects);
                 
                 GuidelinePageRenderer renderer = new GuidelinePageRenderer(document, p - 1 ,72);
                 renderer.intializeImage();
@@ -102,20 +100,25 @@ public class PageProcessor {
                 
             	ArrayList<GeneralPath> lines = renderer.getLines();
             	ArrayList<GeneralPath> triangles = renderer.getTriangles();
+            	
             	if(!lines.isEmpty() && !triangles.isEmpty()) {
 	            	
             		GraphProcessing graphProc = new GraphProcessing();
-	            	graphProc.checkIntersectionToTriangles(lines, triangles);
-	            	ArrayList<GraphObject> graphLine = graphProc.getGraphObject();
+            		ArrayList<GraphObject> graphLine = graphProc.checkIntersectionToTriangles(lines, triangles);
 	            	
-//	            	ArrayList<GraphObject> verticalLine = graphProc.getVerticalLines(lines);
+//	            	ArrayList<VerticalGraphObject> verticalLine = graphProc.getVerticalLines(lines);
 //	            	ArrayList<GraphObject> graphVerticalLine = graphProc.getVerticalLinesGraphObject(graphLine);
 //	            	ArrayList<GraphObject> pairVerticalLine = graphProc.pairVerticalLine(verticalLine);
 	            	
+	                List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects, lines, pageKey, p);
+	                
 	            	if(!graphLine.isEmpty()) {
 	            		
-	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);
-	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset,pageKey,p);
+	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);//add prev & next pointers in regions
+	            		
+	            		//renderer.drawRegionBoundsWithRelations(regionBounds, java.awt.Color.RED);
+
+	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset,pageKey,p);		            	
 	            		if (newRegionList.size()>0) 
 	            		{
 	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());
@@ -127,8 +130,10 @@ public class PageProcessor {
 		            		allRegionList.addAll(newRegionList);
 	            		}
 
-	            	}
+	            	}            	
             	}
+            	
+            	//renderer.OutputImage(true);
             }
             catch (IOException ex)
             {

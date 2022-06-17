@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 
 import parser.config.ConfigProperty;
 import parser.graphics.GraphObject;
+import parser.graphics.VerticalGraphObject;
 import parser.text.RegionWithBound;
 import parser.text.WordWithBounds;
 
@@ -132,6 +134,14 @@ public class GuidelinePageRenderer extends PDFRenderer {
 		}
 	}
 	
+	public void drawArrayListVerticalGraphObject(ArrayList<VerticalGraphObject> graphLine, Color color) {
+		g2d.setColor(color);
+		Iterator<VerticalGraphObject> i = graphLine.iterator();
+		while (i.hasNext()) {
+			g2d.draw(i.next().getpath());
+		}
+	}	
+	
 	public void drawListGraphObject(List<GraphObject> graphLine, Color color) {
 		g2d.setColor(color);
 		Iterator<GraphObject> i = graphLine.iterator();
@@ -166,6 +176,37 @@ public class GuidelinePageRenderer extends PDFRenderer {
         	g2d.draw (region.getBound());
         }
     }
+	
+	public void drawRegionBoundsWithRelations(List<RegionWithBound> regions , Color color) throws IOException {
+        
+        for (RegionWithBound region : regions)
+        {
+        	g2d.setColor(color);
+        	g2d.draw (region.getBound());
+        	
+        	double x = region.getBound().getCenterX();
+        	double y = region.getBound().getCenterY();
+        	
+        	for (int prevRegionIndex : region.getPrevRegions()) {
+        		
+        		double pX = regions.get(prevRegionIndex).getBound().getCenterX();
+            	double pY = regions.get(prevRegionIndex).getBound().getCenterY() - 5;
+            	
+            	g2d.setColor(java.awt.Color.BLUE);
+            	g2d.drawLine((int)x, (int)y, (int)pX, (int)pY);
+        	}
+        	
+        	for (int nextRegionIndex : region.getNextRegions()) {
+        		
+        		double pX = regions.get(nextRegionIndex).getBound().getCenterX();
+            	double pY = regions.get(nextRegionIndex).getBound().getCenterY() + 5;
+            	
+            	g2d.setColor(java.awt.Color.GREEN);
+            	g2d.drawLine((int)x, (int)y, (int)pX, (int)pY);
+        	}
+        }
+    }
+	
 	public void drawRegionOfInterest(Color color) throws IOException {
         g2d.setColor(color);
 		String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");

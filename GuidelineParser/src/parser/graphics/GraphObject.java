@@ -5,7 +5,7 @@ import java.awt.geom.Point2D;
 
 public class GraphObject
 {
-	private static final float EPSILON = 0.000001f;
+	public static final float EPSILON = 0.000001f;
 	
 	private GeneralPath path = new GeneralPath();
 	private Point2D source;
@@ -119,6 +119,11 @@ public class GraphObject
 
 	public Point2D getSource() {
 		return source;
+	}
+	
+	public void setSource(Point2D source) {
+		this.source = source;
+		intializePath();
 	}
 	
 	public GeneralPath getpath()
