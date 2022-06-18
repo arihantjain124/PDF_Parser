@@ -58,7 +58,7 @@ public class TextRegionAnalyser {
 		        	verticalGapHeight = 0;
 		        }
 		        
-		        if(verticalGapHeight < bound.getHeight()) {
+		        if(verticalGapHeight < 0.85*bound.getHeight()) { // 0.85 is a heuristic number
 		        	regionIndex = i;
 		        	break;
 		        }
@@ -77,6 +77,10 @@ public class TextRegionAnalyser {
 		for(WordWithBounds line: linesWithBounds) {
 			
 			Rectangle2D curLineBound = line.getbound();
+			if(line.getText().trim().isEmpty()) {
+				//System.out.println("Ignore Empty Lines.");
+				continue;
+			}
 			
 			int overlappingRegionIndex = getOverlappingRegion(regionBoundList, curLineBound); //Check if line is overlapping with any existing regions
 			if(overlappingRegionIndex >= 0) {
@@ -202,7 +206,7 @@ public class TextRegionAnalyser {
 						verticalLine.addLeftAssociatedRegion(region);
 					}
 					else if((verticalLine.getSource().getX() >= regionBound.getMaxX()) 
-							&& (verticalLine.getSource().getX() - regionBound.getMaxX()) <= 20) 
+							&& (verticalLine.getSource().getX() - regionBound.getMaxX()) <= 25) //25 is a heuristic number. Right line tends to be far away than left line
 					{	
 						//Associate the region with the current vertical line. Line is right to the region
 						verticalLine.addRightAssociatedRegion(region);
@@ -329,8 +333,11 @@ public class TextRegionAnalyser {
 			Point2D source = arrow.getSource();
 			Point2D target = arrow.getTarget();
 			
-			double minDistFromSource = Double.MAX_VALUE, minDistFromTarget = Double.MAX_VALUE, minDistFromTarget2nd = Double.MAX_VALUE;
-			int minDistFromSourceIndex = -1, minDistFromTargetIndex = -1, minDistFromTargetIndex2nd = -1;
+			double minDistFromSource = Double.MAX_VALUE, minDistFromTarget = Double.MAX_VALUE;
+			int minDistFromSourceIndex = -1, minDistFromTargetIndex = -1;
+			
+			double minDistFromSource2nd = Double.MAX_VALUE, minDistFromTarget2nd = Double.MAX_VALUE;
+			int minDistFromSourceIndex2nd = -1, minDistFromTargetIndex2nd = -1;
 			
 			for(int regionIndex = 0; regionIndex < regions.size(); regionIndex++) {
 				
@@ -338,8 +345,15 @@ public class TextRegionAnalyser {
 				
 				double distFromSource = distanceBoxPoint(source, region.getBound());
 				if(distFromSource < minDistFromSource) {
+					
+					minDistFromSource2nd = minDistFromSource;
+					minDistFromSourceIndex2nd = minDistFromSourceIndex;
+					
 					minDistFromSource =  distFromSource;
 					minDistFromSourceIndex = regionIndex;
+				}else if(distFromSource < minDistFromSource2nd) {
+					minDistFromSource2nd = distFromSource;
+					minDistFromSourceIndex2nd = regionIndex;
 				}
 					
 				double distFromTarget = distanceBoxPoint(target, region.getBound());
@@ -358,9 +372,28 @@ public class TextRegionAnalyser {
 			
 			if(minDistFromSourceIndex >= 0 && minDistFromTargetIndex >= 0) {
 				
+				if(Math.abs(minDistFromSource - minDistFromSource2nd) <= 1 && regions.get(minDistFromSourceIndex2nd).isImaginary()) {
+					//Give preference to imaginary in this case as both are close to source and imaginary didn't exist in PDF
+					minDistFromSourceIndex = minDistFromSourceIndex2nd;
+				}
+				
 				if(Math.abs(minDistFromTarget - minDistFromTarget2nd) <= 1 && regions.get(minDistFromTargetIndex2nd).isImaginary()) {
 					//Give preference to imaginary in this case as both are close to target and imaginary didn't exist in PDF
 					minDistFromTargetIndex = minDistFromTargetIndex2nd;
+				}
+				
+				boolean isHorizontal = Math.abs(source.getY() - target.getY()) <= GraphObject.EPSILON;
+				if(isHorizontal ) {
+					
+					Rectangle2D firstNearestRegionBound = regions.get(minDistFromSourceIndex).getBound();
+					Rectangle2D secondNearestRegionBound = regions.get(minDistFromSourceIndex2nd).getBound();
+					
+					if((firstNearestRegionBound.getMinY() > source.getY() ||  firstNearestRegionBound.getMaxY() < source.getY()) && 
+						(secondNearestRegionBound.getMinY() <= source.getY() &&  secondNearestRegionBound.getMaxY() >= source.getY())) {
+						
+						//Horizontal arrow intersecting second nearest region, but not first nearest region.
+						minDistFromSourceIndex = minDistFromSourceIndex2nd;
+					}
 				}
 				
 				if(minDistFromSourceIndex == minDistFromTargetIndex) {
