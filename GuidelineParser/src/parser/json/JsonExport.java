@@ -20,6 +20,7 @@ import com.google.gson.JsonIOException;
 
 import parser.config.ConfigProperty;
 import parser.page.PageInfo;
+import parser.text.FootnoteDetails;
 import parser.text.RegionWithBound;
 import parser.text.WordWithBounds;
 
@@ -219,12 +220,13 @@ public class JsonExport {
 
 	}
 	
-	public static void generateJsonFootNote(HashMap<String, String> pageFootnotes ,List<FootNotesJsonObject> allFootNoteObject) {
+	public static void generateJsonFootNote(HashMap<String, FootnoteDetails> pageFootnotes ,List<FootNotesJsonObject> allFootNoteObject) {
 		
 		for (String key : pageFootnotes.keySet()) {
 			FootNotesJsonObject currFootNotesJsonObject = new FootNotesJsonObject();
 			currFootNotesJsonObject.setFootNoteKey(key);
-			currFootNotesJsonObject.setFootNoteContent(pageFootnotes.get(key));
+			currFootNotesJsonObject.setFootNoteContent(pageFootnotes.get(key).getFootNoteText());
+			currFootNotesJsonObject.setFootNoteLink(pageFootnotes.get(key).getLinkKeys());
 			allFootNoteObject.add(currFootNotesJsonObject);
 		}
 	}
@@ -259,7 +261,7 @@ public class JsonExport {
 	public static void writeJsonLD(GuidelineContent guidelineContent, int startPage, int endPage, String prefix)
 			throws JsonIOException, IOException {
 
-		String filePath = "jsonexport/";
+		String filePath = "/home/arunima/HTIC/ge_oncology/GuidelineParser/jsonexport";
 
 		if (!Paths.get(filePath).toFile().isDirectory()) {
 			//System.out.println("No Folder for jsonexport");

@@ -26,6 +26,7 @@ import parser.json.GuidelineContent;
 import parser.json.JsonExport;
 import parser.renderer.GuidelinePageRenderer;
 import parser.text.FootnoteAnalyser;
+import parser.text.FootnoteDetails;
 import parser.text.GuidelineTextStripper;
 import parser.text.RegionWithBound;
 import parser.text.TextRegionAnalyser;
@@ -64,7 +65,7 @@ public class PageProcessor {
     		throws IOException {
     	
     	HashMap<String, PageInfo> pageHashMap = new HashMap<String, PageInfo>();
-    	HashMap<String, HashMap<String, String>> documentFootnotes = new HashMap<String, HashMap<String, String>>();
+    	HashMap<String, HashMap<String, FootnoteDetails>> documentFootnotes = new HashMap<String, HashMap<String, FootnoteDetails>>();
     	
     	int indexOffset = 0;
 
@@ -73,7 +74,7 @@ public class PageProcessor {
     	HashMap<String, List<RegionWithBound>> labelsHashMap = new HashMap<String, List<RegionWithBound>>();
     	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
     	
-    	HashMap<String, String> docFootnotes = new HashMap<String, String>();
+    	HashMap<String, FootnoteDetails> docFootnotes = new HashMap<String, FootnoteDetails>();
     	for (int p = startPage; p <= endPage; ++p)
         {        	
             try
@@ -89,7 +90,7 @@ public class PageProcessor {
                 
                 List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
                 
-                HashMap<String, String> pageFootnotes = FootnoteAnalyser.analyseFootnotes(wordRects);
+                HashMap<String, FootnoteDetails> pageFootnotes = FootnoteAnalyser.analyseFootnotes(wordRects);
                 pageFootnotes.forEach(docFootnotes::putIfAbsent);
                 
                 documentFootnotes.put(pageKey, pageFootnotes);

@@ -27,9 +27,9 @@ public class FootnoteAnalyser {
 	private static final int MAX_FOOTNOTE_LENGTH = 3; //TODO: Add in configuration
 	private static final int FOOTNOTE_HEIGHT_DIFF = 2; //TODO: Add in configuration
 
-	public static HashMap<String, String> analyseFootnotes(List<WordWithBounds> line) throws IOException {
+	public static HashMap<String, FootnoteDetails> analyseFootnotes(List<WordWithBounds> line) throws IOException {
 		
-		HashMap<String, String> footnoteDefinitions = new HashMap<String, String>();
+		HashMap<String, FootnoteDetails> footnoteDefinitions = new HashMap<String, FootnoteDetails>();
 		int numberOfStrings = line.size();
 		
 		ArrayList<Integer> footnoteLineIndices = new ArrayList<Integer>();
@@ -44,7 +44,9 @@ public class FootnoteAnalyser {
 				String key = curLine.getText().substring(0, footnoteLength);
 				String footnoteText = curLine.getText().substring(footnoteLength + 1);
 				
-				footnoteDefinitions.put(key, footnoteText);
+				FootnoteDetails footnoteDetails = new FootnoteDetails(footnoteText);
+				footnoteDefinitions.put(key, footnoteDetails);
+				
 				
 				previousLineFootnoteDefKey.setLength(0);
 				previousLineFootnoteDefKey.append(key);
@@ -93,10 +95,11 @@ public class FootnoteAnalyser {
 		        	String curLineText = curLine.getText();
 		        	
 		        	String key = previousLineFootnoteDefKey.toString();
-		        	String oldText = footnoteDefinitions.get(key);
+		        	String oldText = footnoteDefinitions.get(key).getFootNoteText();
 		        	String footnoteText = oldText + curLineText;
 		        	
-		        	footnoteDefinitions.put(key, footnoteText);
+		        	FootnoteDetails footnoteDetails = new FootnoteDetails(footnoteText);
+		        	footnoteDefinitions.put(key, footnoteDetails);
 		        	footnoteLineIndices.add(i);
 		        	
 		        }else {

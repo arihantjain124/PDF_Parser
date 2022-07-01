@@ -2,6 +2,7 @@ package parser.json;
 
 import java.lang.reflect.Type;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -24,7 +25,15 @@ public class FootNotesJsonObjectSerializer implements JsonSerializer<FootNotesJs
 		json.addProperty("@id", ID_URL + footNoteJsonObject.getFootNoteKey());
 		json.addProperty("@type", "nccn:Footnote");
 		json.addProperty("nccn:content", footNoteJsonObject.getFootNoteContent());
-		
+		if (!footNoteJsonObject.getFootNoteLink().isEmpty()) {
+			JsonArray link = new JsonArray();
+			
+			for (String linkkey : footNoteJsonObject.getFootNoteLink()) {
+				link.add( linkkey);
+				
+			}
+			json.add("nccn:links", link);
+		}
 		return json;
 	}
 
