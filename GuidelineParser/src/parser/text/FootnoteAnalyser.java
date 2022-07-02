@@ -185,7 +185,7 @@ public class FootnoteAnalyser {
 		}
 	}
 	
-	private static ArrayList<String> analyzeFootNoteReferences(List<WordWithBounds> lines, boolean removeFootnote)
+	public static ArrayList<String> analyzeFootNoteReferences(List<WordWithBounds> lines, boolean removeFootnote)
 	{
 		
 		HashSet<String> footnoteRefSet = new HashSet<String>();

@@ -7,6 +7,8 @@ public class GuidelineContent {
 	private List<GraphJsonObject> graphObjects;
 	
 	private List<FootNotesJsonObject> footNoteObjects;
+
+	private List<LabelJsonObject> labelObjects;
 	
 	public void setGraphObjects(List<GraphJsonObject> contentObjects) {
 		this.graphObjects = contentObjects;
@@ -22,5 +24,13 @@ public class GuidelineContent {
 	
 	public List<FootNotesJsonObject> getFootNotesJsonObject() {
 		return this.footNoteObjects;
+	}
+	
+	public List<LabelJsonObject> getLabelObjects() {
+		return labelObjects;
+	}
+
+	public void setLabelObjects(List<LabelJsonObject> labelObjects) {
+		this.labelObjects = labelObjects;
 	}
 }

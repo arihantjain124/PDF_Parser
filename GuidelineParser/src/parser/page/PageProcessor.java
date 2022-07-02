@@ -31,6 +31,9 @@ import parser.text.GuidelineTextStripper;
 import parser.text.RegionWithBound;
 import parser.text.TextRegionAnalyser;
 import parser.text.WordWithBounds;
+import org.javatuples.Pair;
+import parser.json.LabelJsonObject;
+import java.awt.geom.Rectangle2D;
 
 public class PageProcessor {
 	
@@ -68,6 +71,7 @@ public class PageProcessor {
     	HashMap<String, HashMap<String, FootnoteDetails>> documentFootnotes = new HashMap<String, HashMap<String, FootnoteDetails>>();
     	
     	int indexOffset = 0;
+    	int labelOffset = 0;
 
     	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
     	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
@@ -75,6 +79,8 @@ public class PageProcessor {
     	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
     	
     	HashMap<String, FootnoteDetails> docFootnotes = new HashMap<String, FootnoteDetails>();
+    	HashMap<String, List<Pair<Rectangle2D, LabelJsonObject>>> labelsJsonHashMap = new HashMap<String, List<Pair<Rectangle2D, LabelJsonObject>>>();
+    	List<LabelJsonObject> alllabelsObject = new ArrayList<LabelJsonObject>();
     	for (int p = startPage; p <= endPage; ++p)
         {        	
             try
@@ -123,7 +129,9 @@ public class PageProcessor {
 	            		if (newRegionList.size()>0) 
 	            		{
 	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());
-		            		labelsHashMap.put(pageKey, labels);
+	            			labelProc(labels, labelsJsonHashMap, labelOffset, pageKey, alllabelsObject);
+							labelOffset = labelOffset + labels.size();
+	            			labelsHashMap.put(pageKey, labels);
 		            		
 		            		TextRegionAnalyser.generateChildRegions(newRegionList, allRegionList.size());
 		            		indexOffset = indexOffset + newRegionList.size();
@@ -144,12 +152,13 @@ public class PageProcessor {
 
     	FootnoteAnalyser.analyzeAllFootNoteReferences(allRegionList);
     	FootnoteAnalyser.analyzeAllFootNoteReferences(labelsHashMap);
-    	JsonExport.generateJsonGraphObject(allRegionList, pageHashMap, allGraphObject, labelsHashMap);
+    	JsonExport.generateJsonGraphObject(allRegionList, pageHashMap, allGraphObject, labelsJsonHashMap);
     	JsonExport.generateJsonFootNote(docFootnotes, allFootNoteObject);
     	
     	GuidelineContent guidelineContentObjs = new GuidelineContent();
     	guidelineContentObjs.setGraphObjects(allGraphObject);
     	guidelineContentObjs.setFootNotesJsonObject(allFootNoteObject);
+    	guidelineContentObjs.setLabelObjects(alllabelsObject);
     	
         JsonExport.writeJsonLD(guidelineContentObjs, startPage, endPage, "Graph");
         //JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
@@ -197,5 +206,33 @@ public class PageProcessor {
     	
     	return flowRegions;
     }
+    
+    private void labelProc(List<RegionWithBound> currentPageLabels,
+			HashMap<String, List<Pair<Rectangle2D, LabelJsonObject>>> labelsJsonHashMap, Integer labelOffset,
+			String pageKey, List<LabelJsonObject> alllabelsObject) {
+
+		int currIndex = labelOffset;
+		List<Pair<Rectangle2D, LabelJsonObject>> currPage = new ArrayList<Pair<Rectangle2D, LabelJsonObject>>();
+		LabelJsonObject currlabelObject = new LabelJsonObject();
+		for (RegionWithBound labelbox : currentPageLabels) {
+
+			currlabelObject = new LabelJsonObject();
+			Rectangle2D currRect = labelbox.getBound();
+
+			String currentLabel = "";
+			List<WordWithBounds> labelBounds = labelbox.getContentLines();
+			currlabelObject.setIndex(currIndex);
+			currlabelObject
+					.setFootnoteRefs(FootnoteAnalyser.analyzeFootNoteReferences(labelbox.getContentLines(), false));
+			for (WordWithBounds word : labelBounds) {
+				currentLabel = currentLabel + word.getText();
+			}
+			currlabelObject.setContent(currentLabel);
+			alllabelsObject.add(currlabelObject);
+			currPage.add(Pair.with(currRect, currlabelObject));
+			currIndex += 1;
+		}
+		labelsJsonHashMap.put(pageKey, currPage);
+	}
 	
 }

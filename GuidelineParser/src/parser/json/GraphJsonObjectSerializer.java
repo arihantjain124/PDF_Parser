@@ -27,17 +27,17 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 		json.addProperty("nccn:page-no", graphJsonObject.getPageNo());
 		
 		JsonArray labels = new JsonArray();
-		for(String label : graphJsonObject.getLabels()) {
-			labels.add("nccn:" + label);
-		}		
-		json.add("@type", labels);
+		for (Integer label : graphJsonObject.getLabels()) {
+			labels.add(ID_URL + "labels/" + label);
+		}	
+		json.add("nccn:labels", labels);
 		
 		if(!graphJsonObject.getStageScore().isEmpty()) {
 			JsonArray stage = new JsonArray();
 			for(String label : graphJsonObject.getStageScore()) {
 				stage.add(label);
 			}		
-			json.add("Stage", stage);
+			json.add("nccn:stage", stage);
 		}
 		
 		if(!graphJsonObject.getTScore().isEmpty()) {
@@ -45,7 +45,7 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 			for(String label : graphJsonObject.getTScore()) {
 				tScore.add(label);
 			}		
-			json.add("T-Score", tScore);
+			json.add("nccn:tscore", tScore);
 		}
 
 		if(!graphJsonObject.getMScore().isEmpty()) {
@@ -53,7 +53,7 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 			for(String label : graphJsonObject.getMScore()) {
 				mScore.add(label);
 			}		
-			json.add("M-Score", mScore);
+			json.add("nccn:mscore", mScore);
 		}
 		
 		if(!graphJsonObject.getNScore().isEmpty()) {
@@ -61,7 +61,7 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 			for(String label : graphJsonObject.getNScore()) {
 				nScore.add(label);
 			}		
-			json.add("N-Score", nScore);
+			json.add("nccn:nscore", nScore);
 		}
 		
 		

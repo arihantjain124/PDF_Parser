@@ -19,7 +19,7 @@ public class GraphJsonObject {
 
 	private List<Integer> nConnections = null;
 
-	private List<String> labels = null;
+	private List<Integer> labels = null;
 	
 	private Set<String> stageScore = null;
 	
@@ -71,11 +71,11 @@ public class GraphJsonObject {
 		return pageNo;
 	}
 	
-	public void addLabel(String label) {
+	public void addLabel(Integer label) {
 		labels.add(label);
 	}
 	
-	public List<String> getLabels(){
+	public List<Integer> getLabels(){
 		return labels;
 	}
 

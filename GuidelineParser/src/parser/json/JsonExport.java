@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
+import org.javatuples.Pair;
 
 import parser.config.ConfigProperty;
 import parser.page.PageInfo;
@@ -95,8 +96,8 @@ public class JsonExport {
 	}
 	
 	
-	public static void generateJsonGraphObject(List<RegionWithBound> regionBounds,
-			HashMap<String, PageInfo> pageHashMap, List<GraphJsonObject> allGraphObject,HashMap<String, List<RegionWithBound>> labelsHashMap)
+	public static void generateJsonGraphObject(List<RegionWithBound> regionBounds,HashMap<String, PageInfo> pageHashMap, List<GraphJsonObject> allGraphObject,
+			HashMap<String, List<Pair<Rectangle2D, LabelJsonObject>>> labelsJsonHashMap)
 			throws JsonIOException, IOException {
 
 		GraphJsonObject currJsonObject = new GraphJsonObject();
@@ -194,19 +195,16 @@ public class JsonExport {
 								
 				double currentRegionY = region.getBound().getY();
 				
-				List<RegionWithBound> currentPageLabels = labelsHashMap.get(region.getPageKey());
-				for (RegionWithBound labelbox : currentPageLabels) {
-					
-					Rectangle2D currRect = labelbox.getBound();
+				List<Pair<Rectangle2D, LabelJsonObject>> currentPageLabels = labelsJsonHashMap
+						.get(region.getPageKey());
+				for (Pair<Rectangle2D, LabelJsonObject> labelbox : currentPageLabels) {
+
+					Rectangle2D currRect = labelbox.getValue0();
 					Rectangle2D transformedRect = new Rectangle();
-					transformedRect.setRect(currRect.getX(),currentRegionY,currRect.getWidth(),currRect.getHeight());
-					
+					transformedRect.setRect(currRect.getX(), currentRegionY, currRect.getWidth(), currRect.getHeight());
+
 					if (region.getBound().intersects(transformedRect)) {
-						String currentLabel = "";
-						for (WordWithBounds word : labelbox.getContentLines()) {
-							currentLabel = currentLabel + word.getText();
-						}
-						currJsonObject.addLabel(currentLabel);
+						currJsonObject.addLabel(labelbox.getValue1().getIndex());
 					}
 				}
 				currJsonObject.setType("object");
@@ -286,6 +284,7 @@ public class JsonExport {
                 .registerTypeAdapter(GuidelineContent.class, GuidelineContentSerializer.INSTANCE)
                 .registerTypeAdapter(GraphJsonObject.class, GraphJsonObjectSerializer.INSTANCE)
                 .registerTypeAdapter(FootNotesJsonObject.class, FootNotesJsonObjectSerializer.INSTANCE)
+                .registerTypeAdapter(LabelJsonObject.class, LabelJsonObjectSerializer.INSTANCE)
                 .setPrettyPrinting()
                 .create();
     }
