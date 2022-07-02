@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="lib/pdfbox-app-2.0.25.jar" sourcepath="/pdfbox"/>
 	<classpathentry kind="lib" path="lib/gson-2.9.0.jar"/>
 	<classpathentry kind="lib" path="lib/tabula-1.0.5-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="lib/javatuples-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
