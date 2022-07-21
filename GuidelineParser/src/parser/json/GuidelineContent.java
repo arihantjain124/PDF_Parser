@@ -2,6 +2,8 @@ package parser.json;
 
 import java.util.List;
 
+import parser.table.TableDetails;
+
 public class GuidelineContent {
 
 	private List<GraphJsonObject> graphObjects;
@@ -10,6 +12,16 @@ public class GuidelineContent {
 
 	private List<LabelJsonObject> labelObjects;
 	
+	private List<TableDetails> tablesList;
+	
+	public List<TableDetails> getTablesList() {
+		return tablesList;
+	}
+
+	public void setTablesList(List<TableDetails> tables) {
+		this.tablesList = tables;
+	}
+
 	public void setGraphObjects(List<GraphJsonObject> contentObjects) {
 		this.graphObjects = contentObjects;
 	}

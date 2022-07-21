@@ -8,6 +8,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import parser.config.ConfigProperty;
+import parser.table.TableDetails;
 
 public final class GuidelineContentSerializer implements JsonSerializer<GuidelineContent> {
 
@@ -43,6 +44,10 @@ public final class GuidelineContentSerializer implements JsonSerializer<Guidelin
             graph.add(context.serialize(graphJsonObject));
         }
         
+        for(TableDetails tableDetails : content.getTablesList()) {
+        	graph.add(context.serialize(tableDetails));
+        }
+        
         for (FootNotesJsonObject footNoteJsonObject : content.getFootNotesJsonObject()) {
             graph.add(context.serialize(footNoteJsonObject));
         }
@@ -50,7 +55,6 @@ public final class GuidelineContentSerializer implements JsonSerializer<Guidelin
         for (LabelJsonObject labelJsonObject : content.getLabelObjects()) {
 			graph.add(context.serialize(labelJsonObject));
 		}
-
         return json;
     }
 

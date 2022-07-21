@@ -2,6 +2,7 @@ package parser.page;
 
 import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -25,12 +27,16 @@ import parser.json.GraphJsonObject;
 import parser.json.GuidelineContent;
 import parser.json.JsonExport;
 import parser.renderer.GuidelinePageRenderer;
+import parser.table.GuidelineTableExtractor;
+import parser.table.TableDetails;
 import parser.text.FootnoteAnalyser;
 import parser.text.FootnoteDetails;
 import parser.text.GuidelineTextStripper;
 import parser.text.RegionWithBound;
 import parser.text.TextRegionAnalyser;
 import parser.text.WordWithBounds;
+import technology.tabula.Table;
+
 import org.javatuples.Pair;
 import parser.json.LabelJsonObject;
 import java.awt.geom.Rectangle2D;
@@ -68,19 +74,19 @@ public class PageProcessor {
     		throws IOException {
     	
     	HashMap<String, PageInfo> pageHashMap = new HashMap<String, PageInfo>();
-    	HashMap<String, HashMap<String, FootnoteDetails>> documentFootnotes = new HashMap<String, HashMap<String, FootnoteDetails>>();
     	
     	int indexOffset = 0;
     	int labelOffset = 0;
 
     	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
-    	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
     	HashMap<String, List<RegionWithBound>> labelsHashMap = new HashMap<String, List<RegionWithBound>>();
-    	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
     	
     	HashMap<String, FootnoteDetails> docFootnotes = new HashMap<String, FootnoteDetails>();
     	HashMap<String, List<Pair<Rectangle2D, LabelJsonObject>>> labelsJsonHashMap = new HashMap<String, List<Pair<Rectangle2D, LabelJsonObject>>>();
     	List<LabelJsonObject> alllabelsObject = new ArrayList<LabelJsonObject>();
+    	
+    	List<TableDetails> allTablesList = new ArrayList<TableDetails>();
+    	
     	for (int p = startPage; p <= endPage; ++p)
         {        	
             try
@@ -98,8 +104,6 @@ public class PageProcessor {
                 
                 HashMap<String, FootnoteDetails> pageFootnotes = FootnoteAnalyser.analyseFootnotes(wordRects);
                 pageFootnotes.forEach(docFootnotes::putIfAbsent);
-                
-                documentFootnotes.put(pageKey, pageFootnotes);
                 
                 GuidelinePageRenderer renderer = new GuidelinePageRenderer(document, p - 1 ,72);
                 renderer.intializeImage();
@@ -140,6 +144,12 @@ public class PageProcessor {
 	            		}
 
 	            	}            	
+            	}else {
+            		
+            		if(GuidelineTableExtractor.isTablePage(p)) {
+            			
+            			extractTables(document, p, pageKey, allTablesList);
+            		}
             	}
             	
             	//renderer.OutputImage(true);
@@ -152,13 +162,18 @@ public class PageProcessor {
 
     	FootnoteAnalyser.analyzeAllFootNoteReferences(allRegionList);
     	FootnoteAnalyser.analyzeAllFootNoteReferences(labelsHashMap);
+    	
+    	List<GraphJsonObject> allGraphObject = new ArrayList<GraphJsonObject>();
     	JsonExport.generateJsonGraphObject(allRegionList, pageHashMap, allGraphObject, labelsJsonHashMap);
+    	
+    	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
     	JsonExport.generateJsonFootNote(docFootnotes, allFootNoteObject);
     	
     	GuidelineContent guidelineContentObjs = new GuidelineContent();
     	guidelineContentObjs.setGraphObjects(allGraphObject);
     	guidelineContentObjs.setFootNotesJsonObject(allFootNoteObject);
     	guidelineContentObjs.setLabelObjects(alllabelsObject);
+    	guidelineContentObjs.setTablesList(allTablesList);
     	
         JsonExport.writeJsonLD(guidelineContentObjs, startPage, endPage, "Graph");
         //JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
@@ -234,5 +249,51 @@ public class PageProcessor {
 		}
 		labelsJsonHashMap.put(pageKey, currPage);
 	}
+    
+    public void extractTables(String pdfFile, String password) {
+    	GuidelineTableExtractor tableStripper = null;
+        File inputFile = new File(pdfFile);
+        File tableOutputFolder = new File("jsonexport/");
+        try {
+			tableStripper = new GuidelineTableExtractor(password);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} 
+        
+        try {
+			tableStripper.extractTablesFromFile(inputFile, tableOutputFolder);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    private List<Table> extractTables(PDDocument pdDocument, int pageNum, String pageKey, List<TableDetails> tablesList) {
+    	
+    	GuidelineTableExtractor tableStripper = null;
+    	
+    	List<Table> tables = null;
+        
+        try {
+			tableStripper = new GuidelineTableExtractor("");
+        	tables = tableStripper.extractTablesFromPDDoc(pdDocument, pageNum);
+        	
+        	for(Table table : tables) {
+				TableDetails tableDetails = new TableDetails();
+				tableDetails.setPageNumber(pageNum);
+				tableDetails.setTable(table);
+				tableDetails.setPageKey(pageKey);
+				tableDetails.setIndex(tablesList.size());
+				
+				tablesList.add(tableDetails);
+        	}
+        	
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        
+        return tables;
+    }
 	
 }

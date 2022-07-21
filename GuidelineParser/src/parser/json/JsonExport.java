@@ -21,6 +21,7 @@ import org.javatuples.Pair;
 
 import parser.config.ConfigProperty;
 import parser.page.PageInfo;
+import parser.table.TableDetails;
 import parser.text.FootnoteDetails;
 import parser.text.RegionWithBound;
 import parser.text.WordWithBounds;
@@ -285,6 +286,7 @@ public class JsonExport {
                 .registerTypeAdapter(GraphJsonObject.class, GraphJsonObjectSerializer.INSTANCE)
                 .registerTypeAdapter(FootNotesJsonObject.class, FootNotesJsonObjectSerializer.INSTANCE)
                 .registerTypeAdapter(LabelJsonObject.class, LabelJsonObjectSerializer.INSTANCE)
+                .registerTypeAdapter(TableDetails.class, GuidelineTableSerializer.INSTANCE)
                 .setPrettyPrinting()
                 .create();
     }

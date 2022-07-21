@@ -47,123 +47,129 @@ public class GuidelineTableExtractor {
 
         this.password = password;
     }
-
-    public void extractTables(File pdfFile, File outputFile) throws ParseException {
-        if (!pdfFile.exists()) {
+    
+    public void extractTablesFromFile(File pdfFile, File outputFolder) throws ParseException {
+    	
+    	if (!pdfFile.exists()) {
             throw new ParseException("File does not exist");
         }
-        extractFileTables(pdfFile, outputFile);
-    }
-    
-    public void extractFileTables(File pdfFile, File outputFile) throws ParseException {
-        extractFileInto(pdfFile, outputFile);
-    }
-
-    public void extractFileInto(File pdfFile, File outputFile) throws ParseException {
-        BufferedWriter bufferedWriter = null;
+    	
+    	PDDocument pdDocument = null;
         try {
-            FileWriter fileWriter = new FileWriter(outputFile.getAbsoluteFile());
-            bufferedWriter = new BufferedWriter(fileWriter);
-
-            outputFile.createNewFile();
-            extractFile(pdfFile, bufferedWriter);
-        } catch (IOException e) {
-            throw new ParseException("Cannot create file " + outputFile);
-        } finally {
-            if (bufferedWriter != null) {
-                try {
-                    bufferedWriter.close();
-                } catch (IOException e) {
-                    System.out.println("Error in closing the BufferedWriter" + e);
-                }
-            }
-        }
-    }
-
-    private void extractFile(File pdfFile, Appendable outFile) throws ParseException {
-        PDDocument pdfDocument = null;
-        try {
-            pdfDocument = this.password == null ? PDDocument.load(pdfFile) : PDDocument.load(pdfFile, this.password);
-            PageIterator pageIterator = getPageIterator(pdfDocument);
-            List<Table> tables = new ArrayList<>();
-
-            while (pageIterator.hasNext()) {
-                Page page = pageIterator.next();
-
-                if (tableExtractor.verticalRulingPositions != null) {
-                    for (Float verticalRulingPosition : tableExtractor.verticalRulingPositions) {
-                        page.addRuling(new Ruling(0, verticalRulingPosition, 0.0f, (float) page.getHeight()));
-                    }
-                }
-                
-                int pageNumber = page.getPageNumber();
-                String areaStrList = ConfigProperty.getProperty(pageNumber + ".table.rect");
-                List<Pair<Integer, Rectangle>> areaList = null;
-                
-                if(areaStrList != null) {
-                	areaList = new ArrayList<Pair<Integer, Rectangle>>();
-                	String[] areaStrs = areaStrList.split(";");
-                	
-                	for(String areaStr : areaStrs) {
-		                List<Float> f = parseFloatList(areaStr);
-		                if (f.size() != 4) {
-		                    throw new ParseException("area parameters must be top,left,bottom,right optionally preceded by %");
-		                }
-		                areaList.add(new Pair<Integer, Rectangle>(ABSOLUTE_AREA_CALCULATION_MODE, new Rectangle(f.get(0), f.get(1), f.get(3) - f.get(1), f.get(2) - f.get(0))));
-                	}
-                }
-                
-                String extractionMethod = ConfigProperty.getProperty(pageNumber + ".table.mode");
-                if(extractionMethod != null) {
-                	
-                	if (extractionMethod.equalsIgnoreCase("l")) {
-                		tableExtractor.setMethod(ExtractionMethod.SPREADSHEET);
-                    }
-
-                    // -n/--no-spreadsheet [deprecated; use -t] or  -c/--columns or -g/--guess or -t/--stream
-                    if (extractionMethod.equalsIgnoreCase("t")) {
-                    	tableExtractor.setMethod(ExtractionMethod.BASIC);
-                    }
-                	
-                }else {
-                	tableExtractor.setMethod(ExtractionMethod.DECIDE);
-                }
-
-                if (areaList != null) {
-                    for (Pair<Integer, Rectangle> areaPair : areaList) {
-                        Rectangle area = areaPair.getRight();
-                        if (areaPair.getLeft() == RELATIVE_AREA_CALCULATION_MODE) {
-                            area = new Rectangle((float) (area.getTop() / 100 * page.getHeight()),
-                                    (float) (area.getLeft() / 100 * page.getWidth()), (float) (area.getWidth() / 100 * page.getWidth()),
-                                    (float) (area.getHeight() / 100 * page.getHeight()));
-                        }
-                        tables.addAll(tableExtractor.extractTables(page.getArea(area)));
-                    }
-                } else {
-                    tables.addAll(tableExtractor.extractTables(page));
-                }
-            }
-            writeTables(tables, outFile);
+            pdDocument = this.password == null ? PDDocument.load(pdfFile) : PDDocument.load(pdfFile, this.password);
+            extractTablesFromPDDoc(pdDocument, outputFolder);
         } catch (IOException e) {
             throw new ParseException(e.getMessage());
         } finally {
             try {
-                if (pdfDocument != null) {
-                    pdfDocument.close();
+                if (pdDocument != null) {
+                    pdDocument.close();
                 }
             } catch (IOException e) {
                 System.out.println("Error in closing pdf document" + e);
             }
         }
     }
+    
+    public void extractTablesFromPDDoc(PDDocument pdDocument, File outputFolder) throws ParseException, IOException {   	
+    	PageIterator pageIterator = getPageIterator(pdDocument);
+    	while (pageIterator.hasNext()) {
+    		Page page = pageIterator.next();
+    		extractTablesFromPDDoc(pdDocument, page, outputFolder);
+    	}
+    }
+    
+    public List<Table> extractTablesFromPDDoc(PDDocument pdDocument, int pageNumber) throws ParseException, IOException {
+    	@SuppressWarnings("resource")
+		ObjectExtractor extractor = new ObjectExtractor(pdDocument);
+    	Page page = extractor.extract(pageNumber);
+    	List<Table> tables = extractTablesFromPDDoc(pdDocument, page, null);
+    	return tables;
+    }
+
+    public List<Table> extractTablesFromPDDoc(PDDocument pdDocument, Page page, File outputFolder) throws ParseException, IOException {
+
+        List<Table> tables = new ArrayList<>();
+
+        if (tableExtractor.verticalRulingPositions != null) {
+            for (Float verticalRulingPosition : tableExtractor.verticalRulingPositions) {
+                page.addRuling(new Ruling(0, verticalRulingPosition, 0.0f, (float) page.getHeight()));
+            }
+        }
+        
+        int pageNumber = page.getPageNumber();
+        String areaStrList = ConfigProperty.getProperty(pageNumber + ".table.rect");
+        List<Pair<Integer, Rectangle>> areaList = null;
+        
+        if(areaStrList != null) {
+        	areaList = new ArrayList<Pair<Integer, Rectangle>>();
+        	String[] areaStrs = areaStrList.split(";");
+        	
+        	for(String areaStr : areaStrs) {
+                List<Float> f = parseFloatList(areaStr);
+                if (f.size() != 4) {
+                    throw new ParseException("area parameters must be top,left,bottom,right optionally preceded by %");
+                }
+                areaList.add(new Pair<Integer, Rectangle>(ABSOLUTE_AREA_CALCULATION_MODE, new Rectangle(f.get(0), f.get(1), f.get(3) - f.get(1), f.get(2) - f.get(0))));
+        	}
+        }
+        
+        String extractionMethod = ConfigProperty.getProperty(pageNumber + ".table.mode");
+        if(extractionMethod != null) {
+        	
+        	if (extractionMethod.equalsIgnoreCase("l")) {
+        		tableExtractor.setMethod(ExtractionMethod.SPREADSHEET);
+            }
+
+            // -n/--no-spreadsheet [deprecated; use -t] or  -c/--columns or -g/--guess or -t/--stream
+            if (extractionMethod.equalsIgnoreCase("t")) {
+            	tableExtractor.setMethod(ExtractionMethod.BASIC);
+            }
+        	
+        }else {
+        	tableExtractor.setMethod(ExtractionMethod.DECIDE);
+        }
+
+        if (areaList != null) {
+            for (Pair<Integer, Rectangle> areaPair : areaList) {
+                Rectangle area = areaPair.getRight();
+                if (areaPair.getLeft() == RELATIVE_AREA_CALCULATION_MODE) {
+                    area = new Rectangle((float) (area.getTop() / 100 * page.getHeight()),
+                            (float) (area.getLeft() / 100 * page.getWidth()), (float) (area.getWidth() / 100 * page.getWidth()),
+                            (float) (area.getHeight() / 100 * page.getHeight()));
+                }
+                tables.addAll(tableExtractor.extractTables(page.getArea(area)));
+            }
+        } else {
+            tables.addAll(tableExtractor.extractTables(page));
+        }
+        
+        if(outputFolder != null) {
+        	writeTables(tables, outputFolder, pageNumber);
+        }
+        
+        return tables;
+    }
 
     private PageIterator getPageIterator(PDDocument pdfDocument) throws IOException {
-        ObjectExtractor extractor = new ObjectExtractor(pdfDocument);
+        @SuppressWarnings("resource")
+		ObjectExtractor extractor = new ObjectExtractor(pdfDocument);
         return (pages == null) ?
                 extractor.extract() :
                 extractor.extract(pages);
     }
 
+    public static boolean isTablePage(int pageNum) {
+    	
+		try {
+			List<Integer> tablePageList = whichPages();
+			return tablePageList.contains(pageNum);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return false;
+    }
+    
     // CommandLine parsing methods
 
     private static List<Integer> whichPages() throws ParseException, IOException {
@@ -278,7 +284,7 @@ public class GuidelineTableExtractor {
         }
     }
 
-    private void writeTables(List<Table> tables, Appendable out) throws IOException {
+    private void writeTables(List<Table> tables, File outputFolder, int pageNum) throws IOException, ParseException {
         Writer writer = null;
         switch (outputFormat) {
             case CSV:
@@ -291,7 +297,32 @@ public class GuidelineTableExtractor {
                 writer = new TSVWriter();
                 break;
         }
-        writer.write(out, tables);
+        
+        for(int i = 0; i < tables.size(); i++)
+        {
+        	Table table = tables.get(i);
+        	File outputFile = new File(outputFolder, "page-" + pageNum + "-table-" + (i + 1) + ".json");
+        	
+	        BufferedWriter bufferedWriter = null;
+	        try {
+	            FileWriter fileWriter = new FileWriter(outputFile.getAbsoluteFile());
+	            bufferedWriter = new BufferedWriter(fileWriter);
+	
+	            outputFile.createNewFile();
+	            
+	            writer.write(bufferedWriter, table);
+	        } catch (IOException e) {
+	            throw new ParseException("Cannot create file " + outputFile);
+	        } finally {
+	            if (bufferedWriter != null) {
+	                try {
+	                    bufferedWriter.close();
+	                } catch (IOException e) {
+	                    System.out.println("Error in closing the BufferedWriter" + e);
+	                }
+	            }
+	        }
+        }
     }
 
     private enum OutputFormat {
