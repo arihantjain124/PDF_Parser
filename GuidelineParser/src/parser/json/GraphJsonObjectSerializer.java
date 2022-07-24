@@ -64,8 +64,14 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 			json.add("nccn:nscore", nScore);
 		}
 		
+		String content = graphJsonObject.getConent();
+		if(content.startsWith("\u2022")) {
+			content = content.substring(1).trim();//Remove starting bullets
+		}
 		
-		json.addProperty("nccn:content", graphJsonObject.getConent());
+		content = content.replace("\u2013", "-");//Change unicode "-" to ASCII "-" 
+		
+		json.addProperty("nccn:content", content);
 
 		if(!graphJsonObject.getPConnections().isEmpty()) {
 			JsonArray prev = new JsonArray();

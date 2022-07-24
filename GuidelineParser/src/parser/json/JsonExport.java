@@ -132,7 +132,11 @@ public class JsonExport {
 					currentContent = "IMAGINARY NODE";
 				}else {
 					for (WordWithBounds word : region.getContentLines()) {
-						currentContent = currentContent + word.getText();
+						if(!currentContent.isEmpty()) {
+							currentContent = currentContent + " " + word.getText().trim();
+						}else {
+							currentContent = word.getText().trim();
+						}
 					}
 				}
 			
@@ -288,6 +292,7 @@ public class JsonExport {
                 .registerTypeAdapter(LabelJsonObject.class, LabelJsonObjectSerializer.INSTANCE)
                 .registerTypeAdapter(TableDetails.class, GuidelineTableSerializer.INSTANCE)
                 .setPrettyPrinting()
+                .disableHtmlEscaping()
                 .create();
     }
 }
