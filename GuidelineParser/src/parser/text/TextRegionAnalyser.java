@@ -3,8 +3,21 @@ package parser.text;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.interactive.action.PDAction;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionURI;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
+import org.apache.pdfbox.text.PDFTextStripperByArea;
 
 import parser.graphics.GraphObject;
 import parser.graphics.GraphProcessing;
@@ -31,6 +44,66 @@ public class TextRegionAnalyser {
 		return true;
 	}
 	
+	public static int extractLinks(PDDocument document, int pageNum, String compare) throws IOException {
+
+		PDPage page = document.getPage(pageNum - 1);
+
+		PDFTextStripperByArea stripper = new PDFTextStripperByArea();
+		List<PDAnnotation> annotations = page.getAnnotations();
+		// first setup text extraction regions
+		for (int j = 0; j < annotations.size(); j++) {
+			PDAnnotation annot = annotations.get(j);
+			if (annot instanceof PDAnnotationLink) {
+				PDAnnotationLink link = (PDAnnotationLink) annot;
+				PDRectangle rect = link.getRectangle();
+				// need to reposition link rectangle to match text space
+				float x = rect.getLowerLeftX();
+				float y = rect.getUpperRightY();
+				float width = rect.getWidth();
+				float height = rect.getHeight();
+				int rotation = page.getRotation();
+				if (rotation == 0) {
+					PDRectangle pageSize = page.getMediaBox();
+					y = pageSize.getHeight() - y;
+				} else if (rotation == 90) {
+					// do nothing
+				}
+
+				Rectangle2D.Float awtRect = new Rectangle2D.Float(x - 10, y, width + 10, height);
+				stripper.addRegion("" + j, awtRect);
+			}
+		}
+
+		stripper.extractRegions(page);
+
+		for (int j = 0; j < annotations.size(); j++) {
+			PDAnnotation annot = annotations.get(j);
+			if (annot instanceof PDAnnotationLink) {
+				PDAnnotationLink link = (PDAnnotationLink) annot;
+				PDAction action = link.getAction();
+				String urlText = stripper.getTextForRegion("" + j);
+				if (action instanceof PDActionURI) {
+					PDActionURI uri = (PDActionURI) action;
+				} else if (action instanceof PDActionGoTo) {
+					PDActionGoTo gta = (PDActionGoTo) action;
+					if (gta.getDestination() instanceof PDPageDestination) {
+						PDPageDestination pd = (PDPageDestination) gta.getDestination();
+					} else if (gta.getDestination() instanceof PDNamedDestination) {
+						PDPageDestination pd = document.getDocumentCatalog()
+								.findNamedDestinationPage((PDNamedDestination) gta.getDestination());
+						if (pd != null) {
+							if (urlText.trim().contains(compare)) {
+								return (pd.retrievePageNumber() + 1);
+							}
+						}
+					}
+				}
+
+			}
+		}
+		return 0;
+	}
+
 	private static int getOverlappingRegion(ArrayList<RegionWithBound> boundList, Rectangle2D bound) {
 		int regionIndex = -1;
 		

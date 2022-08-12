@@ -20,3 +20,5 @@ pdfbox/bin/
 *.zip
 *.tar.gz
 *.rar
+/.metadata/
+/GuidelineParser/src/parser/.vs/

@@ -212,4 +212,11 @@ public class GuidelinePageRenderer extends PDFRenderer {
         Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
         g2d.draw (mainContentRect);
 	}
+	
+	public void drawHeadingRegion(Color color) throws IOException {
+        g2d.setColor(color);
+		String[] regionOfInterest = ConfigProperty.getProperty("page.heading.region").split("[,]");
+        Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
+        g2d.draw (mainContentRect);
+	}
 }

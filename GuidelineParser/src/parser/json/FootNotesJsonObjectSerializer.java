@@ -14,7 +14,7 @@ public class FootNotesJsonObjectSerializer implements JsonSerializer<FootNotesJs
 	
     public static final FootNotesJsonObjectSerializer INSTANCE = new FootNotesJsonObjectSerializer();
     
-    private static final String ID_URL = ConfigProperty.getProperty("json-ld.id.url") + "/";
+    private static final String ID_URL = ConfigProperty.getProperty("json-ld.id.url") + "/footnotes/";
 
     private FootNotesJsonObjectSerializer() {}
 
@@ -30,7 +30,6 @@ public class FootNotesJsonObjectSerializer implements JsonSerializer<FootNotesJs
 			
 			for (String linkkey : footNoteJsonObject.getFootNoteLink()) {
 				link.add( linkkey);
-				
 			}
 			json.add("nccn:links", link);
 		}

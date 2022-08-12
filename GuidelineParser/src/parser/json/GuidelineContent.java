@@ -13,6 +13,8 @@ public class GuidelineContent {
 	private List<LabelJsonObject> labelObjects;
 	
 	private List<TableDetails> tablesList;
+
+	private List<TextJsonObject> alltextObject;
 	
 	public List<TableDetails> getTablesList() {
 		return tablesList;
@@ -44,5 +46,13 @@ public class GuidelineContent {
 
 	public void setLabelObjects(List<LabelJsonObject> labelObjects) {
 		this.labelObjects = labelObjects;
+	}
+
+	public List<TextJsonObject> getTextObject() {
+		return alltextObject;
+	}
+
+	public void setTextObject(List<TextJsonObject> alltextObject) {
+		this.alltextObject = alltextObject;
 	}
 }

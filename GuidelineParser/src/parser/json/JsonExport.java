@@ -290,6 +290,7 @@ public class JsonExport {
                 .registerTypeAdapter(GraphJsonObject.class, GraphJsonObjectSerializer.INSTANCE)
                 .registerTypeAdapter(FootNotesJsonObject.class, FootNotesJsonObjectSerializer.INSTANCE)
                 .registerTypeAdapter(LabelJsonObject.class, LabelJsonObjectSerializer.INSTANCE)
+                .registerTypeAdapter(TextJsonObject.class, TextJsonObjectSerializer.INSTANCE)
                 .registerTypeAdapter(TableDetails.class, GuidelineTableSerializer.INSTANCE)
                 .setPrettyPrinting()
                 .disableHtmlEscaping()

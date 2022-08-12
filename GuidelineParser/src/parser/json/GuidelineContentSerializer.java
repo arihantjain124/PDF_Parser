@@ -55,6 +55,11 @@ public final class GuidelineContentSerializer implements JsonSerializer<Guidelin
         for (LabelJsonObject labelJsonObject : content.getLabelObjects()) {
 			graph.add(context.serialize(labelJsonObject));
 		}
+        
+        for (TextJsonObject currTextObject : content.getTextObject()) {
+			graph.add(context.serialize(currTextObject));
+		}
+        
         return json;
     }
 

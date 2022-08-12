@@ -25,7 +25,7 @@ public class FootnoteAnalyser {
 	}
 	
 	private static final int MAX_FOOTNOTE_LENGTH = 3; //TODO: Add in configuration
-	private static final int FOOTNOTE_HEIGHT_DIFF = 2; //TODO: Add in configuration
+	private static final int FOOTNOTE_HEIGHT_DIFF = 1; //TODO: Add in configuration
 
 	public static HashMap<String, FootnoteDetails> analyseFootnotes(List<WordWithBounds> line) throws IOException {
 		
@@ -164,28 +164,30 @@ public class FootnoteAnalyser {
 		return -1;
 	}
 	
-	public static void analyzeAllFootNoteReferences(List<RegionWithBound> allRegionList) {
-		 
-		for(RegionWithBound region : allRegionList) {
-			ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), false);
+	public static void analyzeAllFootNoteReferences(List<RegionWithBound> allRegionList,
+			HashMap<String, String> keyConficts) {
+
+		for (RegionWithBound region : allRegionList) {
+			ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), false, keyConficts);
 			region.addFootnoteRefs(footnoteRefList);
 		}
 	}
 	
-	public static void analyzeAllFootNoteReferences(HashMap<String, List<RegionWithBound>> labelsHashMap) {
+	public static void analyzeAllFootNoteReferences(HashMap<String, List<RegionWithBound>> labelsHashMap, HashMap<String, String> keyConficts) {
 		
 		for(String key : labelsHashMap.keySet()) {
 			
 			List<RegionWithBound> regions = labelsHashMap.get(key);
 			
 			for(RegionWithBound region : regions) {
-				ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), true);
+				ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), true, keyConficts);
 				region.addFootnoteRefs(footnoteRefList);
 			}
 		}
 	}
 	
-	public static ArrayList<String> analyzeFootNoteReferences(List<WordWithBounds> lines, boolean removeFootnote)
+	public static ArrayList<String> analyzeFootNoteReferences(List<WordWithBounds> lines, boolean removeFootnote,
+			HashMap<String, String> keyConficts)
 	{
 		
 		HashSet<String> footnoteRefSet = new HashSet<String>();
@@ -254,7 +256,14 @@ public class FootnoteAnalyser {
 				if(removeFootnote) {
 					strBuilder.replace(startInText, endInText + 1, "");
 				}else {
-					strBuilder.replace(startInText, endInText + 1, "{" + footNoteSubStr.trim() + "}");
+					
+					if (keyConficts.containsKey(footNoteSubStr.trim())) {
+						strBuilder.replace(startInText, endInText + 1, "{" + keyConficts.get(footNoteSubStr.trim()) + "}");
+					}
+					else {
+						strBuilder.replace(startInText, endInText + 1, "{" + footNoteSubStr.trim() + "}");
+						
+					}
 				}
 				
 				//strBuilder.replace(curRange.start, curRange.end + 1, "{" + footNoteSubStr.trim() + "}");
