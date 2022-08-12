@@ -264,7 +264,7 @@ public class JsonExport {
 	public static void writeJsonLD(GuidelineContent guidelineContent, int startPage, int endPage, String prefix)
 			throws JsonIOException, IOException {
 
-		String filePath = "/home/arunima/Desktop/ge_oncology/GuidelineParser/jsonexport";
+		String filePath = "jsonexport/";
 
 		if (!Paths.get(filePath).toFile().isDirectory()) {
 			//System.out.println("No Folder for jsonexport");
