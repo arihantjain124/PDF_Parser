@@ -22,6 +22,7 @@ public final class GuidelineContentSerializer implements JsonSerializer<Guidelin
     public JsonElement serialize(GuidelineContent content, Type type, JsonSerializationContext context) {
         JsonObject json = new JsonObject();
         JsonArray graph = new JsonArray();
+        JsonArray pageInfo = new JsonArray();
         
         JsonObject contextObj = new JsonObject();
         contextObj.addProperty("nccn", ID_URL);
@@ -38,6 +39,7 @@ public final class GuidelineContentSerializer implements JsonSerializer<Guidelin
         contextObj.add("nccn:labels", genericRefObj);
         
         json.add("@context", contextObj);
+        json.add("@nccn:page-info", pageInfo);
         json.add("@graph", graph);
 
         for (GraphJsonObject graphJsonObject : content.getGraphObjects()) {
@@ -59,6 +61,9 @@ public final class GuidelineContentSerializer implements JsonSerializer<Guidelin
         for (TextJsonObject currTextObject : content.getTextObject()) {
 			graph.add(context.serialize(currTextObject));
 		}
+        for(BookmarkJsonObject bookmarkobj : content.getBookmarkObjects()) {
+        	pageInfo.add(context.serialize(bookmarkobj));
+        }
         
         return json;
     }

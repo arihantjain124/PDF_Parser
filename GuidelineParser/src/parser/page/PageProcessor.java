@@ -7,8 +7,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,11 +23,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
 import org.apache.pdfbox.text.PDFTextStripperByArea;
 
 import parser.config.ConfigProperty;
 import parser.graphics.GraphObject;
 import parser.graphics.GraphProcessing;
+import parser.json.BookmarkJsonObject;
 import parser.json.FootNotesJsonObject;
 import parser.json.GraphJsonObject;
 import parser.json.GuidelineContent;
@@ -133,6 +139,44 @@ public class PageProcessor {
 		}
 		return pageKeyConflicts;
 	}
+	
+	private void processBookMark(PDDocument document,List<BookmarkJsonObject> allBookmarkObject) throws IOException
+    {
+    	HashMap <String, Integer> bookmark= new HashMap <String, Integer>();
+    	//HashMap <String, Integer> SortedBookmark= new LinkedHashMap<String, Integer>();
+    	PDDocumentOutline outline =  document.getDocumentCatalog().getDocumentOutline();
+    	ExtractBookMark bm= new ExtractBookMark(document,outline,"");
+    	int count=0;
+    	if( outline != null )
+        {
+            bookmark=bm.getBookmark(document,outline,"");
+            List<Map.Entry<String, Integer> > pageindex =
+                    new LinkedList<Map.Entry<String, Integer> >(bookmark.entrySet());
+            
+            Collections.sort(pageindex, new Comparator<Map.Entry<String, Integer> >() {
+                public int compare(Map.Entry<String, Integer> o1,
+                                   Map.Entry<String, Integer> o2)
+                {
+                    return (o1.getValue()).compareTo(o2.getValue());
+                }
+            });
+            for (Map.Entry<String, Integer> aa : pageindex)
+            {
+            	BookmarkJsonObject currbookmark = new BookmarkJsonObject();
+            	currbookmark.setPageNo(aa.getValue());
+            	currbookmark.setLabels(aa.getKey());
+            	currbookmark.setId(count++);
+            	currbookmark.setPageKey(extractKey(document,aa.getValue()));
+            	allBookmarkObject.add(currbookmark);
+            	
+            }
+            
+            
+        }
+		
+    	
+    	
+    }
     
     public void processPages(int startPage, int endPage, GuidelineTextStripper mainContentStripper, PDDocument document, Writer output) 
     		throws IOException {
@@ -254,13 +298,16 @@ public class PageProcessor {
     	List<FootNotesJsonObject> allFootNoteObject = new ArrayList<FootNotesJsonObject>();
     	JsonExport.generateJsonFootNote(docFootnotes, allFootNoteObject);
     	
+    	List<BookmarkJsonObject> allBookmarkObject= new ArrayList<BookmarkJsonObject>();
+    	processBookMark(document,allBookmarkObject);
+    	
     	GuidelineContent guidelineContentObjs = new GuidelineContent();
     	guidelineContentObjs.setGraphObjects(allGraphObject);
     	guidelineContentObjs.setFootNotesJsonObject(allFootNoteObject);
     	guidelineContentObjs.setLabelObjects(alllabelsObject);
     	guidelineContentObjs.setTablesList(allTablesList);
     	guidelineContentObjs.setTextObject(alltextObject);
-    	
+    	guidelineContentObjs.setBookmarkObjects(allBookmarkObject);
         JsonExport.writeJsonLD(guidelineContentObjs, startPage, endPage, "Graph");
         //JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
 

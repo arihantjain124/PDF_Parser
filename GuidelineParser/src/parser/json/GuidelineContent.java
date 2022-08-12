@@ -16,6 +16,8 @@ public class GuidelineContent {
 
 	private List<TextJsonObject> alltextObject;
 	
+	private List<BookmarkJsonObject> bookmarkobject;
+	
 	public List<TableDetails> getTablesList() {
 		return tablesList;
 	}
@@ -54,5 +56,12 @@ public class GuidelineContent {
 
 	public void setTextObject(List<TextJsonObject> alltextObject) {
 		this.alltextObject = alltextObject;
+	}
+	public void setBookmarkObjects(List<BookmarkJsonObject> bookmarkobj) {
+		 this.bookmarkobject=bookmarkobj;
+	}
+	
+	public List<BookmarkJsonObject> getBookmarkObjects() {
+		return bookmarkobject;
 	}
 }
