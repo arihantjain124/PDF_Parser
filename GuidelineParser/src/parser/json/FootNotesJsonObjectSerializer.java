@@ -14,7 +14,7 @@ public class FootNotesJsonObjectSerializer implements JsonSerializer<FootNotesJs
 	
     public static final FootNotesJsonObjectSerializer INSTANCE = new FootNotesJsonObjectSerializer();
     
-    private static final String ID_URL = ConfigProperty.getProperty("json-ld.id.url") + "/footnotes/";
+    private static final String ID_URL = ConfigProperty.getProperty("json-ld.id.url") + "/footnote/";
 
     private FootNotesJsonObjectSerializer() {}
 

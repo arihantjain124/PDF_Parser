@@ -17,20 +17,11 @@ public class ExtractBookMark {
 	
 	private HashMap <String, Integer> bookmarkmap= new HashMap <String, Integer>();
 
-	public ExtractBookMark(PDDocument document, PDOutlineNode bookmark, String indentation)// extract book mark
-	{
-		
-	}
-
-	
-
-public HashMap <String, Integer> getBookmark(PDDocument document,PDOutlineNode bookmark, String indentation) throws IOException
+	public HashMap <String, Integer> getBookmark(PDDocument document,PDOutlineNode bookmark, String indentation) throws IOException
     {
         PDOutlineItem current = bookmark.getFirstChild();
         while( current != null )
-        {
-           
-             
+        {           
             if (current.getAction() instanceof PDActionGoTo)
             {
                 PDActionGoTo gta = (PDActionGoTo) current.getAction();
@@ -50,13 +41,11 @@ public HashMap <String, Integer> getBookmark(PDDocument document,PDOutlineNode b
                     }
                 }
             }
-            
-           
+                    
             getBookmark( document, current, indentation + "    " );
             current = current.getNextSibling();
         }
-        return bookmarkmap;
-        
+        return bookmarkmap;      
     }
 
 }

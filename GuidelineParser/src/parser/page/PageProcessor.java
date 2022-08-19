@@ -1,6 +1,5 @@
 package parser.page;
 
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
 import java.io.File;
@@ -13,7 +12,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -81,8 +79,7 @@ public class PageProcessor {
 	}
     
     private String extractHeading(PDDocument doc, int pageIndex) throws IOException
-	{
-    	
+	{    	
     	PDFTextStripperByArea pageKeyStripper = new PDFTextStripperByArea();
     	pageKeyStripper.setSortByPosition( true );
     	
@@ -99,7 +96,8 @@ public class PageProcessor {
 
 	private HashMap<String, String> findFootNotes(List<Integer> visitedPage, int pageNo, PDDocument document,
 			GuidelineTextStripper mainContentStripper, Writer output, HashMap<String, FootnoteDetails> docFootnotes)
-			throws IOException {
+			throws IOException 
+	{
 		int refPageNo = TextRegionAnalyser.extractLinks(document, pageNo, "References");
 		String pageKey = extractKey(document, pageNo);
 		HashMap<String, FootnoteDetails> pageFootnotes = new HashMap<String, FootnoteDetails>();
@@ -145,7 +143,7 @@ public class PageProcessor {
     	HashMap <String, Integer> bookmark= new HashMap <String, Integer>();
     	//HashMap <String, Integer> SortedBookmark= new LinkedHashMap<String, Integer>();
     	PDDocumentOutline outline =  document.getDocumentCatalog().getDocumentOutline();
-    	ExtractBookMark bm= new ExtractBookMark(document,outline,"");
+    	ExtractBookMark bm = new ExtractBookMark();
     	int count=0;
     	if( outline != null )
         {
@@ -160,6 +158,7 @@ public class PageProcessor {
                     return (o1.getValue()).compareTo(o2.getValue());
                 }
             });
+            
             for (Map.Entry<String, Integer> aa : pageindex)
             {
             	BookmarkJsonObject currbookmark = new BookmarkJsonObject();
@@ -168,14 +167,8 @@ public class PageProcessor {
             	currbookmark.setId(count++);
             	currbookmark.setPageKey(extractKey(document,aa.getValue()));
             	allBookmarkObject.add(currbookmark);
-            	
             }
-            
-            
         }
-		
-    	
-    	
     }
     
     public void processPages(int startPage, int endPage, GuidelineTextStripper mainContentStripper, PDDocument document, Writer output) 
@@ -213,6 +206,7 @@ public class PageProcessor {
                 mainContentStripper.writeText(document, output);
                 
                 List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
+                FootnoteAnalyser.analyseFootnotes(wordRects);
                 
                 GuidelinePageRenderer renderer = new GuidelinePageRenderer(document, p - 1 ,72);
                 renderer.intializeImage();

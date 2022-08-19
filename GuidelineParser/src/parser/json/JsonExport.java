@@ -183,7 +183,8 @@ public class JsonExport {
 					currJsonObject.addChild(childRegionIndex);
 				}
 
-				pageKeymatcher = pageKeyRegex.matcher(currentContent);
+				String contentWithoutFootnoteRef = currentContent.replaceAll("\\{[^\\{]+\\}", "");//Footnote reference may have page key
+				pageKeymatcher = pageKeyRegex.matcher(contentWithoutFootnoteRef);
 				if (pageKeymatcher.groupCount() >= 0) {
 					
 					while (pageKeymatcher.find()) {

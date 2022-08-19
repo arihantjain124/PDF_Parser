@@ -50,6 +50,7 @@ public class TextRegionAnalyser {
 
 		PDFTextStripperByArea stripper = new PDFTextStripperByArea();
 		List<PDAnnotation> annotations = page.getAnnotations();
+		
 		// first setup text extraction regions
 		for (int j = 0; j < annotations.size(); j++) {
 			PDAnnotation annot = annotations.get(j);
@@ -78,17 +79,22 @@ public class TextRegionAnalyser {
 
 		for (int j = 0; j < annotations.size(); j++) {
 			PDAnnotation annot = annotations.get(j);
+			
 			if (annot instanceof PDAnnotationLink) {
+				
 				PDAnnotationLink link = (PDAnnotationLink) annot;
 				PDAction action = link.getAction();
 				String urlText = stripper.getTextForRegion("" + j);
+				
 				if (action instanceof PDActionURI) {
-					PDActionURI uri = (PDActionURI) action;
+					//PDActionURI uri = (PDActionURI) action; //do nothing
 				} else if (action instanceof PDActionGoTo) {
+					
 					PDActionGoTo gta = (PDActionGoTo) action;
-					if (gta.getDestination() instanceof PDPageDestination) {
-						PDPageDestination pd = (PDPageDestination) gta.getDestination();
+					if (gta.getDestination() instanceof PDPageDestination) {	
+						//PDPageDestination pd = (PDPageDestination) gta.getDestination(); //do nothing
 					} else if (gta.getDestination() instanceof PDNamedDestination) {
+						
 						PDPageDestination pd = document.getDocumentCatalog()
 								.findNamedDestinationPage((PDNamedDestination) gta.getDestination());
 						if (pd != null) {
@@ -98,7 +104,6 @@ public class TextRegionAnalyser {
 						}
 					}
 				}
-
 			}
 		}
 		return 0;
