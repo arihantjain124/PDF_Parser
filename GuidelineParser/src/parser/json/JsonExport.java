@@ -218,6 +218,7 @@ public class JsonExport {
 				currJsonObject.setPageNo(region.getPageNo());
 				currJsonObject.setParent(region.getParentRegionIndex());
 				currJsonObject.addFootnoteRefs(region.getFootnoteRefs());
+				currJsonObject.setBound(region.getBound());
 				allGraphObject.add(currJsonObject);
 			}
 		}

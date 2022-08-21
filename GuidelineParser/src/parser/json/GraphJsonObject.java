@@ -1,5 +1,6 @@
 package parser.json;
 
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +35,8 @@ public class GraphJsonObject {
 	private List<Integer> children = null;
 	
 	private int parent;
+	
+	private Rectangle2D bound = null;
 	
 	private List<String> footnoteRefs = null;
 
@@ -172,5 +175,13 @@ public class GraphJsonObject {
 	
 	public List<String> getFootnoteRefs(){
 		return footnoteRefs;
+	}
+
+	public Rectangle2D getBound() {
+		return bound;
+	}
+
+	public void setBound(Rectangle2D bound) {
+		this.bound = bound;
 	}
 }

@@ -1,7 +1,11 @@
 package parser.json;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.HashMap;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -26,7 +30,22 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 		json.addProperty("nccn:page-key", graphJsonObject.getPageKey());
 		json.addProperty("nccn:page-no", graphJsonObject.getPageNo());
 		
+		HashMap<String, Double> bounds = new HashMap<>();
+
+		bounds.put("X",
+				new BigDecimal(graphJsonObject.getBound().getX()).setScale(2, RoundingMode.HALF_UP).doubleValue());
+		bounds.put("Y",
+				new BigDecimal(graphJsonObject.getBound().getY()).setScale(2, RoundingMode.HALF_UP).doubleValue());
+		bounds.put("W",
+				new BigDecimal(graphJsonObject.getBound().getWidth()).setScale(2, RoundingMode.HALF_UP).doubleValue());
+		bounds.put("H",
+				new BigDecimal(graphJsonObject.getBound().getHeight()).setScale(2, RoundingMode.HALF_UP).doubleValue());
+
+		Gson gson = new Gson();
+		json.add("nccn:bounds", gson.toJsonTree(bounds).getAsJsonObject());
+		
 		JsonArray labels = new JsonArray();
+		
 		for (Integer label : graphJsonObject.getLabels()) {
 			labels.add(ID_URL + "labels/" + label);
 		}	

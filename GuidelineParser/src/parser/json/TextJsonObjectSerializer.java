@@ -14,7 +14,9 @@ public class TextJsonObjectSerializer implements JsonSerializer<TextJsonObject> 
 	
 	public static final TextJsonObjectSerializer INSTANCE = new TextJsonObjectSerializer();
 
-	private static final String ID_URL = ConfigProperty.getProperty("json-ld.id.url") + "/textbox/"; 
+	private static final String ID_URL = ConfigProperty.getProperty("json-ld.id.url") + "/textbox/";
+	
+	private static final String Base_ID_URL = ConfigProperty.getProperty("json-ld.id.url") + "/"; 
 
 	private TextJsonObjectSerializer() {
 	}
@@ -27,11 +29,14 @@ public class TextJsonObjectSerializer implements JsonSerializer<TextJsonObject> 
 		json.addProperty("nccn:content", textJsonObject.getContent());
 		json.addProperty("nccn:pageNo", textJsonObject.getPageNo());
 		json.addProperty("nccn:pageKey", textJsonObject.getPageKey());
-		json.addProperty("nccn:label", textJsonObject.getLabel());
+		JsonArray labels = new JsonArray();
+		labels.add(ID_URL + "labels/" + textJsonObject.getLabel());
+		json.add("nccn:labels", labels);
+		
 		if (textJsonObject.getFootnoteRefs() != null) {
 			JsonArray references = new JsonArray();
 			for (String footnoteKey : textJsonObject.getFootnoteRefs()) {
-				references.add(ID_URL + footnoteKey);
+				references.add(Base_ID_URL + "footnote/" + footnoteKey);
 			}
 			json.add("nccn:reference", references);
 		}

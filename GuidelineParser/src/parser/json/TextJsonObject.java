@@ -15,7 +15,7 @@ public class TextJsonObject {
 
 	private List<String> footnoteRefs = null;
 	
-	private String label;
+	private int label;
 
 	public int getIndex() {
 		return index;
@@ -58,12 +58,12 @@ public class TextJsonObject {
 		this.pageNo = pageNo;
 	}
 
-	public String getLabel() {
+	public int getLabel() {
 		return label;
 	}
 
-	public void setLabel(String label) {
-		this.label = label;
+	public void setLabel(int currlabel) {
+		this.label = currlabel;
 	}
 
 }

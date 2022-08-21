@@ -207,7 +207,7 @@ public class PageProcessor {
                 
                 List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
                 FootnoteAnalyser.analyseFootnotes(wordRects);
-                
+
                 GuidelinePageRenderer renderer = new GuidelinePageRenderer(document, p - 1 ,72);
                 renderer.intializeImage();
                 renderer.getGeometry();
@@ -226,7 +226,7 @@ public class PageProcessor {
 //	            	ArrayList<GraphObject> pairVerticalLine = graphProc.pairVerticalLine(verticalLine);
 	            	
 	                List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects, lines, pageKey, p);
-	                
+
 	            	if(!graphLine.isEmpty()) {
 	            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);//add prev & next pointers in regions
@@ -237,6 +237,7 @@ public class PageProcessor {
 	            		if (newRegionList.size()>0) 
 	            		{
 	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());
+	            			
 	            			labelProc(labels, labelsJsonHashMap, labelOffset, pageKey, alllabelsObject, keyConficts);
 							labelOffset = labelOffset + labels.size();
 					    	FootnoteAnalyser.analyzeAllFootNoteReferences(labels,keyConficts);
@@ -255,19 +256,29 @@ public class PageProcessor {
             			extractTables(document, p, pageKey, allTablesList);
             		}
             		else if (!visitedPage.contains(p)){
+            			LabelJsonObject currlabelObject = new LabelJsonObject();
             			TextJsonObject currtextObject = new TextJsonObject();
     					String content = new String();
+    					
+    					List<String> textReferences = FootnoteAnalyser.analyzeFootNoteReferences(wordRects,false,keyConficts);
     					for (WordWithBounds line : wordRects) {
     						if (line.getbound().getHeight() > 5) {
     							content = content + line.getText();
     						}
     					}
+    					
     					currtextObject.setIndex(textOffset);
     					currtextObject.setContent(content);
     					currtextObject.setPageKey(pageKey);
     					currtextObject.setPageNo(p);
-    					currtextObject.setLabel(extractHeading(document,p));
-    					List<String> textReferences = FootnoteAnalyser.analyzeFootNoteReferences(wordRects,true,keyConficts);
+    					
+    					currlabelObject.setIndex(labelOffset);
+    					labelOffset++;
+    					currlabelObject.setContent(extractHeading(document,p));
+    					alllabelsObject.add(currlabelObject);
+    					currtextObject.setLabel(labelOffset);
+    					
+    					
     					if(textReferences != null) {
         					currtextObject.setFootnoteRefs(textReferences);
     					}
