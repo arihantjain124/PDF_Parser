@@ -158,6 +158,16 @@ public class GuidelineTableExtractor {
                 extractor.extract() :
                 extractor.extract(pages);
     }
+    
+    public static boolean convertToFlowNodes(int pageNum) {
+    	String configPageNumStr = ConfigProperty.getProperty("table-to-flownode.page.no");
+    	if(configPageNumStr != null) {
+    		int configPageNum = Integer.parseInt(configPageNumStr);
+    		return (configPageNum == pageNum);
+    	}
+    	
+    	return false;
+    }
 
     public static boolean isTablePage(int pageNum) {
     	

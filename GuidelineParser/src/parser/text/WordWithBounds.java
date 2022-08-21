@@ -33,6 +33,12 @@ public class WordWithBounds {
         bound.setRect(x, y - h, w - x, h);
 //      System.out.format("%s , %f, %s ,%f %s %d \n",text,x,text.charAt(0),w,text.charAt(numberofchar-1),numberofchar);
     }
+    
+    public WordWithBounds(String text, Rectangle2D bound) 
+    {
+    	this.text = text;
+    	this.bound = bound;
+    }
 
     public String getText()
     {

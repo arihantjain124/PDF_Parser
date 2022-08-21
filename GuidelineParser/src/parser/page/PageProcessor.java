@@ -41,6 +41,7 @@ import parser.text.GuidelineTextStripper;
 import parser.text.RegionWithBound;
 import parser.text.TextRegionAnalyser;
 import parser.text.WordWithBounds;
+import technology.tabula.RectangularTextContainer;
 import technology.tabula.Table;
 
 import org.javatuples.Pair;
@@ -252,7 +253,19 @@ public class PageProcessor {
             	}else {
             		
             		if(GuidelineTableExtractor.isTablePage(p)) {
-            			extractTables(document, p, pageKey, allTablesList);
+            			if(GuidelineTableExtractor.convertToFlowNodes(p)) {//Add table in the flow.
+            				
+            				List<TableDetails> tmpTableList = new ArrayList<TableDetails>();
+            				extractTables(document, p, pageKey, tmpTableList);
+            				
+            				//Convert the rows to nodes
+            				List<RegionWithBound> tableRegions = convertTableRowToNodes(tmpTableList, curPageInfo, indexOffset, pageKey, p);
+            				allRegionList.addAll(tableRegions);
+            				indexOffset= allRegionList.size();
+            				
+            			}else {
+            				extractTables(document, p, pageKey, allTablesList);
+            			}
             		}
             		else if (!visitedPage.contains(p)){
             			TextJsonObject currtextObject = new TextJsonObject();
@@ -423,4 +436,54 @@ public class PageProcessor {
         return tables;
     }
 	
+    @SuppressWarnings("rawtypes")
+	private List<RegionWithBound> convertTableRowToNodes(List<TableDetails> tableList, PageInfo pageInfo, int indexOffset, String pageKey, int pageNo) {
+
+    	List<RegionWithBound> regionList = new ArrayList<RegionWithBound>();
+    	
+		for (int k = 0; k < tableList.size(); k++) {
+			
+			TableDetails tableDetails = tableList.get(k);
+			Table table = tableDetails.getTable();
+
+			for (int i = 0; i < table.getRows().size(); i++) {
+
+				List<RectangularTextContainer> tableRow = table.getRows().get(i);
+				
+				StringBuilder rowText = new StringBuilder();
+				Rectangle2D rowBound = null; 
+				
+				for (int j = 0; j < tableRow.size(); j++) {
+					
+					RectangularTextContainer textChunk = tableRow.get(j);
+					if(rowText.length() > 0){
+						rowText.append(" ");
+						rowText.append(textChunk.getText().trim());
+					}else{
+						rowText.append(textChunk.getText().trim());
+					}
+					
+					if(rowBound == null) {
+						rowBound = textChunk.getBounds2D();
+					}else {
+						rowBound = rowBound.createUnion(textChunk.getBounds2D());
+					}
+					
+				}
+				
+				//Create a node for this row.
+				WordWithBounds wordWithBounds = new WordWithBounds(rowText.toString(), rowBound);
+				
+				RegionWithBound newRegion = new RegionWithBound(rowBound, wordWithBounds);
+				newRegion.setPageKey(pageKey);
+				newRegion.setPageNo(pageNo);
+				
+				regionList.add(newRegion);
+				
+				pageInfo.addStartRegionIndex(i + indexOffset);
+			}
+		}
+		
+		return regionList;
+	}
 }

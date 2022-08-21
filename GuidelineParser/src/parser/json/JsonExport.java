@@ -124,85 +124,83 @@ public class JsonExport {
 			
 			currJsonObject.setIndex(index);
 
-			if (!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty() || 
-					(region.getParentRegionIndex() >= 0)) {
-
-				String currentContent = "";
-				if(region.isImaginary()) {
-					currentContent = "IMAGINARY NODE";
-				}else {
-					for (WordWithBounds word : region.getContentLines()) {
-						if(!currentContent.isEmpty()) {
-							currentContent = currentContent + " " + word.getText().trim();
-						}else {
-							currentContent = word.getText().trim();
-						}
+			String currentContent = "";
+			if(region.isImaginary()) {
+				currentContent = "IMAGINARY NODE";
+			}else {
+				for (WordWithBounds word : region.getContentLines()) {
+					if(!currentContent.isEmpty()) {
+						currentContent = currentContent + " " + word.getText().trim();
+					}else {
+						currentContent = word.getText().trim();
 					}
 				}
+			}
+		
+			currJsonObject.setConent(currentContent);
 			
-				currJsonObject.setConent(currentContent);
-				
-				for(int i=0 ; i<4 ; i++) 
-				{
-					int temp = 0;
-					Pattern currPattern = stagingRegex.get(i);
+			for(int i=0 ; i<4 ; i++) 
+			{
+				int temp = 0;
+				Pattern currPattern = stagingRegex.get(i);
+				matcher = currPattern.matcher(currentContent);
+				while (matcher.find()) {
+				    temp++;
+				}
+				if (temp>0) {
 					matcher = currPattern.matcher(currentContent);
 					while (matcher.find()) {
-					    temp++;
-					}
-					if (temp>0) {
-						matcher = currPattern.matcher(currentContent);
-						while (matcher.find()) {
-							switch(i)
-							{
-							case 0:
-								currJsonObject.setTScore(matcher.group());
-								break;
-							case 1:
-								currJsonObject.setMScore(matcher.group());
-								break;
-							case 2:
-								currJsonObject.setNScore(matcher.group());
-								break;
-							case 3:
-								currJsonObject.setStageScore(matcher.group());
-								break;
-							}	
-						}
+						switch(i)
+						{
+						case 0:
+							currJsonObject.setTScore(matcher.group());
+							break;
+						case 1:
+							currJsonObject.setMScore(matcher.group());
+							break;
+						case 2:
+							currJsonObject.setNScore(matcher.group());
+							break;
+						case 3:
+							currJsonObject.setStageScore(matcher.group());
+							break;
+						}	
 					}
 				}
-				for (int prevRegionIndex : region.getPrevRegions()) {
-					currJsonObject.addPrevIndex(prevRegionIndex);
-				}
+			}
+			for (int prevRegionIndex : region.getPrevRegions()) {
+				currJsonObject.addPrevIndex(prevRegionIndex);
+			}
 
-				for (int nextRegionIndex : region.getNextRegions()) {
-					currJsonObject.addNextIndex(nextRegionIndex);
-				}
+			for (int nextRegionIndex : region.getNextRegions()) {
+				currJsonObject.addNextIndex(nextRegionIndex);
+			}
+			
+			for (int childRegionIndex : region.getChildRegions()) {
+				currJsonObject.addChild(childRegionIndex);
+			}
+
+			String contentWithoutFootnoteRef = currentContent.replaceAll("\\{[^\\{]+\\}", "");//Footnote reference may have page key
+			pageKeymatcher = pageKeyRegex.matcher(contentWithoutFootnoteRef);
+			if (pageKeymatcher.groupCount() >= 0) {
 				
-				for (int childRegionIndex : region.getChildRegions()) {
-					currJsonObject.addChild(childRegionIndex);
-				}
-
-				String contentWithoutFootnoteRef = currentContent.replaceAll("\\{[^\\{]+\\}", "");//Footnote reference may have page key
-				pageKeymatcher = pageKeyRegex.matcher(contentWithoutFootnoteRef);
-				if (pageKeymatcher.groupCount() >= 0) {
+				while (pageKeymatcher.find()) {
+					PageInfo currPageInfo = pageHashMap.get(pageKeymatcher.group());
 					
-					while (pageKeymatcher.find()) {
-						PageInfo currPageInfo = pageHashMap.get(pageKeymatcher.group());
-						
-						if (currPageInfo != null) {
-							currJsonObject.addNextIndex(currPageInfo.getStartRegionIndices());
-							for (int linkPrevPage : currPageInfo.getStartRegionIndices()) {
-								regionBounds.get(linkPrevPage).addPrevRegion(index);
-							}
+					if (currPageInfo != null) {
+						currJsonObject.addNextIndex(currPageInfo.getStartRegionIndices());
+						for (int linkPrevPage : currPageInfo.getStartRegionIndices()) {
+							regionBounds.get(linkPrevPage).addPrevRegion(index);
 						}
 					}
 				}
-								
-				double currentRegionY = region.getBound().getY();
-				
-				List<Pair<Rectangle2D, LabelJsonObject>> currentPageLabels = labelsJsonHashMap
-						.get(region.getPageKey());
+			}
+							
+			double currentRegionY = region.getBound().getY();
+			
+			List<Pair<Rectangle2D, LabelJsonObject>> currentPageLabels = labelsJsonHashMap
+					.get(region.getPageKey());
+			if(currentPageLabels != null) {
 				for (Pair<Rectangle2D, LabelJsonObject> labelbox : currentPageLabels) {
 
 					Rectangle2D currRect = labelbox.getValue0();
@@ -213,13 +211,14 @@ public class JsonExport {
 						currJsonObject.addLabel(labelbox.getValue1().getIndex());
 					}
 				}
-				currJsonObject.setType("object");
-				currJsonObject.setPageKey(region.getPageKey());
-				currJsonObject.setPageNo(region.getPageNo());
-				currJsonObject.setParent(region.getParentRegionIndex());
-				currJsonObject.addFootnoteRefs(region.getFootnoteRefs());
-				allGraphObject.add(currJsonObject);
 			}
+			currJsonObject.setType("object");
+			currJsonObject.setPageKey(region.getPageKey());
+			currJsonObject.setPageNo(region.getPageNo());
+			currJsonObject.setParent(region.getParentRegionIndex());
+			currJsonObject.addFootnoteRefs(region.getFootnoteRefs());
+			allGraphObject.add(currJsonObject);
+			
 		}
 
 	}
