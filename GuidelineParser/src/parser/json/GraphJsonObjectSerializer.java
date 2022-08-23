@@ -3,7 +3,12 @@ package parser.json;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -30,6 +35,7 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 		json.addProperty("nccn:page-key", graphJsonObject.getPageKey());
 		json.addProperty("nccn:page-no", graphJsonObject.getPageNo());
 		
+		
 		HashMap<String, Double> bounds = new HashMap<>();
 
 		bounds.put("X",
@@ -41,6 +47,10 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 		bounds.put("H",
 				new BigDecimal(graphJsonObject.getBound().getHeight()).setScale(2, RoundingMode.HALF_UP).doubleValue());
 
+		
+		String link="http://localhost:8080/nscl.pdf?page=";
+		json.addProperty("nccn:nodelink",link+ graphJsonObject.getPageNo()+"&x="+bounds.get("X").toString()+"&y="+bounds.get("Y").toString()+"&width="+bounds.get("W").toString()+"&height="+bounds.get("H").toString());
+		json.addProperty("nccn:pagelink", "http://localhost:8080/nscl.pdf#page="+graphJsonObject.getPageNo());
 		Gson gson = new Gson();
 		json.add("nccn:bounds", gson.toJsonTree(bounds).getAsJsonObject());
 		
