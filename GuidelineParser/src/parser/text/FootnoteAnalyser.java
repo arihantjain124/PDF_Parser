@@ -165,29 +165,30 @@ public class FootnoteAnalyser {
 	}
 	
 	public static void analyzeAllFootNoteReferences(List<RegionWithBound> allRegionList,
-			HashMap<String, String> keyConficts) {
+			String pageKey, HashMap<String, FootnoteDetails> docFootnotes) {
 
 		for (RegionWithBound region : allRegionList) {
-			ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), false, keyConficts);
+			ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), false, pageKey, docFootnotes);
 			region.addFootnoteRefs(footnoteRefList);
 		}
 	}
 	
-	public static void analyzeAllFootNoteReferences(HashMap<String, List<RegionWithBound>> labelsHashMap, HashMap<String, String> keyConficts) {
+	public static void analyzeAllFootNoteReferences(HashMap<String, List<RegionWithBound>> labelsHashMap, 
+			String pageKey, HashMap<String, FootnoteDetails> docFootnotes) {
 		
 		for(String key : labelsHashMap.keySet()) {
 			
 			List<RegionWithBound> regions = labelsHashMap.get(key);
 			
 			for(RegionWithBound region : regions) {
-				ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), true, keyConficts);
+				ArrayList<String> footnoteRefList = analyzeFootNoteReferences(region.getContentLines(), true, pageKey, docFootnotes);
 				region.addFootnoteRefs(footnoteRefList);
 			}
 		}
 	}
 	
 	public static ArrayList<String> analyzeFootNoteReferences(List<WordWithBounds> lines, boolean removeFootnote,
-			HashMap<String, String> keyConficts)
+			String pageKey, HashMap<String, FootnoteDetails> docFootnotes)
 	{
 		
 		HashSet<String> footnoteRefSet = new HashSet<String>();
@@ -249,21 +250,45 @@ public class FootnoteAnalyser {
 				}
 				
 				String[] footNotes = footNoteSubStr.trim().split(",");
-				footnoteRefSet.addAll(Arrays.asList(footNotes));
+				List<String> footNoteList = new ArrayList<String>();
+				
+				for(int fnIndex = 0; fnIndex < footNotes.length; fnIndex++) {
+					String footNote = footNotes[fnIndex].trim();
+					
+					if(footNote.contains("-")) {
+						
+						//Looks like it's range of integers
+						String[] intRange = footNote.split("-");
+						int startNum = Integer.parseInt(intRange[0].trim());
+						int endNum = Integer.parseInt(intRange[1].trim());
+						for(int rangeNum = startNum; rangeNum <= endNum; rangeNum++) {
+							
+							String pageLevelFootnoteKey = pageKey + "/" + rangeNum;
+							if(docFootnotes.containsKey(pageLevelFootnoteKey)) {
+								footNoteList.add(pageLevelFootnoteKey);
+							}else {
+								footNoteList.add(Integer.toString(rangeNum));
+							}
+						}
+						
+					}else {
+					
+						String pageLevelFootnoteKey = pageKey + "/" + footNote;
+						if(docFootnotes.containsKey(pageLevelFootnoteKey)) {
+							footNoteList.add(pageLevelFootnoteKey);
+						}else {
+							footNoteList.add(footNote);
+						}
+					}
+				}
+				footnoteRefSet.addAll(footNoteList);
 				
 				int startInText = strBuilder.indexOf(footNoteSubStr, curRange.start);//line.getText() & line.getTextPositions() may not be in sync because of ligatures. Hence re-calculate the indices.
 				int endInText = startInText + (curRange.end - curRange.start);
 				if(removeFootnote) {
 					strBuilder.replace(startInText, endInText + 1, "");
 				}else {
-					
-					if (keyConficts.containsKey(footNoteSubStr.trim())) {
-						strBuilder.replace(startInText, endInText + 1, "{" + keyConficts.get(footNoteSubStr.trim()) + "}");
-					}
-					else {
-						strBuilder.replace(startInText, endInText + 1, "{" + footNoteSubStr.trim() + "}");
-						
-					}
+					strBuilder.replace(startInText, endInText + 1, "{" + String.join(",", footNoteList) + "}");
 				}
 				
 				//strBuilder.replace(curRange.start, curRange.end + 1, "{" + footNoteSubStr.trim() + "}");

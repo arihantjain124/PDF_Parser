@@ -30,7 +30,7 @@ public class LabelJsonObjectSerializer implements JsonSerializer<LabelJsonObject
 		if (!labelJsonObject.getFootnoteRefs().isEmpty()) {
 			JsonArray references = new JsonArray();
 			for (String footnoteKey : labelJsonObject.getFootnoteRefs()) {
-				references.add(ID_URL + footnoteKey);
+				references.add(ID_URL + "footnote/" + footnoteKey);
 			}
 			json.add("nccn:reference", references);
 		}
