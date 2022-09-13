@@ -41,12 +41,13 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 				new BigDecimal(graphJsonObject.getBound().getHeight()).setScale(2, RoundingMode.HALF_UP).doubleValue());
 		
 		String link="http://localhost:8080/nscl.pdf?page=";
+		
 		json.addProperty("nccn:nodelink",link+ graphJsonObject.getPageNo()+"&x="+bounds.get("X").toString()+"&y="+bounds.get("Y").toString()+"&width="+bounds.get("W").toString()+"&height="+bounds.get("H").toString());
 		json.addProperty("nccn:pagelink", "http://localhost:8080/nscl.pdf#page="+graphJsonObject.getPageNo());
 		
-		Gson gson = new Gson();
-		json.add("nccn:bounds", gson.toJsonTree(bounds).getAsJsonObject());
-		
+//		Gson gson = new Gson();
+//		json.add("nccn:bounds", gson.toJsonTree(bounds).getAsJsonObject());
+		json.addProperty("nccn:bounds", "X=" + bounds.get("X") + ",Y=" + bounds.get("Y") + ",W=" + bounds.get("W") + ",H=" + bounds.get("H") );
 		JsonArray labels = new JsonArray();
 		
 		for (Integer label : graphJsonObject.getLabels()) {
