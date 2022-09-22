@@ -150,10 +150,20 @@ public class FootnoteAnalyser {
 				return -1;
 			}
 		}
+		
+		int nonFootnoteCharactersIndex = whitespaceIndex + 1;
+		while(nonFootnoteCharactersIndex < curLineTextPositions.size()) {
+			
+			//Find next non space character which will be used below for height difference calculation.
+			if(!Character.isWhitespace(curLineTextPositions.get(nonFootnoteCharactersIndex).getUnicode().charAt(0))) {
+				break;
+			}
+			nonFootnoteCharactersIndex++;
+		}
 
 		double heightDiff = 0;
-		if((whitespaceIndex + 1) < curLineTextPositions.size()) {
-			double nonFootnoteCharactersHeight = curLineTextPositions.get(whitespaceIndex + 1).getFontSizeInPt();
+		if(nonFootnoteCharactersIndex < curLineTextPositions.size()) {
+			double nonFootnoteCharactersHeight = curLineTextPositions.get(nonFootnoteCharactersIndex).getFontSizeInPt();
 			heightDiff = nonFootnoteCharactersHeight - firstCharacterHeight;
 		}
 		
