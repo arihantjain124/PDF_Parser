@@ -375,8 +375,12 @@ public class PageProcessor {
 			currlabelObject.setIndex(currIndex);
 			currlabelObject
 					.setFootnoteRefs(FootnoteAnalyser.analyzeFootNoteReferences(labelbox.getContentLines(), false, pageKey, docFootnotes));
-			for (WordWithBounds word : labelBounds) {
-				currentLabel = currentLabel + word.getText();
+			for (WordWithBounds word : labelBounds) {				
+				if(!currentLabel.isEmpty()) {
+					currentLabel = currentLabel + " " + word.getText().trim();
+				}else {
+					currentLabel = word.getText().trim();
+				}
 			}
 			currlabelObject.setContent(currentLabel);
 			alllabelsObject.add(currlabelObject);
