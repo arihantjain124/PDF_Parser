@@ -332,7 +332,7 @@ public class PageProcessor {
     			
     			flowRegions.add(region);
     			
-    			if(!region.getNextRegions().isEmpty() & region.getPrevRegions().isEmpty()) {
+    			if(!region.getNextRegions().isEmpty() && region.getPrevRegions().isEmpty() && !region.isImaginary()) {
     				//This is a first region in the flow.
     				pageInfo.addStartRegionIndex(newIndex);
     			}
