@@ -223,6 +223,7 @@ public class PageProcessor {
 	            		if (newRegionList.size()>0) 
 	            		{
 	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());
+	            			deMergeLabels(labels);
 	            			
 	            			labelProc(labels, labelsJsonHashMap, labelOffset, pageKey, alllabelsObject, docFootnotes);
 							labelOffset = labelOffset + labels.size();
@@ -356,6 +357,48 @@ public class PageProcessor {
     	}
     	
     	return flowRegions;
+    }
+    
+    private void deMergeLabels(List<RegionWithBound> currentPageLabels) {
+    	
+    	int labelCounts = currentPageLabels.size();
+    	for (int i = 0; i < labelCounts; i++) {
+    		
+    		RegionWithBound curLabelRegion = currentPageLabels.get(i);
+    		
+    		List<WordWithBounds> deMergedLines = new ArrayList<WordWithBounds>();
+    		
+    		List<WordWithBounds> labelLines = curLabelRegion.getContentLines();
+    		int curLabelLinesCount = labelLines.size();
+    		double firstLineLeftX = labelLines.get(0).getbound().getX();
+    		
+    		for(int j = 1; j < curLabelLinesCount; j++) {
+    			
+    			double curLeftX = labelLines.get(j).getbound().getX();
+    			if(Math.abs(curLeftX - firstLineLeftX) > 10) {//Assumption: The lines of a labels are generally left aligned.     				
+    				deMergedLines.add(labelLines.get(j));
+    			}
+    		}
+    		
+    		if(!deMergedLines.isEmpty()) 
+    		{
+    			//break the current region
+    			labelLines.removeAll(deMergedLines);
+    			
+    			//re-calculate bound of the current region
+    			Rectangle2D newBoundOfOldRegion = labelLines.get(0).getbound();
+    			for(int j = 1; j < labelLines.size(); j++) {
+    				newBoundOfOldRegion = newBoundOfOldRegion.createUnion(labelLines.get(j).getbound());
+    			}
+    			curLabelRegion.setBound(newBoundOfOldRegion);
+    			
+    			//Create new region
+    			RegionWithBound newLabelRegion = new RegionWithBound(deMergedLines, -1);
+				newLabelRegion.setPageKey(curLabelRegion.getPageKey());
+				newLabelRegion.setPageNo(curLabelRegion.getPageNo());
+				currentPageLabels.add(newLabelRegion);
+    		}
+    	}
     }
     
     private void labelProc(List<RegionWithBound> currentPageLabels,
