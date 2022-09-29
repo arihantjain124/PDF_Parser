@@ -207,8 +207,15 @@ public class JsonExport {
 					Rectangle2D transformedRect = new Rectangle();
 					transformedRect.setRect(currRect.getX(), currentRegionY, currRect.getWidth(), currRect.getHeight());
 
-					if (region.getBound().intersects(transformedRect)) {
-						currJsonObject.addLabel(labelbox.getValue1().getIndex());
+					Rectangle2D regionBound = region.getBound();
+					if (regionBound.intersects(transformedRect)) 
+					{
+						double regionWidth = regionBound.getWidth();
+						Rectangle2D overlappingRegion = regionBound.createIntersection(transformedRect);
+						
+						if(overlappingRegion.getWidth() >= 0.25*regionWidth) {//At least 25% of region should overlap with label 
+							currJsonObject.addLabel(labelbox.getValue1().getIndex());
+						}
 					}
 				}
 			}
