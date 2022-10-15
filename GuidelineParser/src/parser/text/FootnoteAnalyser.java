@@ -212,7 +212,13 @@ public class FootnoteAnalyser {
 			for(; i < sortedArray.length - 1; i++) {
 				
 				if(fontSizeArray[sortedArray[i]] < fontSizeArray[sortedArray[i + 1]]) {
-					break;
+					
+					float y1 = line.getTextPositions().get(sortedArray[i]).getTextMatrix().getTranslateY();//0,0 in lower left.
+					float y2 = line.getTextPositions().get(sortedArray[i + 1]).getTextMatrix().getTranslateY();//0,0 in lower left.
+					
+					if(y1 > y2) {//Footnote references are at slightly higher positions.
+						break;
+					}
 				}
 			}
 			
