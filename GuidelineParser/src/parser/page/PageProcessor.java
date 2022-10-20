@@ -369,6 +369,9 @@ public class PageProcessor {
     		List<WordWithBounds> deMergedLines = new ArrayList<WordWithBounds>();
     		
     		List<WordWithBounds> labelLines = curLabelRegion.getContentLines();
+    		if(labelLines.isEmpty()) {
+    			continue;
+    		}
     		int curLabelLinesCount = labelLines.size();
     		double firstLineLeftX = labelLines.get(0).getbound().getX();
     		
