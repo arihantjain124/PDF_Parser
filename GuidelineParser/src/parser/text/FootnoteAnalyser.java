@@ -301,10 +301,13 @@ public class FootnoteAnalyser {
 				
 				int startInText = strBuilder.indexOf(footNoteSubStr, curRange.start);//line.getText() & line.getTextPositions() may not be in sync because of ligatures. Hence re-calculate the indices.
 				int endInText = startInText + (curRange.end - curRange.start);
-				if(removeFootnote) {
-					strBuilder.replace(startInText, endInText + 1, "");
-				}else {
-					strBuilder.replace(startInText, endInText + 1, "{" + String.join(",", footNoteList) + "}");
+				
+				if(startInText >= 0) {
+					if(removeFootnote) {
+						strBuilder.replace(startInText, endInText + 1, "");
+					}else {
+						strBuilder.replace(startInText, endInText + 1, "{" + String.join(",", footNoteList) + "}");
+					}
 				}
 				
 				//strBuilder.replace(curRange.start, curRange.end + 1, "{" + footNoteSubStr.trim() + "}");
