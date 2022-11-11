@@ -47,6 +47,7 @@ import technology.tabula.Table;
 import org.javatuples.Pair;
 import parser.json.LabelJsonObject;
 import parser.json.TextJsonObject;
+import parser.json.UpdatesJsonObject;
 
 import java.awt.geom.Rectangle2D;
 
@@ -166,6 +167,7 @@ public class PageProcessor {
     	int indexOffset = 0;
     	int labelOffset = 0;
     	int textOffset = 0;
+    	int updateOffset = 0;
 
     	List<RegionWithBound> allRegionList = new ArrayList<RegionWithBound>();
     	HashMap<String, List<RegionWithBound>> labelsHashMap = new HashMap<String, List<RegionWithBound>>();
@@ -174,6 +176,7 @@ public class PageProcessor {
     	HashMap<String, List<Pair<Rectangle2D, LabelJsonObject>>> labelsJsonHashMap = new HashMap<String, List<Pair<Rectangle2D, LabelJsonObject>>>();
     	List<LabelJsonObject> alllabelsObject = new ArrayList<LabelJsonObject>();
     	List<TextJsonObject> alltextObject = new ArrayList<TextJsonObject>();
+    	List<UpdatesJsonObject> allUpdateObject = new ArrayList<UpdatesJsonObject>();
     	
     	findFootNotes(startPage, endPage, document,mainContentStripper, output ,docFootnotes);
     	
@@ -193,6 +196,11 @@ public class PageProcessor {
                 mainContentStripper.writeText(document, output);
                 
                 List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
+
+				if (pageKey.contains("UPDATES")) {
+					updateOffset = processUpdatePage(wordRects, allUpdateObject, updateOffset);
+					continue;
+				}
                 FootnoteAnalyser.analyseFootnotes(wordRects);//Just to remove footnotes from wordRects list.
 
                 GuidelinePageRenderer renderer = new GuidelinePageRenderer(document, p - 1 ,72);
@@ -222,7 +230,7 @@ public class PageProcessor {
 	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset,pageKey,p);		            	
 	            		if (newRegionList.size()>0) 
 	            		{
-	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());
+	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());	            			
 	            			deMergeLabels(labels);
 	            			
 	            			labelProc(labels, labelsJsonHashMap, labelOffset, pageKey, alllabelsObject, docFootnotes);
@@ -312,10 +320,90 @@ public class PageProcessor {
     	guidelineContentObjs.setTablesList(allTablesList);
     	guidelineContentObjs.setTextObject(alltextObject);
     	guidelineContentObjs.setBookmarkObjects(allBookmarkObject);
+    	guidelineContentObjs.setUpdateJsonObject(allUpdateObject);
         JsonExport.writeJsonLD(guidelineContentObjs, startPage, endPage, "Graph");
         //JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
 
 
+    }
+    
+    private int processUpdatePage(List<WordWithBounds> wordRects, List<UpdatesJsonObject> allUpdateObject, int updateOffset) 
+    {	
+    	HashMap<Pair<Double, Double>, List<WordWithBounds>> wordRectsColumnWise = new HashMap<Pair<Double, Double>, List<WordWithBounds>>();
+    	for (WordWithBounds line : wordRects) 
+    	{
+			if (line.getText().contains("include:"))//To ignore header line
+				continue;
+			
+			Pair<Double, Double> curLineHoriZontalBound = Pair.with(line.getbound().getMinX(), line.getbound().getMaxX());
+			boolean foundOverlappingLine = false;
+			for(Pair<Double, Double> bound : wordRectsColumnWise.keySet())
+			{
+				if (bound.getValue1() < curLineHoriZontalBound.getValue0() || bound.getValue0() > curLineHoriZontalBound.getValue1())
+		        {
+					continue;//No X-Overlap
+		        }
+				
+				//Add to current list
+				List<WordWithBounds> lines = wordRectsColumnWise.get(bound);
+				lines.add(line);
+				
+				Pair<Double, Double> newBound = Pair.with(Math.min(bound.getValue0(), curLineHoriZontalBound.getValue0()), 
+						Math.max(bound.getValue1(), curLineHoriZontalBound.getValue1()));
+				
+				wordRectsColumnWise.remove(bound);
+				wordRectsColumnWise.put(newBound, lines);
+				
+				foundOverlappingLine = true;
+				break;
+			}
+			
+			if(!foundOverlappingLine)
+			{
+				List<WordWithBounds> newColumn = new ArrayList<WordWithBounds>();
+				newColumn.add(line);
+				wordRectsColumnWise.put(curLineHoriZontalBound, newColumn);
+			}
+    	}
+    	
+		boolean firstUpdate = false;
+		String currContent = "";
+		UpdatesJsonObject currUpdateObject = new UpdatesJsonObject();
+		
+		for(Pair<Double, Double> bound : wordRectsColumnWise.keySet())
+		{
+			List<WordWithBounds> lines = wordRectsColumnWise.get(bound);	
+			for (WordWithBounds line : lines) 
+			{
+				if (Math.abs(bound.getValue0() - line.getbound().getMinX()) < 1.0f && Character.isLetter(line.getText().charAt(0))) 
+				{
+					if (firstUpdate == false) {
+						String updateKey = line.getText();
+						currUpdateObject.setPageKey(updateKey);
+						currUpdateObject.setIndex(updateOffset);
+						updateOffset += 1;
+						firstUpdate = true;
+					} else {
+						currUpdateObject.setContent(currContent);
+						allUpdateObject.add(currUpdateObject);
+						
+						currUpdateObject = new UpdatesJsonObject();
+						String updateKey = line.getText();
+						currUpdateObject.setPageKey(updateKey);
+						currUpdateObject.setIndex(updateOffset);
+						updateOffset += 1;
+						currContent = "";
+					}
+				} else {
+					currContent = currContent + line.getText();
+				}				
+			}
+	    }
+	
+		currUpdateObject.setContent(currContent);
+		allUpdateObject.add(currUpdateObject);
+		
+		return updateOffset;
     }
     
     private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, int indexOffset,String pageKey,int pageNo){

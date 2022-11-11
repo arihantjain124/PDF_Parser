@@ -300,6 +300,7 @@ public class JsonExport {
                 .registerTypeAdapter(TextJsonObject.class, TextJsonObjectSerializer.INSTANCE)
                 .registerTypeAdapter(TableDetails.class, GuidelineTableSerializer.INSTANCE)
                 .registerTypeAdapter(BookmarkJsonObject.class, BookmarkJsonSerializer.INSTANCE)
+                .registerTypeAdapter(UpdatesJsonObject.class, UpdatesJsonObjectSerializer.INSTANCE)
                 .setPrettyPrinting()
                 .disableHtmlEscaping()
                 .create();

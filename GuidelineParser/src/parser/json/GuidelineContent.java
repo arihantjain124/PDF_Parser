@@ -18,6 +18,8 @@ public class GuidelineContent {
 	
 	private List<BookmarkJsonObject> bookmarkobject;
 	
+	private List<UpdatesJsonObject> updateJsonObject;
+	
 	public List<TableDetails> getTablesList() {
 		return tablesList;
 	}
@@ -63,5 +65,13 @@ public class GuidelineContent {
 	
 	public List<BookmarkJsonObject> getBookmarkObjects() {
 		return bookmarkobject;
+	}
+
+	public List<UpdatesJsonObject> getUpdateJsonObject() {
+		return updateJsonObject;
+	}
+
+	public void setUpdateJsonObject(List<UpdatesJsonObject> updateJsonObject) {
+		this.updateJsonObject = updateJsonObject;
 	}
 }
