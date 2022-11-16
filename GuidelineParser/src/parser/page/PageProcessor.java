@@ -163,7 +163,14 @@ public class PageProcessor {
     		throws IOException {
     	
     	HashMap<String, PageInfo> pageHashMap = new HashMap<String, PageInfo>();
-    	
+
+        String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");
+        Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
+
+        regionOfInterest = ConfigProperty.getProperty("page.update-content.region").split("[,]");
+        Rectangle TotalRegion = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
+        
+        
     	int indexOffset = 0;
     	int labelOffset = 0;
     	int textOffset = 0;
@@ -194,10 +201,13 @@ public class PageProcessor {
                 mainContentStripper.setEndPage(p);
                 
                 mainContentStripper.writeText(document, output);
-                
-                List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
+
+				mainContentStripper.addRegion("MainContent", mainContentRect);
+				List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
 
 				if (pageKey.contains("UPDATES")) {
+					mainContentStripper.addRegion("MainContent", TotalRegion);
+					wordRects = mainContentStripper.getWordBounds();
 					updateOffset = processUpdatePage(wordRects, allUpdateObject, updateOffset);
 					continue;
 				}
