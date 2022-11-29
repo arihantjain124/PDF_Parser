@@ -8,7 +8,7 @@ import java.util.Properties;
 public class ConfigProperty
 {
 	private Properties configProperties = null;
-	File configFile = null;
+	static File configFile = null;
 
 	private static ConfigProperty configProperty = null;
 
@@ -40,7 +40,10 @@ public class ConfigProperty
 			return null;
 		}
 	}
-
+	
+	public static void loadconfig(String config) {
+		configFile = new File(config);
+	}
 	public static String getProperty(String key){
 
 		if(configProperty == null){

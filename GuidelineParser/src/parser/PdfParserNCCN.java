@@ -19,6 +19,8 @@ import parser.text.GuidelineTextStripper;
 public final class PdfParserNCCN
 {
     private static final String PASSWORD = "-password";
+    private static final String TYPE = "-type";
+    private static final String CONFIG_FILE = "-config";
     private static final String ENCODING = "-encoding";
     private static final String CONSOLE = "-console";
     private static final String START_PAGE = "-startPage";
@@ -70,6 +72,8 @@ public final class PdfParserNCCN
         boolean separateBeads = true;
         
         String password = "";
+        String filetype = "";
+        String config = "";
         String encoding = STD_ENCODING;
         String pdfFile = null;
         String outputFile = null;
@@ -87,6 +91,24 @@ public final class PdfParserNCCN
                     usage();
                 }
                 password = args[i];
+            }
+            else if( args[i].equals( TYPE ) )
+            {
+                i++;
+                if( i >= args.length )
+                {
+                    usage();
+                }
+                filetype = args[i];
+            }
+            else if( args[i].equals( CONFIG_FILE ) )
+            {
+                i++;
+                if( i >= args.length )
+                {
+                    usage();
+                }
+                config = args[i];
             }
             else if( args[i].equals( ENCODING ) )
             {
@@ -184,13 +206,17 @@ public final class PdfParserNCCN
                     System.err.println("Writing to " + outputFile);
                 }
 
-                GuidelineTextStripper stripper;
-                stripper = new GuidelineTextStripper(startPage);
-                stripper.setSortByPosition(sort);
-                stripper.setShouldSeparateByBeads(separateBeads);
-                
-                PageProcessor pageProcessor = new PageProcessor();
-                pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper, document, output);
+				GuidelineTextStripper stripper;
+				stripper = new GuidelineTextStripper(startPage);
+				stripper.setSortByPosition(sort);
+				stripper.setShouldSeparateByBeads(separateBeads);
+
+				if (filetype.equals("NCCN")) {
+					PageProcessor pageProcessor = new PageProcessor();
+					ConfigProperty.loadconfig(config);
+					pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper,
+							document, output);
+				}
                 
                 //Use the following code to generate JSON of individual pages when input is page range.
                 //for (int p = startPage; p <= endPage; ++p)
