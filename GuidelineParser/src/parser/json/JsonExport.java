@@ -279,8 +279,8 @@ public class JsonExport {
 			f.mkdir();
 			//System.out.println("Folder created");
 		}
-
-		String JsonFilePath = filePath + "/NCCN_NSCL" + prefix + "_" + startPage + "_" + endPage + ".json";
+		String guideline_name = ConfigProperty.getProperty("guideline.name");
+		String JsonFilePath = filePath + guideline_name + prefix + "_" + startPage + "_" + endPage + ".json";
 		Writer writer = Files.newBufferedWriter(Paths.get(JsonFilePath));
 		try {
 			Gson gson = gson();
@@ -301,6 +301,7 @@ public class JsonExport {
                 .registerTypeAdapter(TableDetails.class, GuidelineTableSerializer.INSTANCE)
                 .registerTypeAdapter(BookmarkJsonObject.class, BookmarkJsonSerializer.INSTANCE)
                 .registerTypeAdapter(UpdatesJsonObject.class, UpdatesJsonObjectSerializer.INSTANCE)
+                .registerTypeAdapter(IndentedContent.class, IndentedContentSerializer.INSTANCE)
                 .setPrettyPrinting()
                 .disableHtmlEscaping()
                 .create();

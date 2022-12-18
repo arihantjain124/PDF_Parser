@@ -1,6 +1,5 @@
 package parser;
 
-import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,7 +18,6 @@ import parser.text.GuidelineTextStripper;
 public final class PdfParserNCCN
 {
     private static final String PASSWORD = "-password";
-    private static final String TYPE = "-type";
     private static final String CONFIG_FILE = "-config";
     private static final String ENCODING = "-encoding";
     private static final String CONSOLE = "-console";
@@ -72,7 +70,6 @@ public final class PdfParserNCCN
         boolean separateBeads = true;
         
         String password = "";
-        String filetype = "";
         String config = "";
         String encoding = STD_ENCODING;
         String pdfFile = null;
@@ -91,15 +88,6 @@ public final class PdfParserNCCN
                     usage();
                 }
                 password = args[i];
-            }
-            else if( args[i].equals( TYPE ) )
-            {
-                i++;
-                if( i >= args.length )
-                {
-                    usage();
-                }
-                filetype = args[i];
             }
             else if( args[i].equals( CONFIG_FILE ) )
             {
@@ -211,19 +199,16 @@ public final class PdfParserNCCN
 				stripper.setSortByPosition(sort);
 				stripper.setShouldSeparateByBeads(separateBeads);
 
-				if (filetype.equals("NCCN")) {
-					PageProcessor pageProcessor = new PageProcessor();
-					ConfigProperty.loadconfig(config);
-					pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper,
-							document, output);
-				}
-                
+				PageProcessor pageProcessor = new PageProcessor();
+				ConfigProperty.loadconfig(config);
+				pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper,
+						document, output);
                 //Use the following code to generate JSON of individual pages when input is page range.
                 //for (int p = startPage; p <= endPage; ++p)
                 //{ 
                 //	pageProcessor.processPages(p, Math.min(p, document.getNumberOfPages()), stripper, document, output);
                 //}
-            }
+            } 
             finally
             {
                 IOUtils.closeQuietly(output);

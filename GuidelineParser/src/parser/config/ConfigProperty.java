@@ -15,7 +15,6 @@ public class ConfigProperty
 	private ConfigProperty(){
 
 		configProperties = new Properties();
-		configFile = new File("config.properties");
 	}
 
 	private void loadProperty() throws IOException	{
