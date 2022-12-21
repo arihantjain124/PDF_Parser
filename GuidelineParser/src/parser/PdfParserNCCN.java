@@ -19,6 +19,7 @@ public final class PdfParserNCCN
 {
     private static final String PASSWORD = "-password";
     private static final String CONFIG_FILE = "-config";
+    private static final String VERSION = "-version";
     private static final String ENCODING = "-encoding";
     private static final String CONSOLE = "-console";
     private static final String START_PAGE = "-startPage";
@@ -74,6 +75,7 @@ public final class PdfParserNCCN
         String encoding = STD_ENCODING;
         String pdfFile = null;
         String outputFile = null;
+        String version = "";
         // Defaults to text files
         String ext = ".txt";
         int startPage = 1;
@@ -88,6 +90,15 @@ public final class PdfParserNCCN
                     usage();
                 }
                 password = args[i];
+            }
+            else if( args[i].equals( VERSION ) )
+            {
+                i++;
+                if( i >= args.length )
+                {
+                    usage();
+                }
+                version = args[i];
             }
             else if( args[i].equals( CONFIG_FILE ) )
             {
@@ -201,6 +212,7 @@ public final class PdfParserNCCN
 
 				PageProcessor pageProcessor = new PageProcessor();
 				ConfigProperty.loadconfig(config);
+				ConfigProperty.setVersion(version);
 				pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper,
 						document, output);
                 //Use the following code to generate JSON of individual pages when input is page range.

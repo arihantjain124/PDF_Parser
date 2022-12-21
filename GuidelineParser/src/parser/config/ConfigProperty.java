@@ -11,7 +11,7 @@ public class ConfigProperty
 	static File configFile = null;
 
 	private static ConfigProperty configProperty = null;
-
+	private static String version;
 	private ConfigProperty(){
 
 		configProperties = new Properties();
@@ -30,6 +30,14 @@ public class ConfigProperty
 		}
 	}
 
+	public static void setVersion(String ver) {
+		version = ver;
+	}
+	
+	public static String getVersion() {
+		return version;
+	}
+	
 	private String fetchProperty(String key)
 	{
 		String propVal = configProperties.getProperty(key);

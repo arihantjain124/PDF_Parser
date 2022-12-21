@@ -280,7 +280,10 @@ public class JsonExport {
 			//System.out.println("Folder created");
 		}
 		String guideline_name = ConfigProperty.getProperty("guideline.name");
-		String JsonFilePath = filePath + guideline_name + prefix + "_" + startPage + "_" + endPage + ".json";
+		String version_name = ConfigProperty.getVersion();
+		String JsonFilePath = filePath + guideline_name + "_ver_" + version_name + prefix + "_pages_" + startPage + "-"
+				+ endPage + ".json";
+
 		Writer writer = Files.newBufferedWriter(Paths.get(JsonFilePath));
 		try {
 			Gson gson = gson();

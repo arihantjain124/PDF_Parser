@@ -331,7 +331,7 @@ public class PageProcessor {
     	guidelineContentObjs.setTextObject(alltextObject);
     	guidelineContentObjs.setBookmarkObjects(allBookmarkObject);
     	guidelineContentObjs.setUpdateJsonObject(allUpdateObject);
-        JsonExport.writeJsonLD(guidelineContentObjs, startPage, endPage, "Graph");
+        JsonExport.writeJsonLD(guidelineContentObjs, startPage, endPage, "");
         //JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
 
 
