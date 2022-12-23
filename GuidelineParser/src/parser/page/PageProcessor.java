@@ -159,16 +159,11 @@ public class PageProcessor {
         }
     }
     
-    public void processPages(int startPage, int endPage, GuidelineTextStripper mainContentStripper, PDDocument document, Writer output) 
+    public void processPages(int startPage, int endPage, GuidelineTextStripper mainContentStripper , GuidelineTextStripper updateContentStripper, PDDocument document, Writer output) 
     		throws IOException {
     	
     	HashMap<String, PageInfo> pageHashMap = new HashMap<String, PageInfo>();
 
-        String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");
-        Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
-
-        regionOfInterest = ConfigProperty.getProperty("page.update-content.region").split("[,]");
-        Rectangle TotalRegion = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
         
         
     	int indexOffset = 0;
@@ -197,18 +192,18 @@ public class PageProcessor {
             	PageInfo curPageInfo = new PageInfo(p, pageKey);
             	pageHashMap.put(pageKey, curPageInfo);
             	
+            	updateContentStripper.setStartPage(p);
+            	updateContentStripper.setEndPage(p);
+                updateContentStripper.writeText(document, output);
+                List<WordWithBounds> updateRects = updateContentStripper.getWordBounds();;
+            	
             	mainContentStripper.setStartPage(p);
                 mainContentStripper.setEndPage(p);
-                
                 mainContentStripper.writeText(document, output);
-
-				mainContentStripper.addRegion("MainContent", mainContentRect);
 				List<WordWithBounds> wordRects = mainContentStripper.getWordBounds();
 
 				if (pageKey.contains("UPDATES")) {
-					mainContentStripper.addRegion("MainContent", TotalRegion);
-					wordRects = mainContentStripper.getWordBounds();
-					updateOffset = processUpdatePage(wordRects, allUpdateObject, updateOffset);
+					updateOffset = processUpdatePage(updateRects, allUpdateObject, updateOffset);
 					continue;
 				}
                 FootnoteAnalyser.analyseFootnotes(wordRects);//Just to remove footnotes from wordRects list.

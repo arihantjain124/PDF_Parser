@@ -1,5 +1,6 @@
 package parser;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -176,6 +177,14 @@ public final class PdfParserNCCN
             PDDocument document = null;
             try
             {
+				ConfigProperty.loadconfig(config);
+				ConfigProperty.setVersion(version);
+            	String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");
+                Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
+
+                regionOfInterest = ConfigProperty.getProperty("page.update-content.region").split("[,]");
+                Rectangle TotalRegion = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
+                
                 long startTime = startProcessing("Loading PDF "+pdfFile);
                 if( outputFile == null && pdfFile.length() >4 )
                 {
@@ -204,17 +213,21 @@ public final class PdfParserNCCN
                 {
                     System.err.println("Writing to " + outputFile);
                 }
+                GuidelineTextStripper stripper;
+                GuidelineTextStripper uptStripper;
 
-				GuidelineTextStripper stripper;
+				uptStripper = new GuidelineTextStripper(startPage);
+				uptStripper.setSortByPosition(sort);
+				uptStripper.setShouldSeparateByBeads(separateBeads);
+				uptStripper.addRegion( "MainContent", TotalRegion );
+				
 				stripper = new GuidelineTextStripper(startPage);
 				stripper.setSortByPosition(sort);
 				stripper.setShouldSeparateByBeads(separateBeads);
-
+				stripper.addRegion( "MainContent", mainContentRect );
 				PageProcessor pageProcessor = new PageProcessor();
-				ConfigProperty.loadconfig(config);
-				ConfigProperty.setVersion(version);
 				pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper,
-						document, output);
+						uptStripper, document, output);
                 //Use the following code to generate JSON of individual pages when input is page range.
                 //for (int p = startPage; p <= endPage; ++p)
                 //{ 
