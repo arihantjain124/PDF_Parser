@@ -164,8 +164,6 @@ public class PageProcessor {
     	
     	HashMap<String, PageInfo> pageHashMap = new HashMap<String, PageInfo>();
 
-        
-        
     	int indexOffset = 0;
     	int labelOffset = 0;
     	int textOffset = 0;

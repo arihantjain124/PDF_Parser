@@ -8,7 +8,7 @@ import java.util.Properties;
 public class ConfigProperty
 {
 	private Properties configProperties = null;
-	static File configFile = null;
+	private static File configFile = null;
 
 	private static ConfigProperty configProperty = null;
 	private static String version;
@@ -48,8 +48,8 @@ public class ConfigProperty
 		}
 	}
 	
-	public static void loadconfig(String config) {
-		configFile = new File(config);
+	public static void setConfigFilePath(String configFilePath) {
+		configFile = new File(configFilePath);
 	}
 	public static String getProperty(String key){
 

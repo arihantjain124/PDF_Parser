@@ -72,11 +72,11 @@ public final class PdfParserNCCN
         boolean separateBeads = true;
         
         String password = "";
-        String config = "";
+        String config = null;
         String encoding = STD_ENCODING;
         String pdfFile = null;
         String outputFile = null;
-        String version = "";
+        String version = "1"; //Default value
         // Defaults to text files
         String ext = ".txt";
         int startPage = 1;
@@ -166,7 +166,7 @@ public final class PdfParserNCCN
             }
         }
 
-        if( pdfFile == null )
+        if( pdfFile == null || config == null )
         {
             usage();
         }
@@ -177,13 +177,13 @@ public final class PdfParserNCCN
             PDDocument document = null;
             try
             {
-				ConfigProperty.loadconfig(config);
+				ConfigProperty.setConfigFilePath(config);
 				ConfigProperty.setVersion(version);
             	String[] regionOfInterest = ConfigProperty.getProperty("page.main-content.region").split("[,]");
                 Rectangle mainContentRect = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
 
                 regionOfInterest = ConfigProperty.getProperty("page.update-content.region").split("[,]");
-                Rectangle TotalRegion = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
+                Rectangle totalRegion = new Rectangle(Integer.valueOf(regionOfInterest[0]),Integer.valueOf(regionOfInterest[1]),Integer.valueOf(regionOfInterest[2]),Integer.valueOf(regionOfInterest[3]));
                 
                 long startTime = startProcessing("Loading PDF "+pdfFile);
                 if( outputFile == null && pdfFile.length() >4 )
@@ -219,7 +219,7 @@ public final class PdfParserNCCN
 				uptStripper = new GuidelineTextStripper(startPage);
 				uptStripper.setSortByPosition(sort);
 				uptStripper.setShouldSeparateByBeads(separateBeads);
-				uptStripper.addRegion( "MainContent", TotalRegion );
+				uptStripper.addRegion( "MainContent", totalRegion );
 				
 				stripper = new GuidelineTextStripper(startPage);
 				stripper.setSortByPosition(sort);
@@ -291,6 +291,7 @@ public final class PdfParserNCCN
             + "                                (slower, and ignored when -html)\n"
             + "  -startPage <number>         : The first page to start extraction (1 based)\n"
             + "  -endPage <number>           : The last page to extract (1 based, inclusive)\n"
+            + "  -config <config file>"
             + "  <inputfile>                 : The PDF document to use\n"
             + "  [output-text-file]          : The file to write the text to";
         
