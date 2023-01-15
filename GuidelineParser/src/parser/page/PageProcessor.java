@@ -33,6 +33,7 @@ import parser.json.GraphJsonObject;
 import parser.json.GuidelineContent;
 import parser.json.JsonExport;
 import parser.renderer.GuidelinePageRenderer;
+import parser.renderer.UtilRenderer;
 import parser.table.GuidelineTableExtractor;
 import parser.table.TableDetails;
 import parser.text.FootnoteAnalyser;
@@ -159,8 +160,8 @@ public class PageProcessor {
         }
     }
     
-    public void processPages(int startPage, int endPage, GuidelineTextStripper mainContentStripper , GuidelineTextStripper updateContentStripper, PDDocument document, Writer output) 
-    		throws IOException {
+    public void processPages(int startPage, int endPage, boolean generateImage, GuidelineTextStripper mainContentStripper, 
+    		GuidelineTextStripper updateContentStripper, PDDocument document, Writer output) throws IOException {
     	
     	HashMap<String, PageInfo> pageHashMap = new HashMap<String, PageInfo>();
 
@@ -326,7 +327,9 @@ public class PageProcessor {
     	guidelineContentObjs.setUpdateJsonObject(allUpdateObject);
         JsonExport.writeJsonLD(guidelineContentObjs, startPage, endPage, "");
         //JsonExport.writeJson(allFootNoteObject, startPage, endPage, "FootNote");
-
+        if(generateImage) {
+        	UtilRenderer.drawGraphJSONObjects(allGraphObject, startPage, endPage);
+        }
 
     }
     

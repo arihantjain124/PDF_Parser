@@ -27,6 +27,7 @@ public final class PdfParserNCCN
     private static final String END_PAGE = "-endPage";
     private static final String SORT = "-sort";
     private static final String IGNORE_BEADS = "-ignoreBeads";
+    private static final String GENERATE_IMAGE = "-generateImage";
     private static final String DEBUG = "-debug";
 
     private static final String STD_ENCODING = "UTF-8";
@@ -70,6 +71,7 @@ public final class PdfParserNCCN
         boolean toConsole = false;
         boolean sort = false;
         boolean separateBeads = true;
+        boolean generateImage = false;
         
         String password = "";
         String config = null;
@@ -135,6 +137,10 @@ public final class PdfParserNCCN
             else if( args[i].equals( IGNORE_BEADS ) )
             {
                 separateBeads = false;
+            }
+            else if( args[i].equals( GENERATE_IMAGE ) )
+            {
+                generateImage = true;
             }
             else if( args[i].equals( DEBUG ) )
             {
@@ -226,7 +232,7 @@ public final class PdfParserNCCN
 				stripper.setShouldSeparateByBeads(separateBeads);
 				stripper.addRegion( "MainContent", mainContentRect );
 				PageProcessor pageProcessor = new PageProcessor();
-				pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), stripper,
+				pageProcessor.processPages(startPage, Math.min(endPage, document.getNumberOfPages()), generateImage, stripper,
 						uptStripper, document, output);
                 //Use the following code to generate JSON of individual pages when input is page range.
                 //for (int p = startPage; p <= endPage; ++p)
@@ -273,27 +279,8 @@ public final class PdfParserNCCN
      */
     private static void usage()
     {
-        String message = "Usage: java -jar pdfbox-app-x.y.z.jar ExtractText [options] <inputfile> [output-text-file]\n"
-            + "\nOptions:\n"
-            + "  -password <password>        : Password to decrypt document\n"
-            + "  -encoding <output encoding> : UTF-8 (default) or ISO-8859-1, UTF-16BE,\n"
-            + "                                UTF-16LE, etc.\n"
-            + "  -console                    : Send text to console instead of file\n"
-            + "  -html                       : Output in HTML format instead of raw text\n"
-            + "  -sort                       : Sort the text before writing\n"
-            + "  -ignoreBeads                : Disables the separation by beads\n"
-            + "  -debug                      : Enables debug output about the time consumption\n"
-            + "                                of every stage\n"
-            + "  -alwaysNext                 : Process next page (if applicable) despite\n"
-            + "                                IOException (ignored when -html)\n"
-            + "  -rotationMagic              : Analyze each page for rotated/skewed text,\n"
-            + "                                rotate to 0° and extract separately\n"
-            + "                                (slower, and ignored when -html)\n"
-            + "  -startPage <number>         : The first page to start extraction (1 based)\n"
-            + "  -endPage <number>           : The last page to extract (1 based, inclusive)\n"
-            + "  -config <config file>"
-            + "  <inputfile>                 : The PDF document to use\n"
-            + "  [output-text-file]          : The file to write the text to";
+        String message = "java -jar guideline-parser.jar -startPage <start page no.> -endPage <end page no.> -version <guideline version> -generateImage(optional)"
+        		+ "-config <config file path> <guideline pdf file path>";
         
         System.err.println(message);
         System.exit( 1 );

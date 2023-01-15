@@ -69,7 +69,7 @@ public class GuidelinePageRenderer extends PDFRenderer {
 	
 	public void OutputImage(boolean debug) throws IOException {
         
-		String outputPrefix = "mark1_page_";
+		String outputPrefix = "jsonexport/mark1_page_";
         String imageFormat = "jpg";
         float quality = (float) 0.7;
         boolean success = true;
@@ -185,7 +185,7 @@ public class GuidelinePageRenderer extends PDFRenderer {
         	
         	double x = region.getBound().getCenterX();
         	double y = region.getBound().getCenterY();
-        	
+        	       	
         	for (int prevRegionIndex : region.getPrevRegions()) {
         		
         		double pX = regions.get(prevRegionIndex).getBound().getCenterX();
