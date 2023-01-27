@@ -2,6 +2,7 @@ package parser.json;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,8 +18,10 @@ public class GraphJsonObject {
 	private String content;
 
 	private List<Integer> pConnections = null;
+	private List<String> pConnectionsPageKey = null; //Must be in sync with pConnections 
 
 	private List<Integer> nConnections = null;
+	private List<String> nConnectionsPageKey = null; //Must be in sync with nConnections
 
 	private List<Integer> labels = null;
 	
@@ -43,6 +46,8 @@ public class GraphJsonObject {
 	public void setIndex(int index) {
 		nConnections = new ArrayList<>();
 		pConnections = new ArrayList<>();
+		pConnectionsPageKey = new ArrayList<>();
+		nConnectionsPageKey = new ArrayList<>();
 		labels = new ArrayList<>();
 		stageScore = new HashSet<> ();
 		tScore = new HashSet<> ();
@@ -90,20 +95,24 @@ public class GraphJsonObject {
 		return this.content;
 	}
 
-	public void addPrevIndex(List<Integer> pIndex) {
+	public void addPrevIndex(List<Integer> pIndex, String pageKey) {
 		this.pConnections = pIndex;
+		this.pConnectionsPageKey.addAll(Collections.nCopies(pIndex.size(), pageKey));
 	}
 
-	public void addNextIndex(List<Integer> nIndex) {
+	public void addNextIndex(List<Integer> nIndex, String pageKey) {
 		this.nConnections.addAll(nIndex);
+		this.nConnectionsPageKey.addAll(Collections.nCopies(nIndex.size(), pageKey));
 	}
 	
-	public void addPrevIndex(int pIndex) {
+	public void addPrevIndex(int pIndex, String pageKey) {
 		this.pConnections.add(pIndex);
+		this.pConnectionsPageKey.add(pageKey);
 	}
 
-	public void addNextIndex(int nIndex) {
+	public void addNextIndex(int nIndex, String pageKey) {
 		this.nConnections.add(nIndex);
+		this.nConnectionsPageKey.add(pageKey);
 	}
 	
 	public void addChild(int cIndex) {
@@ -121,6 +130,15 @@ public class GraphJsonObject {
 	public List<Integer> getNConnections(){
 		return nConnections;
 	}
+
+	public List<String> getPConnectionsPageKey(){
+		return pConnectionsPageKey;
+	}
+	
+	public List<String> getNConnectionsPageKey(){
+		return nConnectionsPageKey;
+	}
+	
 	
 	public List<Integer> getChildren(){
 		return children;

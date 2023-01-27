@@ -2,7 +2,9 @@ package parser.text;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RegionWithBound {
 
@@ -13,10 +15,20 @@ public class RegionWithBound {
 	private String pageKey = "";
 	private int pageNo;
 	private List<Integer> prevRegions = new ArrayList<Integer>();
+	private Map<Integer, String> crossPagePrevRegions = new LinkedHashMap<Integer, String>();
 	private List<Integer> childRegions = new ArrayList<Integer>();
 	private int parentRegionIndex = -1;
 	private boolean isImaginary = false;
+	private int index = -1;
 	
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
 	private ArrayList<String> footnoteRefs = new ArrayList<String>();
 	
 	public RegionWithBound(Rectangle2D bound) {
@@ -89,8 +101,16 @@ public class RegionWithBound {
 		prevRegions.add(prevRegionIndex);
 	}
 	
+	public void addCrossPagePrevRegion(int prevRegionIndex, String pageKey) {
+		crossPagePrevRegions.put(prevRegionIndex, pageKey);
+	}
+	
 	public List<Integer> getPrevRegions() {
 		return prevRegions;
+	}
+	
+	public Map<Integer, String> getCrossPagePrevRegions() {
+		return crossPagePrevRegions;
 	}
 	
 	public List<Integer> getChildRegions() {

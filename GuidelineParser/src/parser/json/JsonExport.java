@@ -169,11 +169,15 @@ public class JsonExport {
 				}
 			}
 			for (int prevRegionIndex : region.getPrevRegions()) {
-				currJsonObject.addPrevIndex(prevRegionIndex);
+				currJsonObject.addPrevIndex(prevRegionIndex, region.getPageKey());
+			}
+			
+			for (int crossPagePrevRegionIndex : region.getCrossPagePrevRegions().keySet()) {
+				currJsonObject.addPrevIndex(crossPagePrevRegionIndex, region.getCrossPagePrevRegions().get(crossPagePrevRegionIndex));
 			}
 
 			for (int nextRegionIndex : region.getNextRegions()) {
-				currJsonObject.addNextIndex(nextRegionIndex);
+				currJsonObject.addNextIndex(nextRegionIndex, region.getPageKey());
 			}
 			
 			for (int childRegionIndex : region.getChildRegions()) {
@@ -188,9 +192,9 @@ public class JsonExport {
 					PageInfo currPageInfo = pageHashMap.get(pageKeymatcher.group());
 					
 					if (currPageInfo != null) {
-						currJsonObject.addNextIndex(currPageInfo.getStartRegionIndices());
+						currJsonObject.addNextIndex(currPageInfo.getStartRegionIndices(), currPageInfo.getPageKey());
 						for (int linkPrevPage : currPageInfo.getStartRegionIndices()) {
-							regionBounds.get(linkPrevPage).addPrevRegion(index);
+							regionBounds.get(linkPrevPage).addCrossPagePrevRegion(index, region.getPageKey());
 						}
 					}
 				}

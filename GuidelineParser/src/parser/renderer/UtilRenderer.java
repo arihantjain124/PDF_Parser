@@ -40,7 +40,7 @@ public class UtilRenderer {
 	public void intializeImage(float widthPt, float heightPt) {
 		this.scale = dpi/defaultDPI;
         
-        int widthPx = (int) Math.max(Math.floor(widthPt * scale), 1);
+        int widthPx = (int) (Math.max(Math.floor(widthPt * scale), 1) + 200);
         int heightPx = (int) Math.max(Math.floor(heightPt * scale), 1);
         
         this.image = new BufferedImage(widthPx, heightPx, BufferedImage.TYPE_INT_RGB);
@@ -135,7 +135,7 @@ public class UtilRenderer {
         	int idLocX = (int)(graphObject.getBound().getMinX() + 10);
         	int idLocY = (int)(graphObject.getBound().getMaxY() + 11);
         	
-        	if(graphObject.getParent() > 0) 
+        	if(graphObject.getParent() >= 0) 
         	{
         		Rectangle2D.Double bound = new Rectangle2D.Double(graphObject.getBound().getX() + 2, graphObject.getBound().getY() + 2,
         				graphObject.getBound().getWidth() - 4, graphObject.getBound().getHeight() - 4); 
@@ -151,47 +151,103 @@ public class UtilRenderer {
         		g2d.drawString(Integer.toString(graphObject.getIndex()), idLocX, idLocY);
         	}
         	
-        	StringBuilder interPagePConnections = new StringBuilder();
-        	for (int prevRegionIndex : graphObject.getPConnections()) {
-        		
-        		if(graphObjMap.containsKey(prevRegionIndex)) {
-	        		
-	        		double pX = graphObjMap.get(prevRegionIndex).getBound().getCenterX();
-	            	double pY = graphObjMap.get(prevRegionIndex).getBound().getCenterY() - 5;
-	            	
-	            	g2d.setColor(java.awt.Color.BLUE);
-	            	g2d.drawLine((int)x, (int)y, (int)pX, (int)pY);
-        		}else {
-        			interPagePConnections.append(prevRegionIndex);
-        			interPagePConnections.append(";");
-        		}
-        	}
-        	
-        	if(interPagePConnections.length() > 0) {
-        		g2d.drawString(" P:"+interPagePConnections.toString(), idLocX + 20, idLocY);
-        	}
-        	
-        	StringBuilder interPageNConnections = new StringBuilder();
-        	for (int nextRegionIndex : graphObject.getNConnections()) {
-        		
-        		if(graphObjMap.containsKey(nextRegionIndex)) {
-	        		double pX = graphObjMap.get(nextRegionIndex).getBound().getCenterX();
-	            	double pY = graphObjMap.get(nextRegionIndex).getBound().getCenterY() + 5;
-	            	
-	            	g2d.setColor(java.awt.Color.GREEN);
-	            	g2d.drawLine((int)x, (int)y, (int)pX, (int)pY);
-        		}else {
-        			interPageNConnections.append(nextRegionIndex);
-        			interPageNConnections.append(";");
-        		}
-        	}
-        	
-        	if(interPageNConnections.length() > 0) {
-        		g2d.drawString(" N:"+interPageNConnections.toString(), idLocX + 20, idLocY);
-        	}
-        	
+        	drawConnections(graphObject, graphObjMap, x, y, idLocX, idLocY, true); //Draw previous connections
+        	drawConnections(graphObject, graphObjMap, x, y, idLocX, idLocY, false); //Draw next connections
         }
     }
+	
+	private void drawConnections(GraphJsonObject graphObject, HashMap<Integer, GraphJsonObject> graphObjMap, double centreX, double centreY,
+			int locX, int locY, boolean isPreviousConnection)
+	{
+		List<Integer> connectionIndices = null;
+		List<String> connectionPageKeys = null;
+		String connectionPrefix = null;
+		java.awt.Color lineColor = null;
+		if(isPreviousConnection)
+		{
+			connectionIndices = graphObject.getPConnections();
+			connectionPageKeys = graphObject.getPConnectionsPageKey();
+			connectionPrefix = " P:";
+			lineColor = java.awt.Color.BLUE;
+		}
+		else
+		{
+			connectionIndices = graphObject.getNConnections();
+			connectionPageKeys = graphObject.getNConnectionsPageKey();
+			connectionPrefix = " N:";
+			lineColor = java.awt.Color.GREEN;
+		}
+		
+    	ArrayList<Integer> crossPageConnectionIndices = new ArrayList<Integer>();
+    	
+    	for (int i = 0; i < connectionIndices.size(); i++) {
+    		
+    		int connectedRegionIndex = connectionIndices.get(i);
+    		if(graphObjMap.containsKey(connectedRegionIndex)) {
+        		
+        		double pX = graphObjMap.get(connectedRegionIndex).getBound().getCenterX();
+            	double pY = graphObjMap.get(connectedRegionIndex).getBound().getCenterY();
+            	           	
+            	g2d.setColor(lineColor);
+            	if(isPreviousConnection) {
+            		g2d.drawLine((int)centreX, (int)centreY, (int)pX, (int)pY - 5);
+            	}else {
+            		g2d.drawLine((int)centreX, (int)centreY, (int)pX, (int)pY + 5);
+            	}
+    		}else {
+    			crossPageConnectionIndices.add(i);
+    		}
+    	}
+    	
+    	StringBuilder crossPageConnectionsStr = new StringBuilder();
+    	String curPageKey = null;
+    	for(int i : crossPageConnectionIndices) 
+    	{
+    		if(crossPageConnectionsStr.length() == 0) 
+    		{
+    			curPageKey = connectionPageKeys.get(i);
+    			crossPageConnectionsStr.append(curPageKey + "/" + connectionIndices.get(i));
+    		}
+    		else 
+    		{
+    			if(connectionPageKeys.get(i).equalsIgnoreCase(curPageKey))
+    			{
+	    			crossPageConnectionsStr.append("," + connectionIndices.get(i));
+    			}
+    			else
+    			{
+    				curPageKey = connectionPageKeys.get(i);
+	    			crossPageConnectionsStr.append(";");
+	    			crossPageConnectionsStr.append(curPageKey + "/" + connectionIndices.get(i));
+    			}
+    		}
+    	}
+    	
+    	if(crossPageConnectionsStr.length() > 0) 
+    	{
+    		if(crossPageConnectionsStr.length() > 100) {
+    			if(isPreviousConnection)
+    			{
+	    			g2d.drawString(connectionPrefix + crossPageConnectionsStr.substring(0, 100), locX, locY + 12);
+	    			g2d.drawString(crossPageConnectionsStr.substring(100), locX, locY + 24);
+    			}
+    			else
+    			{
+	    			g2d.drawString(connectionPrefix + crossPageConnectionsStr.substring(0, 100), locX + 20, locY );
+	    			g2d.drawString(crossPageConnectionsStr.substring(100), locX + 20, locY + 12);    				
+    			}
+    		}else {
+    			if(isPreviousConnection)
+    			{
+    				g2d.drawString(connectionPrefix + crossPageConnectionsStr.toString(), locX, locY + 12);
+    			}
+    			else
+    			{
+    				g2d.drawString(connectionPrefix + crossPageConnectionsStr.toString(), locX + 20, locY);
+    			}
+    		}
+    	}		
+	}
 	
 	public static void drawGraphJSONObjects(List<GraphJsonObject> graphObjects, int startPage, int endPage) throws IOException
 	{

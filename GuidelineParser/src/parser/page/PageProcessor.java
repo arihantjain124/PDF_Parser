@@ -226,7 +226,7 @@ public class PageProcessor {
 	                List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects, lines, pageKey, p);
 
 	            	if(!graphLine.isEmpty()) {
-	            		
+	            			            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);//add prev & next pointers in regions
 	            		
 	            		//renderer.drawRegionBoundsWithRelations(regionBounds, java.awt.Color.RED);
@@ -434,8 +434,9 @@ public class PageProcessor {
     		}
     	}
     	
-    	for(RegionWithBound region : flowRegions) {
+    	for(int index = 0; index < flowRegions.size(); index++) {
     		
+    		RegionWithBound region = flowRegions.get(index);
     		List<Integer> nextRegions = region.getNextRegions();
     		List<Integer> prevRegions = region.getPrevRegions();
     		
@@ -446,9 +447,63 @@ public class PageProcessor {
     			nextRegions.set(i, oldVsNewIndex.get(nextRegions.get(i)));
     		}
     		
+    		region.setIndex(index);
     		region.setPageKey(pageKey);
     		region.setPageNo(pageNo);
     	}
+    	
+    	return flowRegions;
+    	//return sortFlowRegions(flowRegions, pageInfo);
+    }
+    
+    //Sort regions by from left to write, top to bottom.
+    private List<RegionWithBound> sortFlowRegions(List<RegionWithBound> flowRegions, PageInfo pageInfo){
+    	
+    	Collections.sort(flowRegions, new Comparator<RegionWithBound>() {
+    	    @Override
+    	    public int compare(RegionWithBound region1, RegionWithBound region2) {
+    	    	double x1 = region1.getBound().getMinX();
+    	    	double x2 = region2.getBound().getMinX();
+    	    	
+    	    	double y1 = region1.getBound().getMinY();
+    	    	double y2 = region2.getBound().getMinY();
+    	    	
+    	        if( x1 != x2) {
+    	        	return ( x1 < x2 ? -1 : 1);
+    	        }else if( y1 != y2) {
+    	        	return ( y1 < y2 ? -1 : 1);
+    	        }else {
+    	        	return 0;
+    	        }
+    	    }
+    	});
+    	
+    	HashMap<Integer, Integer> oldVsNewIndex = new HashMap<Integer, Integer>();
+    	for(int i = 0; i < flowRegions.size(); i++) {
+    		
+    		RegionWithBound region = flowRegions.get(i);
+    		oldVsNewIndex.put(region.getIndex(), i);
+    		region.setIndex(i);
+    	}
+    	
+    	for(RegionWithBound region : flowRegions) {
+    		
+    		List<Integer> nextRegions = region.getNextRegions();
+    		List<Integer> prevRegions = region.getPrevRegions();
+    		
+    		for(int i = 0; i < prevRegions.size(); i++) {
+    			prevRegions.set(i, oldVsNewIndex.get(prevRegions.get(i)));
+    		}
+    		for(int i = 0; i < nextRegions.size(); i++) {
+    			nextRegions.set(i, oldVsNewIndex.get(nextRegions.get(i)));
+    		}    		
+    	}
+    	
+		List<Integer> startRegionIndices = pageInfo.getStartRegionIndices();
+		
+		for(int i = 0; i < startRegionIndices.size(); i++) {
+			startRegionIndices.set(i, oldVsNewIndex.get(startRegionIndices.get(i)));
+		}
     	
     	return flowRegions;
     }
