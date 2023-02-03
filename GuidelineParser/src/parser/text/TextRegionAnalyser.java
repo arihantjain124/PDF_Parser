@@ -527,7 +527,7 @@ public class TextRegionAnalyser {
 		return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 	}
 	
-	public static void generateChildRegions(List<RegionWithBound> regionList, int indexOffset) {
+	public static void generateChildRegions(List<RegionWithBound> regionList) {
 		
 		int curRegionCount = regionList.size();
 		for(int i = 0; i < curRegionCount; i++) {
@@ -546,7 +546,7 @@ public class TextRegionAnalyser {
 					hasBulletedLines = true;
 					
 					if(curChildList.size() > 0) {
-						createChildRegion(curChildList, parentRegion, i, regionList, indexOffset);
+						createChildRegion(curChildList, parentRegion, parentRegion.getIndex(), regionList);
 						curChildList.clear();
 					}
 					
@@ -557,7 +557,7 @@ public class TextRegionAnalyser {
 			
 			if(hasBulletedLines) {
 				if(curChildList.size() > 0) {// Create a new child node using the remaining lines					
-					createChildRegion(curChildList, parentRegion, i, regionList, indexOffset);
+					createChildRegion(curChildList, parentRegion, parentRegion.getIndex(), regionList);
 					curChildList.clear();
 				}
 				parentRegion.resetContentLine();
@@ -568,13 +568,14 @@ public class TextRegionAnalyser {
 	}
 	
 	private static void createChildRegion(List<WordWithBounds> contentList, RegionWithBound parentRegion, int parentIndex, 
-			List<RegionWithBound> mainRegionList, int indexOffset) {
+			List<RegionWithBound> mainRegionList) {
 		
-		RegionWithBound newRegion = new RegionWithBound(contentList, parentIndex + indexOffset);
+		RegionWithBound newRegion = new RegionWithBound(contentList, parentIndex);
 		newRegion.setPageKey(parentRegion.getPageKey());
 		newRegion.setPageNo(parentRegion.getPageNo());
 		int newRegionIndex = mainRegionList.size();
+		newRegion.setIndex(newRegionIndex);
 		mainRegionList.add(newRegion);
-		parentRegion.addChildRegion(newRegionIndex + indexOffset);
+		parentRegion.addChildRegion(newRegionIndex);
 	}
 }

@@ -10,6 +10,16 @@ public class PageInfo {
 	
 	private List<Integer> startRegionIndices = new ArrayList<Integer>();
 	
+	private int startRegionIndexOffset = 0; 
+	
+	public int getStartRegionIndexOffset() {
+		return startRegionIndexOffset;
+	}
+
+	public void setStartRegionIndexOffset(int startRegionIndexOffset) {
+		this.startRegionIndexOffset = startRegionIndexOffset;
+	}
+
 	public PageInfo(int pageNum, String key) {
 		this.pageNumber = pageNum;
 		this.pageKey = key;

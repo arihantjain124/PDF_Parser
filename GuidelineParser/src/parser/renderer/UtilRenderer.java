@@ -183,7 +183,7 @@ public class UtilRenderer {
     	for (int i = 0; i < connectionIndices.size(); i++) {
     		
     		int connectedRegionIndex = connectionIndices.get(i);
-    		if(graphObjMap.containsKey(connectedRegionIndex)) {
+    		if(connectionPageKeys.get(i).equalsIgnoreCase(graphObject.getPageKey())) {
         		
         		double pX = graphObjMap.get(connectedRegionIndex).getBound().getCenterX();
             	double pY = graphObjMap.get(connectedRegionIndex).getBound().getCenterY();

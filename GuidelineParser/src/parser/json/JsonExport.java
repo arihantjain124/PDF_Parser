@@ -120,7 +120,7 @@ public class JsonExport {
 		for (RegionWithBound region : regionBounds) {
 
 			currJsonObject = new GraphJsonObject();
-			int index = regionBounds.indexOf(region);
+			int index = region.getIndex();
 			
 			currJsonObject.setIndex(index);
 
@@ -173,7 +173,10 @@ public class JsonExport {
 			}
 			
 			for (int crossPagePrevRegionIndex : region.getCrossPagePrevRegions().keySet()) {
-				currJsonObject.addPrevIndex(crossPagePrevRegionIndex, region.getCrossPagePrevRegions().get(crossPagePrevRegionIndex));
+				List<String> pageKeyList = region.getCrossPagePrevRegions().get(crossPagePrevRegionIndex);
+				for(String pageKey : pageKeyList) {
+					currJsonObject.addPrevIndex(crossPagePrevRegionIndex, pageKey);
+				}
 			}
 
 			for (int nextRegionIndex : region.getNextRegions()) {
@@ -194,7 +197,7 @@ public class JsonExport {
 					if (currPageInfo != null) {
 						currJsonObject.addNextIndex(currPageInfo.getStartRegionIndices(), currPageInfo.getPageKey());
 						for (int linkPrevPage : currPageInfo.getStartRegionIndices()) {
-							regionBounds.get(linkPrevPage).addCrossPagePrevRegion(index, region.getPageKey());
+							regionBounds.get(linkPrevPage + currPageInfo.getStartRegionIndexOffset()).addCrossPagePrevRegion(index, region.getPageKey());
 						}
 					}
 				}

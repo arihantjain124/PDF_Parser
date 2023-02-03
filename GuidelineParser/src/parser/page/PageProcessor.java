@@ -189,6 +189,7 @@ public class PageProcessor {
             {
             	String pageKey = extractKey(document, p);
             	PageInfo curPageInfo = new PageInfo(p, pageKey);
+            	curPageInfo.setStartRegionIndexOffset(indexOffset);
             	pageHashMap.put(pageKey, curPageInfo);
             	
             	updateContentStripper.setStartPage(p);
@@ -231,7 +232,7 @@ public class PageProcessor {
 	            		
 	            		//renderer.drawRegionBoundsWithRelations(regionBounds, java.awt.Color.RED);
 
-	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo,indexOffset,pageKey,p);		            	
+	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo, pageKey,p);		            	
 	            		if (newRegionList.size()>0) 
 	            		{
 	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());	            			
@@ -242,7 +243,7 @@ public class PageProcessor {
 					    	FootnoteAnalyser.analyzeAllFootNoteReferences(labels, pageKey, docFootnotes);
 	            			labelsHashMap.put(pageKey, labels);
 		            		
-		            		TextRegionAnalyser.generateChildRegions(newRegionList, allRegionList.size());
+		            		TextRegionAnalyser.generateChildRegions(newRegionList);
 		            		indexOffset = indexOffset + newRegionList.size();
 		            		FootnoteAnalyser.analyzeAllFootNoteReferences(newRegionList, pageKey, docFootnotes);
 		            		allRegionList.addAll(newRegionList);
@@ -258,7 +259,7 @@ public class PageProcessor {
             				extractTables(document, p, pageKey, tmpTableList);
             				
             				//Convert the rows to nodes
-            				List<RegionWithBound> tableRegions = convertTableRowToNodes(tmpTableList, curPageInfo, indexOffset, pageKey, p);
+            				List<RegionWithBound> tableRegions = convertTableRowToNodes(tmpTableList, curPageInfo, pageKey, p);
             				allRegionList.addAll(tableRegions);
             				indexOffset= allRegionList.size();
             				
@@ -412,7 +413,7 @@ public class PageProcessor {
 		return updateOffset;
     }
     
-    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, int indexOffset,String pageKey,int pageNo){
+    private List<RegionWithBound> collectFlowRegions(List<RegionWithBound> allRegions, PageInfo pageInfo, String pageKey,int pageNo){
     	
     	ArrayList<RegionWithBound> flowRegions = new ArrayList<RegionWithBound>();
     	HashMap<Integer, Integer> oldVsNewIndex = new HashMap<Integer, Integer>();
@@ -422,7 +423,7 @@ public class PageProcessor {
     		RegionWithBound region = allRegions.get(i);
     		if(!region.getNextRegions().isEmpty() || !region.getPrevRegions().isEmpty()) {
     			
-    			int newIndex = flowRegions.size() + indexOffset;
+    			int newIndex = flowRegions.size();
     			oldVsNewIndex.put(i, newIndex);
     			
     			flowRegions.add(region);
@@ -452,8 +453,8 @@ public class PageProcessor {
     		region.setPageNo(pageNo);
     	}
     	
-    	return flowRegions;
-    	//return sortFlowRegions(flowRegions, pageInfo);
+    	//return flowRegions;
+    	return sortFlowRegions(flowRegions, pageInfo);
     }
     
     //Sort regions by from left to write, top to bottom.
@@ -468,9 +469,9 @@ public class PageProcessor {
     	    	double y1 = region1.getBound().getMinY();
     	    	double y2 = region2.getBound().getMinY();
     	    	
-    	        if( x1 != x2) {
+    	        if( Math.abs(x1 - x2) > 0.09) {
     	        	return ( x1 < x2 ? -1 : 1);
-    	        }else if( y1 != y2) {
+    	        }else if( Math.abs(y1 - y2) > 0.09) {
     	        	return ( y1 < y2 ? -1 : 1);
     	        }else {
     	        	return 0;
@@ -632,7 +633,7 @@ public class PageProcessor {
     }
 	
     @SuppressWarnings("rawtypes")
-	private List<RegionWithBound> convertTableRowToNodes(List<TableDetails> tableList, PageInfo pageInfo, int indexOffset, String pageKey, int pageNo) {
+	private List<RegionWithBound> convertTableRowToNodes(List<TableDetails> tableList, PageInfo pageInfo, String pageKey, int pageNo) {
 
     	List<RegionWithBound> regionList = new ArrayList<RegionWithBound>();
     	
@@ -672,10 +673,12 @@ public class PageProcessor {
 				RegionWithBound newRegion = new RegionWithBound(rowBound, wordWithBounds);
 				newRegion.setPageKey(pageKey);
 				newRegion.setPageNo(pageNo);
+				int regionIndex = regionList.size();
+				newRegion.setIndex(regionIndex);
 				
 				regionList.add(newRegion);
 				
-				pageInfo.addStartRegionIndex(i + indexOffset);
+				pageInfo.addStartRegionIndex(regionIndex);
 			}
 		}
 		

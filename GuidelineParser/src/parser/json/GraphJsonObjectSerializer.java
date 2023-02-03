@@ -24,7 +24,7 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 	public JsonElement serialize(GraphJsonObject graphJsonObject, Type type, JsonSerializationContext arg2) {
 		JsonObject json = new JsonObject();
 		
-		json.addProperty("@id", ID_URL + graphJsonObject.getIndex());
+		json.addProperty("@id", ID_URL + graphJsonObject.getPageKey() + "/" + graphJsonObject.getIndex());
 		json.addProperty("nccn:page-key", graphJsonObject.getPageKey());
 		json.addProperty("nccn:page-no", graphJsonObject.getPageNo());
 		
@@ -97,16 +97,18 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 
 		if(!graphJsonObject.getPConnections().isEmpty()) {
 			JsonArray prev = new JsonArray();
-			for(Integer index : graphJsonObject.getPConnections()) {
-				prev.add(ID_URL + index);
+			for(int i = 0; i < graphJsonObject.getPConnections().size(); i++) {
+				Integer index = graphJsonObject.getPConnections().get(i);
+				prev.add(ID_URL + graphJsonObject.getPConnectionsPageKey().get(i) + "/" + index);
 			}		
 			json.add("nccn:prev", prev);
 		}
 		
 		if(!graphJsonObject.getNConnections().isEmpty()) {
 			JsonArray next = new JsonArray();
-			for(Integer index : graphJsonObject.getNConnections()) {
-				next.add(ID_URL + index);
+			for(int i = 0; i < graphJsonObject.getNConnections().size(); i++) {
+				Integer index = graphJsonObject.getNConnections().get(i);
+				next.add(ID_URL + graphJsonObject.getNConnectionsPageKey().get(i) + "/"+ index);
 			}		
 			json.add("nccn:next", next);
 		}
@@ -114,14 +116,14 @@ public class GraphJsonObjectSerializer implements JsonSerializer<GraphJsonObject
 		if(!graphJsonObject.getChildren().isEmpty()) {
 			JsonArray children = new JsonArray();
 			for(Integer index : graphJsonObject.getChildren()) {
-				children.add(ID_URL + index);
+				children.add(ID_URL + graphJsonObject.getPageKey() + "/" + index);
 			}		
 			json.add("nccn:contains", children);
 		}
 		
 		if(graphJsonObject.getParent() >= 0) {
 			int parentIndex = graphJsonObject.getParent();
-			json.addProperty("nccn:parent", ID_URL + parentIndex);
+			json.addProperty("nccn:parent", ID_URL + graphJsonObject.getPageKey() + "/" + parentIndex);
 		}
 		
 		if(!graphJsonObject.getFootnoteRefs().isEmpty()) {

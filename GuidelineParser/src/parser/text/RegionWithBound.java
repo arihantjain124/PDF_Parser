@@ -15,7 +15,7 @@ public class RegionWithBound {
 	private String pageKey = "";
 	private int pageNo;
 	private List<Integer> prevRegions = new ArrayList<Integer>();
-	private Map<Integer, String> crossPagePrevRegions = new LinkedHashMap<Integer, String>();
+	private Map<Integer, List<String>> crossPagePrevRegions = new LinkedHashMap<Integer, List<String>>();
 	private List<Integer> childRegions = new ArrayList<Integer>();
 	private int parentRegionIndex = -1;
 	private boolean isImaginary = false;
@@ -102,14 +102,20 @@ public class RegionWithBound {
 	}
 	
 	public void addCrossPagePrevRegion(int prevRegionIndex, String pageKey) {
-		crossPagePrevRegions.put(prevRegionIndex, pageKey);
+		if(crossPagePrevRegions.containsKey(prevRegionIndex)) {
+			crossPagePrevRegions.get(prevRegionIndex).add(pageKey);
+		}else {
+			List<String> pageKeyList = new ArrayList<String>();
+			pageKeyList.add(pageKey);
+			crossPagePrevRegions.put(prevRegionIndex, pageKeyList);
+		}
 	}
 	
 	public List<Integer> getPrevRegions() {
 		return prevRegions;
 	}
 	
-	public Map<Integer, String> getCrossPagePrevRegions() {
+	public Map<Integer, List<String>> getCrossPagePrevRegions() {
 		return crossPagePrevRegions;
 	}
 	
