@@ -81,6 +81,48 @@ public class PageProcessor {
         return null;
 	}
     
+    private String extractKeyWithMultiPagePart(PDDocument doc, int pageIndex) throws IOException
+	{
+    	PDFTextStripperByArea pageKeyStripper = new PDFTextStripperByArea();
+    	pageKeyStripper.setSortByPosition( true );
+    	
+    	String[] regionofPageKey = ConfigProperty.getProperty("page.key.region").split("[,]");
+        Rectangle pageKeyRect = new Rectangle(Integer.valueOf(regionofPageKey[0]),Integer.valueOf(regionofPageKey[1]),Integer.valueOf(regionofPageKey[2]),Integer.valueOf(regionofPageKey[3]));
+    	
+    	pageKeyStripper.addRegion( "keyArea",pageKeyRect);
+
+		String regexForPageId = ConfigProperty.getProperty("page.key.regex");
+        Pattern pattern = Pattern.compile(regexForPageId);
+        
+		PDPage firstPage = doc.getPage(pageIndex - 1);
+		pageKeyStripper.extractRegions( firstPage );
+		
+		String pageKeyAreaText = pageKeyStripper.getTextForRegion("keyArea").trim();
+		
+		Pattern multiPagePattern = Pattern.compile("[1-9]{1,4} OF [1-9]{1,4}");
+		Matcher multiPageMatcher = multiPagePattern.matcher(pageKeyAreaText);
+		String multiplePagePart = "";
+		if(multiPageMatcher.find()) 
+		{
+			multiplePagePart = multiPageMatcher.group();
+			multiplePagePart = multiplePagePart.replaceAll(" ", "-");
+		}
+		
+		Matcher matcher = pattern.matcher(pageKeyAreaText);
+		if (matcher.find())
+		{
+			String pageKey = matcher.group();
+			if(!multiplePagePart.isEmpty()) 
+			{
+				pageKey = pageKey + "-" + multiplePagePart;
+			}
+
+			return pageKey;
+		}
+        return null;
+	}
+
+    
     private String extractHeading(PDDocument doc, int pageIndex) throws IOException
 	{    	
     	PDFTextStripperByArea pageKeyStripper = new PDFTextStripperByArea();
@@ -188,9 +230,6 @@ public class PageProcessor {
             try
             {
             	String pageKey = extractKey(document, p);
-            	PageInfo curPageInfo = new PageInfo(p, pageKey);
-            	curPageInfo.setStartRegionIndexOffset(indexOffset);
-            	pageHashMap.put(pageKey, curPageInfo);
             	
             	updateContentStripper.setStartPage(p);
             	updateContentStripper.setEndPage(p);
@@ -216,6 +255,15 @@ public class PageProcessor {
             	ArrayList<GeneralPath> triangles = renderer.getTriangles();
             	
             	if(!lines.isEmpty() && !triangles.isEmpty()) {
+            		
+            		String pageKeyForFootnote = pageKey; 
+            		if(pageHashMap.containsKey(pageKey)) {
+            			pageKey = extractKeyWithMultiPagePart(document, p);//Avoid key duplication for graph pages.
+            		}
+            		
+                	PageInfo curPageInfo = new PageInfo(p, pageKey);
+                	curPageInfo.setStartRegionIndexOffset(indexOffset);
+                	pageHashMap.put(pageKey, curPageInfo);
 	            	
             		GraphProcessing graphProc = new GraphProcessing();
             		ArrayList<GraphObject> graphLine = graphProc.checkIntersectionToTriangles(lines, triangles);
@@ -238,19 +286,23 @@ public class PageProcessor {
 	            			List<RegionWithBound> labels = regionBounds.stream().distinct().filter(x -> (!(newRegionList.contains(x)) && (x.getBound().getY() < 512))).collect(Collectors.toList());	            			
 	            			deMergeLabels(labels);
 	            			
-	            			labelProc(labels, labelsJsonHashMap, labelOffset, pageKey, alllabelsObject, docFootnotes);
+	            			labelProc(labels, labelsJsonHashMap, labelOffset, pageKey, pageKeyForFootnote, alllabelsObject, docFootnotes);
 							labelOffset = labelOffset + labels.size();
-					    	FootnoteAnalyser.analyzeAllFootNoteReferences(labels, pageKey, docFootnotes);
+					    	FootnoteAnalyser.analyzeAllFootNoteReferences(labels, pageKeyForFootnote, docFootnotes);
 	            			labelsHashMap.put(pageKey, labels);
 		            		
 		            		TextRegionAnalyser.generateChildRegions(newRegionList);
 		            		indexOffset = indexOffset + newRegionList.size();
-		            		FootnoteAnalyser.analyzeAllFootNoteReferences(newRegionList, pageKey, docFootnotes);
+		            		FootnoteAnalyser.analyzeAllFootNoteReferences(newRegionList, pageKeyForFootnote, docFootnotes);
 		            		allRegionList.addAll(newRegionList);
 	            		}
 
 	            	}            	
             	}else {
+            		
+                	PageInfo curPageInfo = new PageInfo(p, pageKey);
+                	curPageInfo.setStartRegionIndexOffset(indexOffset);
+                	pageHashMap.put(pageKey, curPageInfo);
             		
             		if(GuidelineTableExtractor.isTablePage(p)) {
             			if(GuidelineTableExtractor.convertToFlowNodes(p)) {//Add table in the flow.
@@ -556,7 +608,7 @@ public class PageProcessor {
     
     private void labelProc(List<RegionWithBound> currentPageLabels,
 			HashMap<String, List<Pair<Rectangle2D, LabelJsonObject>>> labelsJsonHashMap, Integer labelOffset,
-			String pageKey, List<LabelJsonObject> alllabelsObject, HashMap<String, FootnoteDetails> docFootnotes) {
+			String pageKey, String pageKeyForFootnote, List<LabelJsonObject> alllabelsObject, HashMap<String, FootnoteDetails> docFootnotes) {
 
 		int currIndex = labelOffset;
 		List<Pair<Rectangle2D, LabelJsonObject>> currPage = new ArrayList<Pair<Rectangle2D, LabelJsonObject>>();
@@ -570,7 +622,7 @@ public class PageProcessor {
 			List<WordWithBounds> labelBounds = labelbox.getContentLines();
 			currlabelObject.setIndex(currIndex);
 			currlabelObject
-					.setFootnoteRefs(FootnoteAnalyser.analyzeFootNoteReferences(labelbox.getContentLines(), false, pageKey, docFootnotes));
+					.setFootnoteRefs(FootnoteAnalyser.analyzeFootNoteReferences(labelbox.getContentLines(), false, pageKeyForFootnote, docFootnotes));
 			for (WordWithBounds word : labelBounds) {				
 				if(!currentLabel.isEmpty()) {
 					currentLabel = currentLabel + " " + word.getText().trim();
