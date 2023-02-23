@@ -147,7 +147,7 @@ public class TextRegionAnalyser {
 	}
 
 	//Group lines to create regions
-	public static List<RegionWithBound> getRegions(List<WordWithBounds> linesWithBounds, ArrayList<GeneralPath> graphLines, 
+	public static List<RegionWithBound> getRegions(List<WordWithBounds> linesWithBounds, ArrayList<GeneralPath> graphLines, ArrayList<VerticalGraphObject> fanoutLines,
 			String pageKey, int p){
 		
 		ArrayList<RegionWithBound> regionBoundList = new ArrayList<RegionWithBound>();
@@ -175,6 +175,18 @@ public class TextRegionAnalyser {
 				//Create a new region
 				regionBoundList.add(new RegionWithBound(curLineBound, line));
 			}
+		}
+		
+		for(VerticalGraphObject fanoutLine : fanoutLines) 
+		{
+			Rectangle2D verticalLineBound = fanoutLine.getpath().getBounds2D();
+			Rectangle2D newRegionBound = new Rectangle2D.Double(verticalLineBound.getX() - 1, verticalLineBound.getY(), 
+					verticalLineBound.getWidth() + 1, verticalLineBound.getHeight());
+			RegionWithBound newRegion = new RegionWithBound(newRegionBound);
+			newRegion.setPageKey(pageKey);
+			newRegion.setPageNo(p);
+			newRegion.setIsImaginary(true);
+			regionBoundList.add(newRegion);
 		}
 		
 		analyzeRegionsUsingVerticalLines(regionBoundList, graphLines, pageKey, p); 

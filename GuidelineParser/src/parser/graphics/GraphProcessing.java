@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import parser.config.ConfigProperty;
@@ -130,7 +131,7 @@ public class GraphProcessing {
 		return verticalLine;
 	}
 	
-	public ArrayList<GraphObject> checkIntersectionToTriangles(ArrayList<GeneralPath> lines,ArrayList<GeneralPath> triangles) 
+	public ArrayList<GraphObject> checkIntersectionToTriangles(ArrayList<GeneralPath> lines,ArrayList<GeneralPath> triangles, ArrayList<VerticalGraphObject> fanoutLines) 
 			throws NumberFormatException, IOException {
 
 		ArrayList<GraphObject> graphLine = new ArrayList<GraphObject>();
@@ -154,6 +155,7 @@ public class GraphProcessing {
 				pathIterator.next();
 			}
 			
+			HashMap<Integer, GeneralPath> matchedTriangles = new HashMap<Integer, GeneralPath>(); 
 			Iterator<GeneralPath> triangleIterator = triangles.iterator();
 			//Iterating over all triangles in the page
 			
@@ -170,6 +172,7 @@ public class GraphProcessing {
 					
 						if(!targets.contains(index)) {
 							targets.add(index);
+							matchedTriangles.put(index, currTriangle);
 						}
 					}
 				}
@@ -190,6 +193,31 @@ public class GraphProcessing {
 					handledTriangleIntersection = true;
 				} 
 				
+				if(lineCoor.size() == 2 && targets.size() == 2) 
+				{	
+					//Match the orientation of triangles and with that of line, pick the triangle having the same orientation as line.
+					int lineOrientation = -1; //0: Line is Horizontal, 1: Line is Vertical
+					if(Math.abs(lineCoor.get(0).getY() - lineCoor.get(1).getY()) <= GraphObject.EPSILON) 
+					{
+						lineOrientation = 0;
+					}
+					else if(Math.abs(lineCoor.get(0).getX() - lineCoor.get(1).getX()) <= GraphObject.EPSILON) 
+					{
+						lineOrientation = 1;
+					}
+					
+					for(int target : targets)
+					{
+						GeneralPath triangle = matchedTriangles.get(target);
+						if(getTriangleOrientation(triangle) == lineOrientation)
+						{
+							graphLine.add(new GraphObject(lineCoor.get(1 - target), lineCoor.get(target)));
+							handledTriangleIntersection = true;
+							break;
+						}
+					}
+				}
+				
 				if(!handledTriangleIntersection)
 				{
 					System.out.println("Unhandled triangle intersection");
@@ -206,8 +234,143 @@ public class GraphProcessing {
 			currGraphLine.extrapolateTarget(extrapolateLength);
 		}
         
+        detectFanoutLines(lines, graphLine, fanoutLines);
         extendMultisegmentArrows(lines, graphLine);
+        mergeArrows(graphLine);
         return graphLine;
+	}
+	
+	private int getTriangleOrientation(GeneralPath triangle)
+	{
+		int orientation = -1; //0: horizontal, 1: vertical
+		ArrayList<Point2D> lineCoor = new ArrayList<Point2D>();
+
+		float[] coords = new float[6];
+		PathIterator pathIterator = triangle.getPathIterator(null);
+		while (pathIterator.isDone() == false) {
+			pathIterator.currentSegment(coords);
+			lineCoor.add(new Point2D.Float(coords[0], coords[1]));
+			pathIterator.next();
+		}
+		
+		if(Math.abs(lineCoor.get(0).getY() - lineCoor.get(1).getY()) <= GraphObject.EPSILON || 
+				Math.abs(lineCoor.get(0).getY() - lineCoor.get(2).getY()) <= GraphObject.EPSILON ||
+				Math.abs(lineCoor.get(1).getY() - lineCoor.get(2).getY()) <= GraphObject.EPSILON)
+		{
+			orientation = 1; //One of the edged is perfect horizontal
+		}
+		else if(Math.abs(lineCoor.get(0).getX() - lineCoor.get(1).getX()) <= GraphObject.EPSILON ||
+				Math.abs(lineCoor.get(0).getX() - lineCoor.get(2).getX()) <= GraphObject.EPSILON ||
+				Math.abs(lineCoor.get(1).getX() - lineCoor.get(2).getX()) <= GraphObject.EPSILON)
+		{
+			orientation = 0; //One of the edged is perfect vertical
+		}
+		
+		return orientation;
+	}
+	
+	private void detectFanoutLines(ArrayList<GeneralPath> lines, ArrayList<GraphObject> arrowLines, ArrayList<VerticalGraphObject> fanoutLines) {
+		
+		Iterator<GeneralPath> lineIterator = lines.iterator();
+		ArrayList<GeneralPath> linesToBeRemoved = new ArrayList<GeneralPath>();
+		
+		while (lineIterator.hasNext()) {
+
+			// Current line from the iteration
+			GeneralPath currLine = lineIterator.next();
+			ArrayList<Point2D> lineCoor = new ArrayList<Point2D>();
+
+			float[] coords = new float[6];
+			PathIterator pathIterator = currLine.getPathIterator(null);
+			while (pathIterator.isDone() == false) {
+				pathIterator.currentSegment(coords);
+				lineCoor.add(new Point2D.Float(coords[0], coords[1]));
+				pathIterator.next();
+			}
+
+			int numFanout = 0, numEndFanout = 0;
+			if (lineCoor.size() == 2 && Math.abs(lineCoor.get(0).getX() - lineCoor.get(1).getX()) <= GraphObject.EPSILON) 
+			{
+				//current line is a vertical line
+				double maxY = lineCoor.get(0).getY() > lineCoor.get(1).getY() ? lineCoor.get(0).getY() : lineCoor.get(1).getY();
+				double minY = lineCoor.get(0).getY() < lineCoor.get(1).getY() ? lineCoor.get(0).getY() : lineCoor.get(1).getY();
+				
+				minY -= 1; maxY += 1; //expand the range
+				
+				for (GraphObject currArrowLine : arrowLines) {
+					
+					if(Math.abs(currArrowLine.getSource().getY() - currArrowLine.getTarget().getY()) > GraphObject.EPSILON){
+						continue;
+					}
+					
+					//Current arrow is horizontal arrow
+					if(currArrowLine.getSource().getY() < minY || currArrowLine.getSource().getY() > maxY){
+						continue;
+					}
+					
+					if(Math.abs(lineCoor.get(0).getX() - currArrowLine.getSource().getX()) <= 1.0 ||
+							Math.abs(lineCoor.get(1).getX() - currArrowLine.getSource().getX()) <= 1.0)
+					{
+						numFanout++;
+						if(Math.abs(lineCoor.get(0).getY() - currArrowLine.getSource().getY()) <= 1.0 ||
+								Math.abs(lineCoor.get(1).getY() - currArrowLine.getSource().getY()) <= 1.0)
+						{
+							numEndFanout++;
+						}
+					}
+				}
+				
+				if(numEndFanout == 2 && numFanout >= 3)
+				{
+					//This is a fan-out line
+					fanoutLines.add(new VerticalGraphObject(lineCoor.get(0), lineCoor.get(1)));
+					linesToBeRemoved.add(currLine);
+				}
+			}//end of if (lineCoor.size() == 2 && Math.abs(lineCoor.get(0).getX() - lineCoor.get(1).getX()) <= GraphObject.EPSILON)
+		}//end of while
+		
+		lines.removeAll(linesToBeRemoved);
+		
+		//Fan-out lines are vertical lines, fanning out in right side. Convert non-arrow lines terminating to fan-out line as arrow lines
+		for(VerticalGraphObject fanoutLine : fanoutLines)
+		{
+			double fanoutMaxY = fanoutLine.getSource().getY() > fanoutLine.getTarget().getY() ? fanoutLine.getSource().getY() : fanoutLine.getTarget().getY();
+			double fanoutMinY = fanoutLine.getSource().getY() < fanoutLine.getTarget().getY() ? fanoutLine.getSource().getY() : fanoutLine.getTarget().getY();
+			fanoutMinY -= 1; fanoutMaxY += 1; //expand the range
+			
+			lineIterator = lines.iterator();
+			linesToBeRemoved = new ArrayList<GeneralPath>();
+			
+			while (lineIterator.hasNext()) {
+
+				// Current line from the iteration
+				GeneralPath currLine = lineIterator.next();
+				ArrayList<Point2D> lineCoor = new ArrayList<Point2D>();
+
+				float[] coords = new float[6];
+				PathIterator pathIterator = currLine.getPathIterator(null);
+				while (pathIterator.isDone() == false) {
+					pathIterator.currentSegment(coords);
+					lineCoor.add(new Point2D.Float(coords[0], coords[1]));
+					pathIterator.next();
+				}
+				
+				if (lineCoor.size() == 2 && (Math.abs(lineCoor.get(0).getY() - lineCoor.get(1).getY()) <= GraphObject.EPSILON) //current line is a horizontal line
+						&& (lineCoor.get(0).getY() >= fanoutMinY && lineCoor.get(0).getY() <= fanoutMaxY)) //current is within Y bound of fan-out line
+				{
+					int rightIndex = lineCoor.get(0).getX() > lineCoor.get(1).getX() ? 0 : 1;
+					double rightX = lineCoor.get(rightIndex).getX();
+					
+					if(Math.abs(fanoutLine.getSource().getX() - rightX) <= 1.0)
+					{
+						linesToBeRemoved.add(currLine);
+						arrowLines.add(new GraphObject(lineCoor.get(1 - rightIndex), lineCoor.get(rightIndex)));
+					}					
+				}
+			}//end of while
+		}//end of for
+		
+		lines.removeAll(linesToBeRemoved);
 	}
 	
 	private void extendMultisegmentArrows(ArrayList<GeneralPath> lines, ArrayList<GraphObject> arrowLines) {
@@ -280,6 +443,51 @@ public class GraphProcessing {
 			
 			currArrowLine.setSource(arrowSource);
 		}
+	}
+	
+	private void mergeArrows(ArrayList<GraphObject> arrowLines) {
+
+		ArrayList<GraphObject> toBeDeleted = new ArrayList<GraphObject>();
+		
+		for (int j = 0; j < arrowLines.size(); j++) {
+			
+			GraphObject currArrowLine = arrowLines.get(j);
+			
+			if(toBeDeleted.contains(currArrowLine)) {
+				continue;
+			}
+			
+			Point2D arrowSource = currArrowLine.getSource();
+
+			Point2D newArrowSource = null;
+			do {
+				int i = 0;
+				newArrowSource = null;
+				
+				for (; i < arrowLines.size() && (i != j); i++) {
+					
+					GraphObject otherArrowLine = arrowLines.get(i);
+					
+					if(Math.abs(arrowSource.getX() - otherArrowLine.getTarget().getX()) <= 4 &&
+							Math.abs(arrowSource.getY() - otherArrowLine.getTarget().getY()) <= 4) {
+						newArrowSource = otherArrowLine.getSource();
+					}
+										
+					if(newArrowSource != null) {
+						break;
+					}
+				}
+				
+				if(newArrowSource != null) {
+					arrowSource = newArrowSource;
+					toBeDeleted.add(arrowLines.get(i));
+				}
+			}while(newArrowSource != null);
+			
+			currArrowLine.setSource(arrowSource);
+		}
+		
+		arrowLines.removeAll(toBeDeleted);
 	}
 	
 	private boolean closeEnough(Point2D p1, Point2D p2) {

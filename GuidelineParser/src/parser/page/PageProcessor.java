@@ -27,6 +27,7 @@ import org.apache.pdfbox.text.PDFTextStripperByArea;
 import parser.config.ConfigProperty;
 import parser.graphics.GraphObject;
 import parser.graphics.GraphProcessing;
+import parser.graphics.VerticalGraphObject;
 import parser.json.BookmarkJsonObject;
 import parser.json.FootNotesJsonObject;
 import parser.json.GraphJsonObject;
@@ -265,20 +266,22 @@ public class PageProcessor {
                 	curPageInfo.setStartRegionIndexOffset(indexOffset);
                 	pageHashMap.put(pageKey, curPageInfo);
 	            	
+                	ArrayList<VerticalGraphObject> fanoutLines = new ArrayList<VerticalGraphObject>();
             		GraphProcessing graphProc = new GraphProcessing();
-            		ArrayList<GraphObject> graphLine = graphProc.checkIntersectionToTriangles(lines, triangles);
+            		ArrayList<GraphObject> graphLine = graphProc.checkIntersectionToTriangles(lines, triangles, fanoutLines);
 	            	
 //	            	ArrayList<VerticalGraphObject> verticalLine = graphProc.getVerticalLines(lines);
 //	            	ArrayList<GraphObject> graphVerticalLine = graphProc.getVerticalLinesGraphObject(graphLine);
 //	            	ArrayList<GraphObject> pairVerticalLine = graphProc.pairVerticalLine(verticalLine);
 	            	
-	                List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects, lines, pageKey, p);
+	                List<RegionWithBound> regionBounds = TextRegionAnalyser.getRegions(wordRects, lines, fanoutLines, pageKey, p);
 
 	            	if(!graphLine.isEmpty()) {
 	            			            		
 	            		TextRegionAnalyser.generateTextRegionAssociation(graphLine, regionBounds);//add prev & next pointers in regions
 	            		
 	            		//renderer.drawRegionBoundsWithRelations(regionBounds, java.awt.Color.RED);
+	            		//renderer.drawArrayListGraphObject(graphLine, java.awt.Color.RED);
 
 	            		List<RegionWithBound> newRegionList = collectFlowRegions(regionBounds, curPageInfo, pageKey,p);		            	
 	            		if (newRegionList.size()>0) 
